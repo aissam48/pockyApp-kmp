@@ -83,7 +83,7 @@ actual fun CameraView(navController: NavHostController) {
                         Log.e("onImageSaved", output.savedUri?.path ?: "")
                         savedUri = output.savedUri
                         val encodedFilePath = Uri.encode(savedUri?.path)
-                        navController.navigate(NavRoutes.CAPTURE_PREVIEW.route + "/${encodedFilePath}")
+                        navController.navigate(NavRoutes.MOMENT_PREVIEW.route + "/${encodedFilePath}")
                     }
 
                     override fun onError(exception: ImageCaptureException) {

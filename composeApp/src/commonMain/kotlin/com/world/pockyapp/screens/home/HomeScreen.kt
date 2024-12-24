@@ -2,6 +2,7 @@ package com.world.pockyapp.screens.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,9 +27,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.world.pockyapp.screens.home.navigations.ChatScreen
-import com.world.pockyapp.screens.home.navigations.DiscoverScreen
-import com.world.pockyapp.screens.home.navigations.ProfileScreen
+import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
+import com.world.pockyapp.screens.home.navigations.discover.DiscoverScreen
+import com.world.pockyapp.screens.home.navigations.profile.ProfileScreen
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -45,6 +48,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
         mutableIntStateOf(viewModel.selectedScreen)
     }
 
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.onPrimary)
@@ -54,17 +58,21 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp)
         ) {
-            Image(
+            /*Image(
                 painter = painterResource(Res.drawable.compose_multiplatform),
-                modifier = Modifier.size(35.dp).clip(CircleShape),
+                modifier = Modifier.size(35.dp).clip(CircleShape).clickable {
+
+                },
                 contentDescription = null,
             )
 
-            Spacer(modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.size(20.dp))*/
 
             Image(
                 painter = painterResource(Res.drawable.ic_search_black),
-                modifier = Modifier.size(25.dp),
+                modifier = Modifier.size(25.dp).clickable {
+                    navController.navigate(NavRoutes.SEARCH.route)
+                },
                 contentDescription = null,
             )
         }

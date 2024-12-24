@@ -1,21 +1,21 @@
 package com.world.pockyapp.screens
 
-import android.app.Activity
 import android.content.Context
 import android.net.Uri
-import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavHostController
+import com.world.pockyapp.navigation.NavRoutes
 
 
 @Composable
-actual fun ImagePicker() {
+actual fun ImagePicker(navController: NavHostController) {
     val context = LocalContext.current
-    var onImagePickedCallback: ((String?) -> Unit)? = null
+
     fun getPathFromUri(context: Context, uri: Uri): String? {
         val projection = arrayOf(android.provider.MediaStore.Images.Media.DATA)
         context.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
@@ -26,11 +26,23 @@ actual fun ImagePicker() {
         return null
     }
 
-    val pickImageLauncher = (context as ComponentActivity).registerForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        val imagePath = uri?.let { getPathFromUri(context, it) }
-        onImagePickedCallback?.invoke(imagePath)
-    }
+    // Activity Result Launcher for image picking
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            val imagePath = uri?.let { getPathFromUri(context, it) }
 
-    fun pickI
+            println("imagePath -> $imagePath")
+            val encodedFilePath = Uri.encode(imagePath)
+            navController.navigate(NavRoutes.MOMENT_PREVIEW.route + "/${encodedFilePath}")
+
+        }
+    )
+
+
+
+
+    Button(onClick = { pickImageLauncher.launch("image/*") }) {
+        Text("Pick Image")
+    }
+}

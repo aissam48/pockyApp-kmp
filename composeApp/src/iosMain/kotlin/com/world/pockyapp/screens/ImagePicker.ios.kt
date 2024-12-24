@@ -1,7 +1,8 @@
 package com.world.pockyapp.screens
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
 
 @Composable
-actual fun ImagePicker() {
+actual fun ImagePicker(navController: NavHostController) {
 }

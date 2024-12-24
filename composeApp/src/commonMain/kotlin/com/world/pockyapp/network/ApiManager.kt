@@ -4,43 +4,80 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.world.pockyapp.network.models.model.CategoryModel
-import com.world.pockyapp.network.models.model.ProductModel
-import com.world.pockyapp.network.models.requests.CreateStoreRequestModel
+import com.world.pockyapp.Constant
+import com.world.pockyapp.network.models.model.ChatRequestModel
+import com.world.pockyapp.network.models.model.ConversationModel
+import com.world.pockyapp.network.models.model.DataModel
+import com.world.pockyapp.network.models.model.MessageModel
+import com.world.pockyapp.network.models.model.PostModel
+import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.network.models.requests.ChangePasswordRequestModel
+import com.world.pockyapp.network.models.requests.LocationRequestModel
 import com.world.pockyapp.network.models.requests.LoginRequestModel
 import com.world.pockyapp.network.models.requests.RegisterRequestModel
-import com.world.pockyapp.network.models.model.StoreModel
-import com.world.pockyapp.network.models.requests.AddProductRequestModel
-import com.world.pockyapp.network.models.requests.RequestProductModel
-import com.world.pockyapp.network.models.responses.AddProductResponseModel
-import com.world.pockyapp.network.models.responses.CategoriesResponseModel
-import com.world.pockyapp.network.models.responses.CreateStoreResponseModel
-import com.world.pockyapp.network.models.responses.GetProductsResponseModel
-import com.world.pockyapp.network.models.responses.GetStoreResponseModel
-import com.world.pockyapp.network.models.responses.GetStoresResponseModel
+import com.world.pockyapp.network.models.requests.ResponseChatRequestModel
+import com.world.pockyapp.network.models.requests.SendChatRequestModel
+import com.world.pockyapp.network.models.responses.GetCountriesModel
+import com.world.pockyapp.network.models.responses.GetFriendsMomentsResponseModel
+import com.world.pockyapp.network.models.responses.GetPostsResponseModel
+import com.world.pockyapp.network.models.responses.GetProfileResponseModel
 import com.world.pockyapp.network.models.responses.LoginResponseModel
-import com.world.pockyapp.network.models.responses.ProductsResponseModel
+import com.world.pockyapp.network.models.responses.SearchResponseModel
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.onUpload
+import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
+import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.client.plugins.websocket.webSocket
+import io.ktor.client.plugins.websocket.webSocketSession
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.websocket.Frame
+import io.ktor.websocket.readText
+import io.ktor.websocket.send
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 
 class ApiManager(val dataStore: DataStore<Preferences>) {
 
-    private val baseUrl = "http://192.168.0.74:3000/api/v1"
-    private val client = HttpClient {
+    private val baseUrl = "http://${Constant.BASE_URL}:3000/api/v1"
+
+    //private val client = HttpClient(CIO) {
+    private val client = HttpClient(CIO) {
+
+        install(WebSockets) {
+            maxFrameSize = Long.MAX_VALUE
+            pingIntervalMillis = 20_000
+        }
+        install(HttpTimeout) {
+            requestTimeoutMillis = 300_000
+            connectTimeoutMillis = 300_000
+            socketTimeoutMillis = 300_000
+        }
 
         install(ContentNegotiation) {
             json(Json {
@@ -49,7 +86,6 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             })
         }
     }
-
 
     private suspend fun getToken(): String {
         val preferences = dataStore.edit { }
@@ -63,6 +99,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         phone: String,
         email: String,
         password: String,
+        country: String,
+        city: String,
         onSuccess: (LoginResponseModel) -> Unit,
         onFailure: (String) -> Unit
     ) {
@@ -72,25 +110,32 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             lastName = lastName,
             phone = phone,
             email = email,
-            password = password
+            password = password,
+            country = country,
+            city = city
         )
 
 
         //16/3/2021
-        val response: HttpResponse = client.post("$baseUrl/auth/register") {
-            contentType(ContentType.Application.Json)
-            setBody(registerRequestModel)
+        try {
+            val response: HttpResponse = client.post("$baseUrl/auth/register") {
+                contentType(ContentType.Application.Json)
+                setBody(registerRequestModel)
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: LoginResponseModel =
+                    response.body() // Extract response body if request is successful
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String =
+                    response.bodyAsText() // Get the error message from the response
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
         }
 
-        if (response.status.isSuccess()) {
-            val responseBody: LoginResponseModel =
-                response.body() // Extract response body if request is successful
-            onSuccess(responseBody)
-        } else {
-            val errorMessage: String =
-                response.bodyAsText() // Get the error message from the response
-            onFailure(errorMessage)
-        }
     }
 
     suspend fun login(
@@ -105,236 +150,48 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             password = password
         )
 
-        val response: HttpResponse = client.post("$baseUrl/auth/login") {
-            contentType(ContentType.Application.Json)
-            setBody(loginRequestModel)
-        }
+        try {
 
-        if (response.status.isSuccess()) {
-            val responseBody: LoginResponseModel =
-                response.body() // Extract response body if request is successful
-            onSuccess(responseBody)
-        } else {
-            val errorMessage: String =
-                response.bodyAsText() // Get the error message from the response
-            onFailure(errorMessage)
-        }
-    }
-
-    suspend fun getMyStore(
-        onSuccess: (GetStoreResponseModel) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-
-
-        val response: HttpResponse = client.get("$baseUrl/operations/store") {
-            contentType(ContentType.Application.Json)
-            val token = getToken()
-            headers {
-                append(HttpHeaders.Authorization, "Bearer $token")
+            val response: HttpResponse = client.post("$baseUrl/auth/login") {
+                contentType(ContentType.Application.Json)
+                setBody(loginRequestModel)
             }
-        }
 
-        if (response.status.isSuccess()) {
-            val responseBody: GetStoreResponseModel =
-                response.body()
-            println("ServerSuccess---> ${response.bodyAsText()}")
-            onSuccess(responseBody)
-        } else {
-            val errorMessage: String =
-                response.bodyAsText()
-            onFailure(errorMessage)
-        }
-    }
-
-    suspend fun getStore(
-        id: String,
-        onSuccess: (StoreModel) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-
-
-        val response: HttpResponse = client.get("$baseUrl/operations/store/$id") {
-            contentType(ContentType.Application.Json)
-            val token = getToken()
-            headers {
-                append(HttpHeaders.Authorization, "Bearer $token")
+            if (response.status.isSuccess()) {
+                val responseBody: LoginResponseModel =
+                    response.body() // Extract response body if request is successful
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String =
+                    response.bodyAsText() // Get the error message from the response
+                onFailure(errorMessage)
             }
-        }
+        } catch (e: Exception) {
 
-        if (response.status.isSuccess()) {
-            val responseBody: StoreModel =
-                response.body()
-            onSuccess(responseBody)
-        } else {
-            val errorMessage: String =
-                response.bodyAsText()
-            onFailure(errorMessage)
         }
     }
 
-    suspend fun createStore(
-        storeName: String,
-        description: String,
-        phone: String,
-        address: String,
-        email: String,
-        onSuccess: (CreateStoreResponseModel) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-
-        val createStoreRequestModel =
-            CreateStoreRequestModel(storeName, description, phone, address, email)
-        val response: HttpResponse = client.post("$baseUrl/operations/store") {
-            contentType(ContentType.Application.Json)
-            val token = getToken()
-
-            println("token-----> $token")
-            setBody(createStoreRequestModel)
-            headers { append(HttpHeaders.Authorization, "Bearer $token") }
-        }
-
-        if (response.status.isSuccess()) {
-            val responseBody: CreateStoreResponseModel =
-                response.body()
-            onSuccess(responseBody)
-        } else {
-            val errorMessage: String =
-                response.bodyAsText()
-            onFailure(errorMessage)
-        }
-    }
-
-    suspend fun addProduct(
-        productName: String,
-        description: String,
-        category: CategoryModel?,
-        price: Double,
-        stock: Int,
-        isNew: Boolean,
-        onSuccess: (AddProductResponseModel) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-
-        val createStoreRequestModel =
-            AddProductRequestModel(productName, category, description, price, stock, isNew)
-        val response: HttpResponse = client.post("$baseUrl/operations/product") {
-            contentType(ContentType.Application.Json)
-            val token = getToken()
-
-            println("token-----> $token")
-            setBody(createStoreRequestModel)
-            headers { append(HttpHeaders.Authorization, "Bearer $token") }
-        }
-
-        if (response.status.isSuccess()) {
-            println("success-----> ${response.body() as String}")
-            val responseBody: AddProductResponseModel =
-                response.body()
-            onSuccess(responseBody)
-        } else {
-            val errorMessage: String =
-                response.bodyAsText()
-            onFailure(errorMessage)
-        }
-    }
-
-    suspend fun getCategories(
-        onSuccess: (List<CategoryModel>) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-
-        val response: HttpResponse = client.get("$baseUrl/operations/categories") {
-            contentType(ContentType.Application.Json)
-            val token = getToken()
-
-            println("token-----> $token")
-            headers { append(HttpHeaders.Authorization, "Bearer $token") }
-        }
-
-        if (response.status.isSuccess()) {
-            val responseBody: CategoriesResponseModel =
-                response.body()
-            onSuccess(responseBody.categories)
-        } else {
-            val errorMessage: String =
-                response.bodyAsText()
-            onFailure(errorMessage)
-        }
-    }
-
-    suspend fun getMyProducts(
-        onSuccess: (List<ProductModel>) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-
-        val response: HttpResponse = client.get("$baseUrl/operations/store/products/me") {
-            contentType(ContentType.Application.Json)
-            val token = getToken()
-
-            println("token-----> $token")
-            headers { append(HttpHeaders.Authorization, "Bearer $token") }
-        }
-
-        if (response.status.isSuccess()) {
-            val responseBody: ProductsResponseModel =
-                response.body()
-            println("success-----> ${response.bodyAsText()}")
-            onSuccess(responseBody.products)
-        } else {
-            val errorMessage: String =
-                response.bodyAsText()
-            onFailure(errorMessage)
-        }
-    }
-
-    suspend fun getProduct(
-        productId: String,
-        onSuccess: (ProductModel) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-
-        val response: HttpResponse = client.get("$baseUrl/operations/products/$productId") {
-            contentType(ContentType.Application.Json)
-            val token = getToken()
-
-            println("token-----> $token")
-            headers { append(HttpHeaders.Authorization, "Bearer $token") }
-        }
-
-        if (response.status.isSuccess()) {
-            val responseBody: ProductModel =
-                response.body()
-            println("success-----> ${response.bodyAsText()}")
-            onSuccess(responseBody)
-        } else {
-            val errorMessage: String =
-                response.bodyAsText()
-            onFailure(errorMessage)
-        }
-    }
-
-    suspend fun requestProduct(
-        productId: String,
-        storeId: String,
-        name: String,
-        phone: String,
-        city: String,
-        address: String,
-        quantity: Int,
-        ownerId: String,
+    suspend fun setPost(
+        byteArray: ByteArray,
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
     ) {
 
-        val requestProductModel =
-            RequestProductModel(productId, storeId, name, phone, city, address, quantity, ownerId)
-        val response: HttpResponse = client.post("$baseUrl/operations/products") {
-            contentType(ContentType.Application.Json)
+        val response: HttpResponse = client.submitFormWithBinaryData(
+            url = "$baseUrl/operations/setpost",
+            formData {
+                append("file", byteArray, Headers.build {
+                    println("Original size ${byteArray.size} bytes")
+                    append(HttpHeaders.ContentType, "image/jpg")
+                    append(HttpHeaders.ContentDisposition, "filename=file")
+                })
+            }) {
             val token = getToken()
-            setBody(requestProductModel)
             println("token-----> $token")
             headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            onUpload { bytesSentTotal, contentLength ->
+                println("Sent $bytesSentTotal bytes from $contentLength")
+            }
         }
 
         if (response.status.isSuccess()) {
@@ -349,12 +206,123 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         }
     }
 
-    suspend fun getStores(
-        onSuccess: (List<StoreModel>) -> Unit,
+    suspend fun editProfile(
+        firstName: String,
+        lastName: String,
+        phone: String,
+        email: String,
+        description: String,
+        byteArray: ByteArray?,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.submitFormWithBinaryData(
+                url = "$baseUrl/operations/editprofile",
+                formData {
+                    if (byteArray != null) {
+                        append("file", byteArray, Headers.build {
+                            println("Original size ${byteArray.size} bytes")
+                            append(HttpHeaders.ContentType, "image/jpg")
+                            append(HttpHeaders.ContentDisposition, "filename=file")
+                        })
+                    }
+
+                    append("firstName", firstName)
+                    append("lastName", lastName)
+                    append("phone", phone)
+                    append("email", email)
+                    append("description", description)
+                }) {
+                val token = getToken()
+                println("token-----> $token")
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+                onUpload { bytesSentTotal, contentLength ->
+                    println("Sent $bytesSentTotal bytes from $contentLength")
+                }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: String =
+                    response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String =
+                    response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun editLocation(
+        country: String,
+        city: String,
+        onSuccess: (LocationRequestModel) -> Unit,
         onFailure: (String) -> Unit
     ) {
 
-        val response: HttpResponse = client.get("$baseUrl/operations/stores") {
+        val locationRequestModel = LocationRequestModel(country, city)
+        try {
+            val response: HttpResponse = client.post("$baseUrl/operations/editlocation") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(locationRequestModel)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: LocationRequestModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun getMyPosts(
+        onSuccess: (List<PostModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/myposts") {
+                contentType(ContentType.Application.Json)
+                val token = getToken()
+
+                println("token-----> $token")
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: GetPostsResponseModel =
+                    response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.posts)
+            } else {
+                val errorMessage: String =
+                    response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun getMyProfile(
+        onSuccess: (ProfileModel) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+
+        val response: HttpResponse = client.get("$baseUrl/operations/me") {
             contentType(ContentType.Application.Json)
             val token = getToken()
 
@@ -363,10 +331,10 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         }
 
         if (response.status.isSuccess()) {
-            val responseBody: GetStoresResponseModel =
+            val responseBody: GetProfileResponseModel =
                 response.body()
             println("success-----> ${response.bodyAsText()}")
-            onSuccess(responseBody.stores)
+            onSuccess(responseBody.profile)
         } else {
             val errorMessage: String =
                 response.bodyAsText()
@@ -374,29 +342,432 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         }
     }
 
-    suspend fun getProducts(
-        onSuccess: (List<ProductModel>) -> Unit,
+    suspend fun getCountriesAndCities(
+        onSuccess: (List<DataModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse =
+                client.get("https://countriesnow.space/api/v0.1/countries") {
+                    contentType(ContentType.Application.Json)
+                }
+
+            if (response.status.isSuccess()) {
+                val responseBody: GetCountriesModel =
+                    response.body()
+                onSuccess(responseBody.data)
+            } else {
+                val errorMessage: String =
+                    response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun getFriendsMoments(
+        onSuccess: (List<ProfileModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/friendsmoments") {
+                contentType(ContentType.Application.Json)
+                val token = getToken()
+
+                println("token-----> $token")
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<ProfileModel> =
+                    response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String =
+                    response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun getNearbyMoments(
+        onSuccess: (List<ProfileModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/nearbymoments") {
+                contentType(ContentType.Application.Json)
+                val token = getToken()
+
+                println("token-----> $token")
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<ProfileModel> =
+                    response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String =
+                    response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun getNearbyPosts(
+        onSuccess: (List<PostModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/nearbyposts") {
+                contentType(ContentType.Application.Json)
+                val token = getToken()
+
+                println("token-----> $token")
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<PostModel> =
+                    response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String =
+                    response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun search(
+        keyword: String,
+        onSuccess: (List<ProfileModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/search") {
+                contentType(ContentType.Application.Json)
+                val token = getToken()
+                parameter("keyword", keyword)
+                println("token-----> $token")
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: SearchResponseModel =
+                    response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.users)
+            } else {
+                val errorMessage: String =
+                    response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun getProfile(
+        id: String,
+        onSuccess: (ProfileModel) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/profile") {
+                contentType(ContentType.Application.Json)
+                val token = getToken()
+                parameter("id", id)
+                println("token-----> $token")
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: GetProfileResponseModel =
+                    response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.profile)
+            } else {
+                val errorMessage: String =
+                    response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun getPosts(
+        id: String,
+        onSuccess: (List<PostModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/posts") {
+                contentType(ContentType.Application.Json)
+                val token = getToken()
+                parameter("id", id)
+                println("token-----> $token")
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: GetPostsResponseModel =
+                    response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.posts)
+            } else {
+                val errorMessage: String =
+                    response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun changePassword(
+        currentPassword: String,
+        newPassword: String,
+        onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
     ) {
 
-        val response: HttpResponse = client.get("$baseUrl/operations/products") {
-            contentType(ContentType.Application.Json)
-            val token = getToken()
+        val changePasswordRequestModel = ChangePasswordRequestModel(currentPassword, newPassword)
+        try {
+            val response: HttpResponse = client.post("$baseUrl/operations/changepassword") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(changePasswordRequestModel)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
 
-            println("token-----> $token")
-            headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            if (response.status.isSuccess()) {
+                val responseBody: String = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
         }
 
-        if (response.status.isSuccess()) {
-            val responseBody: GetProductsResponseModel =
-                response.body()
-            println("success-----> ${response.bodyAsText()}")
-            onSuccess(responseBody.products)
-        } else {
-            val errorMessage: String =
-                response.bodyAsText()
-            onFailure(errorMessage)
+    }
+
+    lateinit var ws: DefaultClientWebSocketSession
+
+    init {
+        try {
+            val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+            scope.launch {
+                ws = client.webSocketSession("ws://${Constant.BASE_URL}:3000/ws")
+            }
+        } catch (e: Exception) {
+
         }
+
+    }
+
+    suspend fun sendRequestChat(
+        otherUserID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val sendChatRequestModel = SendChatRequestModel(otherUserID)
+
+            val response: HttpResponse = client.post("$baseUrl/operations/sendrequestchat") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(sendChatRequestModel)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: String = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun responseRequestChat(
+        id: String,
+        senderID: String,
+        status: Boolean,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val responseChatRequestModel = ResponseChatRequestModel(id, senderID, status)
+
+            val response: HttpResponse = client.post("$baseUrl/operations/responserequestchat") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(responseChatRequestModel)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: String = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+
+    }
+
+    suspend fun getAllChatRequests(
+        onSuccess: (List<ChatRequestModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/getallchatrequests") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<ChatRequestModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun getMessages(
+        conversationID: String,
+        onSuccess: (List<MessageModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/messages") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("conversationID", conversationID)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<MessageModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun sendMessage(
+        data: MessageModel,
+        onSuccess: (List<MessageModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val jsonMessage = Json.encodeToString<MessageModel>(data)
+            CoroutineScope(Dispatchers.IO).launch {
+                ws.send(Frame.Text(jsonMessage))
+            }
+        } catch (e: Exception) {
+
+        }
+
+
+    }
+
+    suspend fun getChatRequests(
+        onSuccess: (List<ChatRequestModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/chatrequests") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<ChatRequestModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun getConversations(
+        onSuccess: (List<ConversationModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/conversations") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<ConversationModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
     }
 
 }

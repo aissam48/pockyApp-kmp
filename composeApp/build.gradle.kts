@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
     kotlin("plugin.serialization")
+    id("com.google.gms.google-services")
+
 }
 
 kotlin {
@@ -17,20 +19,21 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
+            export("io.github.mirzemehdi:kmpnotifier:1.3.0")
             baseName = "ComposeApp"
             isStatic = true
         }
     }
-    
+
     sourceSets {
-        
+
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -45,8 +48,7 @@ kotlin {
             implementation(libs.androidx.camera.lifecycle)
             // CameraX View class
             implementation(libs.androidx.camera.view)
-
-            implementation("io.coil-kt:coil-compose:2.4.0")
+            //implementation("io.ktor:ktor-client-okhttp:3.0.1")
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -66,6 +68,7 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.jetbrains.kotlinx.serialization.json)
+            implementation("io.ktor:ktor-client-websockets:3.0.1")
 
             api(libs.datastore)
             api(libs.datastore.prefrences)
@@ -78,7 +81,21 @@ kotlin {
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.kotlinx.coroutines.swing)
 
+            //implementation("io.coil-kt.coil3:coil-compose:3.0.0-alpha06")
+            //implementation("io.coil-kt.coil3:coil-network-ktor:3.0.0-alpha06")
+
             implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+            implementation("io.coil-kt.coil3:coil-network-ktor2:3.0.4")
+            implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.4")
+
+            implementation("io.github.vinceglb:filekit-compose:0.8.8")
+
+            implementation("io.github.onseok:peekaboo-image-picker:0.5.2")
+
+            api("io.github.mirzemehdi:kmpnotifier:1.3.0")
+
+            // For CIO engine
+            implementation("io.ktor:ktor-client-cio:3.0.1")
 
         }
     }
