@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.home.navigations.profile.ProfileUiState
 import com.world.pockyapp.screens.post_preview.PostUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,12 +29,26 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
     private val _responseChatRequestState = MutableStateFlow<String>("")
     val responseChatRequestState: StateFlow<String> = _responseChatRequestState.asStateFlow()
 
+    private val _myProfileState = MutableStateFlow<ProfileModel?>(ProfileModel())
+    val myProfileState: StateFlow<ProfileModel?> = _myProfileState.asStateFlow()
+
+
     fun getProfile(id: String) {
         viewModelScope.launch {
             sdk.getProfile(id, { success ->
                 _profileState.value = ProfilePreviewUiState.Success(success)
             }, { error ->
                 _profileState.value = ProfilePreviewUiState.Error(error ?: "Unknown error")
+            })
+        }
+    }
+
+    fun getMyProfile() {
+        viewModelScope.launch {
+            sdk.getMyProfile({ success ->
+                _myProfileState.value = success
+            }, { error ->
+                _myProfileState.value = null
             })
         }
     }

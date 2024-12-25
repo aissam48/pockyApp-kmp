@@ -15,6 +15,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -25,7 +26,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
@@ -54,6 +59,18 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
         modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.onPrimary)
     ) {
 
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp)
+        ) {
+            Text(
+                "AroundMe",
+                fontSize = 25.sp,
+                fontStyle = FontStyle.Italic,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+            )
+        }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp)
@@ -132,10 +149,18 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
             Column() {
 
                 Spacer(modifier = Modifier.size(20.dp))
-                when(selected){
-                    0->{ DiscoverScreen(navController) }
-                    1->{ ChatScreen(navController) }
-                    2->{ ProfileScreen(navController) }
+                when (selected) {
+                    0 -> {
+                        DiscoverScreen(navController)
+                    }
+
+                    1 -> {
+                        ChatScreen(navController)
+                    }
+
+                    2 -> {
+                        ProfileScreen(navController)
+                    }
                 }
 
 

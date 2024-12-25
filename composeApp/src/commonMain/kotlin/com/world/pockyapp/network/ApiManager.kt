@@ -5,12 +5,14 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.world.pockyapp.Constant
+import com.world.pockyapp.getPlatform
 import com.world.pockyapp.network.models.model.ChatRequestModel
 import com.world.pockyapp.network.models.model.ConversationModel
 import com.world.pockyapp.network.models.model.DataModel
 import com.world.pockyapp.network.models.model.MessageModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.network.models.model.ResponseMessageModel
 import com.world.pockyapp.network.models.requests.ChangePasswordRequestModel
 import com.world.pockyapp.network.models.requests.LocationRequestModel
 import com.world.pockyapp.network.models.requests.LoginRequestModel
@@ -22,6 +24,7 @@ import com.world.pockyapp.network.models.responses.GetFriendsMomentsResponseMode
 import com.world.pockyapp.network.models.responses.GetPostsResponseModel
 import com.world.pockyapp.network.models.responses.GetProfileResponseModel
 import com.world.pockyapp.network.models.responses.LoginResponseModel
+import com.world.pockyapp.network.models.responses.ResponsePostModel
 import com.world.pockyapp.network.models.responses.SearchResponseModel
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -33,12 +36,14 @@ import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.client.plugins.websocket.webSocketSession
+import io.ktor.client.request.delete
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
@@ -66,24 +71,43 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     private val baseUrl = "http://${Constant.BASE_URL}:3000/api/v1"
 
-    //private val client = HttpClient(CIO) {
-    private val client = HttpClient(CIO) {
+    private val client = if (getPlatform().name.contains("Android")) {
+        HttpClient(CIO) {
+            install(WebSockets) {
+                maxFrameSize = Long.MAX_VALUE
+                pingIntervalMillis = 20_000
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 300_000
+                connectTimeoutMillis = 300_000
+                socketTimeoutMillis = 300_000
+            }
 
-        install(WebSockets) {
-            maxFrameSize = Long.MAX_VALUE
-            pingIntervalMillis = 20_000
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                    useAlternativeNames = false
+                })
+            }
         }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 300_000
-            connectTimeoutMillis = 300_000
-            socketTimeoutMillis = 300_000
-        }
+    } else {
+        HttpClient() {
+            install(WebSockets) {
+                maxFrameSize = Long.MAX_VALUE
+                pingIntervalMillis = 20_000
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 300_000
+                connectTimeoutMillis = 300_000
+                socketTimeoutMillis = 300_000
+            }
 
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                useAlternativeNames = false
-            })
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                    useAlternativeNames = false
+                })
+            }
         }
     }
 
@@ -355,6 +379,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             if (response.status.isSuccess()) {
                 val responseBody: GetCountriesModel =
                     response.body()
+                println("success countries ${response.bodyAsText()}")
                 onSuccess(responseBody.data)
             } else {
                 val errorMessage: String =
@@ -362,6 +387,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
+            println("error countries ${e.message}")
 
         }
 
@@ -760,6 +786,142 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 val responseBody: List<ConversationModel> = response.body()
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun like(
+        postID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.post("$baseUrl/operations/likepost") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("postID" to postID))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: String = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun unLike(
+        postID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.put("$baseUrl/operations/unlikepost") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("postID" to postID))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: String = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun viewMoment(
+        momentID: String,
+        ownerID: String,
+        onSuccess: (ResponseMessageModel) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.post("$baseUrl/operations/viewmoment") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("momentID" to momentID, "ownerID" to ownerID))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun getPost(
+        postID: String,
+        onSuccess: (PostModel) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/post") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("postID", postID)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponsePostModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.post)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun deletePost(
+        postID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.delete("$baseUrl/operations/post") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("postID", postID)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.message)
             } else {
                 val errorMessage: String = response.bodyAsText()
                 onFailure(errorMessage)

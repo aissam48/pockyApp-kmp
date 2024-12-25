@@ -2,6 +2,8 @@ package com.world.pockyapp.screens.auth.register
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,9 +80,12 @@ class RegisterScreenViewModel(
                 return@launch
             }
 
-            sdk.register(firstName, lastName, phone, email, password, country, city, {
+            sdk.register(firstName, lastName, phone, email, password, country, city, { success ->
                 _uiState.value = RegisterUiState.Success("Registration successful")
                 CoroutineScope(Dispatchers.Main).launch {
+                    dataStore.edit {
+                        it[stringPreferencesKey("token")] = success.data.accessToken
+                    }
                     delay(500)
                     _uiState.value = RegisterUiState.Idle
                 }

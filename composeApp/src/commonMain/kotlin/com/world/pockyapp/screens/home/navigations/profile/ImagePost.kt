@@ -1,5 +1,6 @@
 package com.world.pockyapp.screens.home.navigations.profile
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -13,9 +14,11 @@ import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant
 
 @Composable
-fun ImagePost(first: Int, postID: String) {
+fun ImagePost(first: Int, postID: String, clicked: () -> Unit) {
 
-    Box(modifier = Modifier.size((convertPxToDp(first / 3)-8).dp)){
+    Box(modifier = Modifier.size((convertPxToDp(first / 3) - 8).dp).clickable {
+        clicked()
+    }) {
         AsyncImage(
             model = "http://${Constant.BASE_URL}:3000/api/v1/stream/media/$postID", // URL of the image
             contentScale = ContentScale.Crop,

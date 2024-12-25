@@ -1,6 +1,10 @@
 package com.world.pockyapp.screens.home.navigations.profile
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,9 +38,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
@@ -158,20 +165,45 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                             Box(modifier = Modifier.fillMaxWidth()) {
 
                                 Box(modifier = Modifier.size(150.dp)) {
-                                    Image(
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.size(150.dp).clip(CircleShape).clickable {
-                                            val modulesJson =
-                                                Json.encodeToString(listOf(state.profile)).replace("/", "%")
-                                            navController.navigate(
-                                                NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/" + { true }
-                                            )
-                                        },
-                                        painter = if (state.profile.photoID.isEmpty()) painterResource(
-                                            Res.drawable.compose_multiplatform
-                                        ) else rememberAsyncImagePainter("http://${Constant.BASE_URL}:3000/api/v1/stream/media/${state.profile.photoID}"),
-                                        contentDescription = null
-                                    )
+
+                                    val checkIfSeeAllMoments =
+                                        state.profile.moments.find { !it.viewed }
+                                    Box(
+                                        modifier = Modifier
+                                            .size(150.dp)
+                                            .border(
+                                                width = 5.dp,
+                                                brush = Brush.linearGradient(
+                                                    colors = if (checkIfSeeAllMoments != null) listOf(
+                                                        Color.Red,
+                                                        Color.Yellow,
+                                                        Color.White
+                                                    ) else listOf(
+                                                        Color.Gray,
+                                                        Color.Gray,
+                                                        Color.Gray
+                                                    )
+                                                ),
+                                                shape = CircleShape
+                                            ),
+                                    ) {
+                                        Image(
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.size(150.dp).clip(CircleShape)
+                                                .clickable {
+                                                    val modulesJson =
+                                                        Json.encodeToString(listOf(state.profile))
+                                                            .replace("/", "%")
+                                                    navController.navigate(
+                                                        NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/" + { true }
+                                                    )
+                                                },
+                                            painter = if (state.profile.photoID.isEmpty()) painterResource(
+                                                Res.drawable.compose_multiplatform
+                                            ) else rememberAsyncImagePainter("http://${Constant.BASE_URL}:3000/api/v1/stream/media/${state.profile.photoID}"),
+                                            contentDescription = null
+                                        )
+                                    }
 
 
                                     Icon(
@@ -188,9 +220,10 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                 Image(
                                     painter = painterResource(Res.drawable.ic_settings_black),
                                     contentDescription = null,
-                                    modifier = Modifier.size(40.dp).align(Alignment.TopEnd).clickable {
-                                        navController.navigate(NavRoutes.SETTINGS.route)
-                                    }
+                                    modifier = Modifier.size(40.dp).align(Alignment.TopEnd)
+                                        .clickable {
+                                            navController.navigate(NavRoutes.SETTINGS.route)
+                                        }
                                 )
 
                             }
@@ -260,7 +293,9 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                             ) {
 
                                 item.forEachIndexed { index, postModel ->
-                                    ImagePost(screenSize.value.first, item[index].postID)
+                                    ImagePost(screenSize.value.first, item[index].postID) {
+                                        navController.navigate(NavRoutes.POST.route + "/${item[index].postID}" + "/${state.profile.id}")
+                                    }
                                     if (postModel != item.last()) {
                                         Spacer(modifier = Modifier.size(3.dp))
                                     }

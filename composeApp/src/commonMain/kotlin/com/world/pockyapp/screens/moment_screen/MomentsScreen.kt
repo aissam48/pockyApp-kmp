@@ -1,11 +1,13 @@
-package com.world.pockyapp.screens
+package com.world.pockyapp.screens.moment_screen
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -27,10 +29,14 @@ import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ProfileModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_back_black
+import pockyapp.composeapp.generated.resources.ic_view
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -40,7 +46,8 @@ fun StoriesViewer(
     initialUserIndex: Int = 0,
     onStoriesFinished: () -> Unit,
     navController: NavHostController,
-    back: Boolean
+    back: Boolean,
+    viewModel: MomentsViewModel
 ) {
     var currentUserIndex by remember { mutableStateOf(initialUserIndex) }
     var currentStoryIndex by remember { mutableStateOf(0) }
@@ -48,11 +55,18 @@ fun StoriesViewer(
         initialPage = initialUserIndex,
         pageCount = { users.size }
     )
+
     val coroutineScope = rememberCoroutineScope()
+    val indexFirstUnvViewed = users[currentUserIndex].moments.indexOfFirst { !it.viewed }
+
+    currentStoryIndex = if (indexFirstUnvViewed == -1) 0 else indexFirstUnvViewed
 
     LaunchedEffect(pagerState.currentPage) {
+        println("pagerState.currentPage ${pagerState.currentPage}")
         currentUserIndex = pagerState.currentPage
-        currentStoryIndex = 0
+        val currentMoment = users[currentUserIndex]
+        val indexFirstUnvViewedL = currentMoment.moments.indexOfFirst { !it.viewed }
+        currentStoryIndex = if (indexFirstUnvViewedL == -1) 0 else indexFirstUnvViewedL
     }
 
     Box(
@@ -67,7 +81,18 @@ fun StoriesViewer(
             val user = users[userIndex]
             StoryPage(
                 userStories = user,
-                currentStoryIndex = if (userIndex == currentUserIndex) currentStoryIndex else 0,
+                currentStoryIndex = if (userIndex == currentUserIndex) {
+                    val momentID = user.moments[currentStoryIndex].postID
+                    viewModel.viewMoment(momentID, user.id)
+                    currentStoryIndex
+                } else {
+                    val index = user.moments.indexOfFirst { !it.viewed }
+                    if (index == -1) {
+                        0
+                    } else {
+                        index
+                    }
+                },
                 onStoryFinished = {
                     if (currentStoryIndex < user.moments.size - 1) {
                         currentStoryIndex++
@@ -100,7 +125,8 @@ fun StoriesViewer(
                     }
                 },
                 navController = navController,
-                back = back
+                back = back,
+                viewModel = viewModel
             )
         }
     }
@@ -114,13 +140,21 @@ fun StoryPage(
     onTapLeft: () -> Unit,
     onTapRight: () -> Unit,
     navController: NavHostController,
-    back: Boolean
+    back: Boolean,
+    viewModel: MomentsViewModel
 ) {
+
+    if (currentStoryIndex > userStories.moments.size-1){
+        navController.popBackStack()
+        return
+    }
     val story = userStories.moments[currentStoryIndex]
     var progressValue by remember { mutableStateOf(0f) }
     val progressAnimation = remember {
         Animatable(0f)
     }
+
+    var isHolding by remember { mutableStateOf(false) }
 
     LaunchedEffect(currentStoryIndex) {
         progressAnimation.snapTo(0f)
@@ -136,7 +170,10 @@ fun StoryPage(
     }
 
     LaunchedEffect(progressAnimation.value) {
-        progressValue = progressAnimation.value
+        if (!isHolding) {
+            progressValue = progressAnimation.value
+        }
+
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -175,11 +212,27 @@ fun StoryPage(
             modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(Unit) {
-                    detectTapGestures { offset ->
-                        if (offset.x < size.width / 2) {
-                            onTapLeft()
-                        } else {
-                            onTapRight()
+
+                    awaitEachGesture {
+                        // Wait for down event
+                        val down = awaitFirstDown()
+                        isHolding = true
+                        CoroutineScope(Dispatchers.Main).launch {
+                            progressAnimation.stop()
+                        }
+                        val offset = down.position
+                        val up = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+                            waitForUpOrCancellation()
+                        }
+
+                        if (up != null) {
+                            isHolding = false
+                            println("Clicked!")
+                            if (offset.x < size.width / 2) {
+                                onTapLeft()
+                            } else {
+                                onTapRight()
+                            }
                         }
                     }
                 }
@@ -236,6 +289,17 @@ fun StoryPage(
             }
 
         }
+
+        Row(
+            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(50.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.size(15.dp))
+            Text(text = "${story.views.size}", color = Color.Yellow, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.size(5.dp))
+            Image(painter = painterResource(Res.drawable.ic_view), contentDescription = null, modifier = Modifier.size(25.dp))
+
+        }
     }
 }
 
@@ -245,7 +309,8 @@ fun MomentsScreen(
     navController: NavHostController,
     moments: List<ProfileModel>,
     index: String?,
-    back: Boolean
+    back: Boolean,
+    viewModel: MomentsViewModel = koinViewModel()
 ) {
     val sampleUsers = moments
 
@@ -256,6 +321,7 @@ fun MomentsScreen(
         },
         initialUserIndex = index?.toIntOrNull() ?: 0,
         navController = navController,
-        back = back
+        back = back,
+        viewModel = viewModel
     )
 }

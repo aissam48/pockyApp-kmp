@@ -13,9 +13,13 @@ import com.world.pockyapp.screens.change_password.ChangePasswordViewModel
 import com.world.pockyapp.screens.chat.ChatViewModel
 import com.world.pockyapp.screens.edit_profile.EditProfileViewModel
 import com.world.pockyapp.screens.home.navigations.conversations.ConversationsViewModel
+import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.profile_preview.ProfilePreviewViewModel
 import com.world.pockyapp.screens.search.SearchScreen
 import com.world.pockyapp.screens.search.SearchViewModel
+import com.world.pockyapp.screens.splash_screen.SplashScreen
+import com.world.pockyapp.screens.splash_screen.SplashViewModel
+import com.world.pockyapp.screens.view_post.ViewPostViewModel
 import org.koin.compose.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -24,6 +28,7 @@ val appModule = module {
 
     single { ApiManager(dataStore = get()) }
 
+    viewModel { SplashViewModel(dataStore = get()) }
     viewModel { LoginScreenViewModel(sdk = get(), dataStore = get()) }
     viewModel { RegisterScreenViewModel(sdk = get(), dataStore = get()) }
     viewModel { HomeViewModel(sdk = get()) }
@@ -37,5 +42,7 @@ val appModule = module {
     viewModel { ChangePasswordViewModel(sdk = get()) }
     viewModel { ChatViewModel(sdk = get()) }
     viewModel { ConversationsViewModel(sdk = get()) }
+    viewModel { MomentsViewModel(sdk = get()) }
+    viewModel { ViewPostViewModel(sdk = get()) }
 
 }

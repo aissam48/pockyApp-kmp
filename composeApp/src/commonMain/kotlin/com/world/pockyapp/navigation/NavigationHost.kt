@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.ImagePicker
-import com.world.pockyapp.screens.MomentsScreen
+import com.world.pockyapp.screens.moment_screen.MomentsScreen
 import com.world.pockyapp.screens.camera.CameraView
 import com.world.pockyapp.screens.edit_location.EditLocationScreen
 import com.world.pockyapp.screens.edit_profile.EditProfileScreen
@@ -22,6 +22,8 @@ import com.world.pockyapp.screens.profile_preview.ProfilePreviewScreen
 import com.world.pockyapp.screens.search.SearchScreen
 import com.world.pockyapp.screens.settings.SettingsScreen
 import com.world.pockyapp.screens.show_moment.ShowMoments
+import com.world.pockyapp.screens.splash_screen.SplashScreen
+import com.world.pockyapp.screens.view_post.ViewPostScreen
 import kotlinx.serialization.json.Json
 
 @Composable
@@ -29,8 +31,12 @@ fun NavigationHost(navController: NavHostController) {
 
     NavHost(
         navController = navController,
-        startDestination = NavRoutes.LOGIN.route,
+        startDestination = NavRoutes.SPLASH.route,
     ) {
+
+        composable(NavRoutes.SPLASH.route) {
+            SplashScreen(navController)
+        }
 
         composable(NavRoutes.LOGIN.route) {
             LoginScreen(navController)
@@ -109,6 +115,12 @@ fun NavigationHost(navController: NavHostController) {
         composable(route = "${NavRoutes.PROFILE_PREVIEW.route}/{id}") { navBackStackEntry ->
             val id = navBackStackEntry.arguments?.getString("id") ?: ""
             ProfilePreviewScreen(navController, id = id)
+        }
+
+        composable(route = "${NavRoutes.POST.route}/{id}/{myID}") { navBackStackEntry ->
+            val id = navBackStackEntry.arguments?.getString("id") ?: ""
+            val myID = navBackStackEntry.arguments?.getString("myID") ?: ""
+            ViewPostScreen(navController, postID = id, myID = myID)
         }
 
         composable(route = "${NavRoutes.CHAT.route}/{conversationID}/{profileID}") { navBackStackEntry ->

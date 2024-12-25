@@ -88,6 +88,7 @@ fun ProfilePreviewScreen(
     )
 
     val profileState by viewModel.profileState.collectAsState()
+    val myProfileState by viewModel.myProfileState.collectAsState()
     val postsState by viewModel.postsState.collectAsState()
     val sendChatRequestState by viewModel.sendChatRequestState.collectAsState()
     val responseChatRequestState by viewModel.responseChatRequestState.collectAsState()
@@ -96,6 +97,7 @@ fun ProfilePreviewScreen(
     LaunchedEffect(Unit) {
         viewModel.getProfile(id = id)
         viewModel.getPosts(id = id)
+        viewModel.getMyProfile()
     }
 
     LaunchedEffect(responseChatRequestState) {
@@ -411,7 +413,9 @@ fun ProfilePreviewScreen(
                             ) {
 
                                 item.forEachIndexed { index, postModel ->
-                                    ImagePost(screenSize.value.first, item[index].postID)
+                                    ImagePost(screenSize.value.first, item[index].postID){
+                                        navController.navigate(NavRoutes.POST.route + "/${item[index].postID}" + "/${myProfileState?.id}")
+                                    }
                                     if (postModel != item.last()) {
                                         Spacer(modifier = Modifier.size(3.dp))
                                     }

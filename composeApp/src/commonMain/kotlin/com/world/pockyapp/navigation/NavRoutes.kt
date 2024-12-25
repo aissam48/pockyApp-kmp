@@ -1,6 +1,7 @@
 package com.world.pockyapp.navigation
 
 enum class NavRoutes(val route: String) {
+    SPLASH("splash"),
     LOGIN("login"),
     REGISTER("register"),
     HOME("home"),
@@ -17,4 +18,5 @@ enum class NavRoutes(val route: String) {
     PROFILE_PREVIEW("profile_preview"),
     CHANGE_PASSWORD("change_password"),
     CHAT("chat"),
+    POST("post"),
 }
