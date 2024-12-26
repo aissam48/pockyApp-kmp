@@ -51,16 +51,6 @@ fun LoginScreen(
     val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    /*val notifier = NotifierManager.getLocalNotifier()
-    notifier.notify (
-        title = "Title from KMPNotifier",
-        body = "Body message from KMPNotifier",
-        payloadData = mapOf(
-            Notifier.KEY_URL to "https://github.com/mirzemehdi/KMPNotifier/",
-            "extraKey" to "randomValue"
-        )
-    )*/
-
     LaunchedEffect(uiState) {
         when (uiState) {
             is LoginUiState.Logging -> {

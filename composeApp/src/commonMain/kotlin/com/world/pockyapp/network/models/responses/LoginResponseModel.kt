@@ -11,5 +11,5 @@ data class LoginResponseModel(
 @Serializable
 data class LoginResponseData(
     val message: String,
-    val accessToken:String
+    val accessToken:String,
 )

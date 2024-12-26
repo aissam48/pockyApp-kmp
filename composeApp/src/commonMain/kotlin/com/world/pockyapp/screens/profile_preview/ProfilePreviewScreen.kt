@@ -160,7 +160,8 @@ fun ProfilePreviewScreen(
                             ).height(30.dp).width(90.dp).clickable {
                                 viewModel.responseRequestChat(
                                     status.profile.chatRequest.id,
-                                    true
+                                    true,
+                                    status.profile.chatRequest.senderID
                                 )
                             },
                             contentAlignment = Alignment.Center
@@ -180,7 +181,8 @@ fun ProfilePreviewScreen(
                             ).height(30.dp).width(90.dp).clickable {
                                 viewModel.responseRequestChat(
                                     status.profile.chatRequest.id,
-                                    false
+                                    false,
+                                    status.profile.chatRequest.senderID
                                 )
                             },
                             contentAlignment = Alignment.Center

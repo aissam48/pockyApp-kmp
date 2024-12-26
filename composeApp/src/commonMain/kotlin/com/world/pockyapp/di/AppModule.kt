@@ -17,6 +17,7 @@ import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.post_preview.PostViewModel
 import com.world.pockyapp.screens.profile_preview.ProfilePreviewViewModel
 import com.world.pockyapp.screens.search.SearchViewModel
+import com.world.pockyapp.screens.settings.SettingsViewModel
 import com.world.pockyapp.screens.splash_screen.SplashViewModel
 import com.world.pockyapp.screens.view_post.ViewPostViewModel
 import org.koin.compose.viewmodel.dsl.viewModel
@@ -44,5 +45,6 @@ val appModule = module {
     viewModel { MomentsViewModel(sdk = get()) }
     viewModel { ViewPostViewModel(sdk = get()) }
     viewModel { FriendRequestsViewModel(sdk = get()) }
+    viewModel { SettingsViewModel(dataStore = get()) }
 
 }

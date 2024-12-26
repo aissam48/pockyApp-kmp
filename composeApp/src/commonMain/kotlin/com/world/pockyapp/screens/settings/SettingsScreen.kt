@@ -18,6 +18,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,8 +45,20 @@ import pockyapp.composeapp.generated.resources.ic_close_black
 import pockyapp.composeapp.generated.resources.ic_edit_black
 
 @Composable
-fun SettingsScreen(navController: NavHostController) {
+fun SettingsScreen(navController: NavHostController, viewModel: SettingsViewModel = koinViewModel()) {
 
+    val logout = viewModel.logoutState.collectAsState()
+
+    LaunchedEffect(logout.value){
+        if (logout.value == "logout"){
+            navController.navigate(NavRoutes.SPLASH.route){
+                popUpTo(NavRoutes.SPLASH.route){
+                    inclusive = true
+                }
+            }
+
+        }
+    }
 
     Scaffold(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -144,11 +158,32 @@ fun SettingsScreen(navController: NavHostController) {
                         .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
                         .height(50.dp).padding(start = 15.dp)
                         .clickable {
+                            viewModel.logout()
+                        }) {
+                    Text(
+                        text = "Logout",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    )
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(35.dp))
+            }
+
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                        .background(color = Color.Red, shape = RoundedCornerShape(15.dp))
+                        .height(50.dp).padding(start = 15.dp)
+                        .clickable {
 
                         }) {
                     Text(
                         text = "Delete account",
-                        color = Color.Black,
+                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.CenterStart)
                     )

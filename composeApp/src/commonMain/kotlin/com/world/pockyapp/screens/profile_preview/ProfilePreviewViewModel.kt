@@ -91,10 +91,11 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
 
     fun responseRequestChat(
         id: String,
-        status: Boolean
+        status: Boolean,
+        senderID:String
     ) {
         viewModelScope.launch {
-            sdk.responseRequestChat(id, status, { success ->
+            sdk.responseRequestChat(id, status,senderID, { success ->
                 _responseChatRequestState.value = success
             }, { error ->
                 _responseChatRequestState.value = error

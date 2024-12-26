@@ -1,3 +1,4 @@
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -60,7 +61,10 @@ import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.DataModel
 import com.world.pockyapp.screens.auth.register.RegisterScreenViewModel
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
+import pockyapp.composeapp.generated.resources.Res
+import pockyapp.composeapp.generated.resources.ic_back_black
 
 @Composable
 fun RegisterScreen(
@@ -137,22 +141,29 @@ fun RegisterScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
+                .padding(start = 10.dp, top = 10.dp, end = 10.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.padding(top = 100.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.align(Alignment.Start)) {
+                Image(
+                    modifier = Modifier.size(23.dp).clickable {
+                        navController.popBackStack()
+                    },
+                    painter = painterResource(Res.drawable.ic_back_black),
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.size(15.dp))
+                androidx.compose.material.Text(
+                    text = "Register",
+                    color = Color.Black,
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
-            Text(
-                text = "Register",
-                fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 50.sp,
-            )
-
-            Spacer(modifier = Modifier.padding(top = 80.dp))
-
+            Spacer(modifier = Modifier.padding(top = 50.dp))
 
             OutlinedTextField(
                 singleLine = true,

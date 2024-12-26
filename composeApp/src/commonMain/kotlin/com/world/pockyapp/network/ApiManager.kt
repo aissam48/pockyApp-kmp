@@ -153,9 +153,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                     response.body() // Extract response body if request is successful
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String =
-                    response.bodyAsText() // Get the error message from the response
-                onFailure(errorMessage)
+                val errorMessage: ResponseMessageModel = response.body() // Get the error message from the response
+                onFailure(errorMessage.message)
             }
         } catch (e: Exception) {
 
@@ -647,11 +646,12 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun responseRequestChat(
         id: String,
         status: Boolean,
+        senderID:String,
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
     ) {
         try {
-            val responseChatRequestModel = ResponseChatRequestModel(id, status)
+            val responseChatRequestModel = ResponseChatRequestModel(id,senderID, status)
 
             val response: HttpResponse = client.post("$baseUrl/operations/responserequestchat") {
                 val token = getToken()

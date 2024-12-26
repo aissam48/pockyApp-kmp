@@ -15,6 +15,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,9 +35,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.screens.auth.login.LoginUiState
 import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverScreen
 import com.world.pockyapp.screens.home.navigations.profile.ProfileScreen
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -52,9 +56,17 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
     var selected by remember {
         mutableIntStateOf(viewModel.selectedScreen)
     }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val scope = rememberCoroutineScope()
 
+    scope.launch {
+        snackbarHostState.showSnackbar(
+            message = "test",
+            actionLabel = "Dismiss",
+            duration = SnackbarDuration.Short
+        )
+    }
     Column(
         modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.onPrimary)
     ) {
@@ -75,15 +87,6 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp)
         ) {
-            /*Image(
-                painter = painterResource(Res.drawable.compose_multiplatform),
-                modifier = Modifier.size(35.dp).clip(CircleShape).clickable {
-
-                },
-                contentDescription = null,
-            )
-
-            Spacer(modifier = Modifier.size(20.dp))*/
 
             Image(
                 painter = painterResource(Res.drawable.ic_search_black),
