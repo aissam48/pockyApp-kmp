@@ -16,6 +16,7 @@ import com.world.pockyapp.screens.home.HomeScreen
 import com.world.pockyapp.screens.auth.login.LoginScreen
 import com.world.pockyapp.screens.change_password.ChangePasswordScreen
 import com.world.pockyapp.screens.chat.ChatScreen
+import com.world.pockyapp.screens.friend_request.FriendRequestsScreen
 import com.world.pockyapp.screens.moment_preview.MomentPreview
 import com.world.pockyapp.screens.post_preview.PostPreview
 import com.world.pockyapp.screens.profile_preview.ProfilePreviewScreen
@@ -84,6 +85,10 @@ fun NavigationHost(navController: NavHostController) {
 
         composable(NavRoutes.CHANGE_PASSWORD.route) {
             ChangePasswordScreen(navController)
+        }
+
+        composable(NavRoutes.FRIEND_REQUESTS.route) {
+            FriendRequestsScreen(navController)
         }
 
         composable(route = "${NavRoutes.MOMENTS.route}/{moments}/{index}/{back}") { backStackEntry ->

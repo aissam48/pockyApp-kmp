@@ -19,4 +19,5 @@ enum class NavRoutes(val route: String) {
     CHANGE_PASSWORD("change_password"),
     CHAT("chat"),
     POST("post"),
+    FRIEND_REQUESTS("friend_requests"),
 }

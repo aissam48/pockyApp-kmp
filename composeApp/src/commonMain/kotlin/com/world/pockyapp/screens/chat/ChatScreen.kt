@@ -166,7 +166,7 @@ fun ChatScreen(
                     modifier = Modifier.fillMaxWidth(0.80f),
                     value = message.value,
                     onValueChange = { message.value = it },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     colors = TextFieldDefaults.textFieldColors(
                         textColor = MaterialTheme.colorScheme.primary,
                         cursorColor = MaterialTheme.colorScheme.primary,

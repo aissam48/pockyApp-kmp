@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class ChatRequestModel(
     val id: String,
     val senderID: String,
-    val receiverID: String,
+    val members: List<String> = emptyList(),
     val createdAt: String,
     val expired: Boolean,
     val status: String,

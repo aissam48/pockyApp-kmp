@@ -9,6 +9,7 @@ import com.world.pockyapp.getPlatform
 import com.world.pockyapp.network.models.model.ChatRequestModel
 import com.world.pockyapp.network.models.model.ConversationModel
 import com.world.pockyapp.network.models.model.DataModel
+import com.world.pockyapp.network.models.model.FriendRequestModel
 import com.world.pockyapp.network.models.model.MessageModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
@@ -645,13 +646,12 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun responseRequestChat(
         id: String,
-        senderID: String,
         status: Boolean,
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
     ) {
         try {
-            val responseChatRequestModel = ResponseChatRequestModel(id, senderID, status)
+            val responseChatRequestModel = ResponseChatRequestModel(id, status)
 
             val response: HttpResponse = client.post("$baseUrl/operations/responserequestchat") {
                 val token = getToken()
@@ -915,6 +915,139 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 val token = getToken()
                 contentType(ContentType.Application.Json)
                 parameter("postID", postID)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.message)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun beFriend(
+        friendID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.post("$baseUrl/operations/befriend") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("friendID" to friendID))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.message)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun unFriend(
+        friendID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.delete("$baseUrl/operations/unfriend") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("friendID", friendID)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.message)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun getFriendRequests(
+        onSuccess: (List<FriendRequestModel>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/friendrequests") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<FriendRequestModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun acceptFriendRequest(
+        requestID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.put("$baseUrl/operations/acceptfriend") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("requestId", requestID)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.message)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun rejectFriendRequest(
+        requestID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.put("$baseUrl/operations/rejectfriend") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("requestId", requestID)
                 headers { append(HttpHeaders.Authorization, "Bearer $token") }
             }
 

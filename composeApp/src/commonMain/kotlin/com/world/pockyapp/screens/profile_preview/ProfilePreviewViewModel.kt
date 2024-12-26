@@ -32,6 +32,12 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
     private val _myProfileState = MutableStateFlow<ProfileModel?>(ProfileModel())
     val myProfileState: StateFlow<ProfileModel?> = _myProfileState.asStateFlow()
 
+    private val _beFriendState = MutableStateFlow<String>("")
+    val beFriendState: StateFlow<String> = _beFriendState.asStateFlow()
+
+    private val _unFriendState = MutableStateFlow<String>("")
+    val unFriendState: StateFlow<String> = _unFriendState.asStateFlow()
+
 
     fun getProfile(id: String) {
         viewModelScope.launch {
@@ -39,6 +45,16 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
                 _profileState.value = ProfilePreviewUiState.Success(success)
             }, { error ->
                 _profileState.value = ProfilePreviewUiState.Error(error ?: "Unknown error")
+            })
+        }
+    }
+
+    fun beFriend(id: String) {
+        viewModelScope.launch {
+            sdk.beFriend(id, { success ->
+                _beFriendState.value = success
+            }, { error ->
+                _beFriendState.value = ""
             })
         }
     }
@@ -75,14 +91,23 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
 
     fun responseRequestChat(
         id: String,
-        senderID: String,
         status: Boolean
     ) {
         viewModelScope.launch {
-            sdk.responseRequestChat(id, senderID, status, { success ->
+            sdk.responseRequestChat(id, status, { success ->
                 _responseChatRequestState.value = success
             }, { error ->
                 _responseChatRequestState.value = error
+            })
+        }
+    }
+
+    fun removeFriend(id: String) {
+        viewModelScope.launch {
+            sdk.unFriend(id, { success ->
+                _unFriendState.value = success
+            }, { error ->
+                _unFriendState.value = ""
             })
         }
     }

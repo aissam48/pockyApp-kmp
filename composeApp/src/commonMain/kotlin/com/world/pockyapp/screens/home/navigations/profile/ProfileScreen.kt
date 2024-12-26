@@ -66,6 +66,7 @@ import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.compose_multiplatform
 import pockyapp.composeapp.generated.resources.ic_add_black
 import pockyapp.composeapp.generated.resources.ic_add_post_black
+import pockyapp.composeapp.generated.resources.ic_be_friend
 import pockyapp.composeapp.generated.resources.ic_location_black
 import pockyapp.composeapp.generated.resources.ic_settings_black
 import pockyapp.composeapp.generated.resources.is_add_story_black
@@ -217,17 +218,34 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                     )
                                 }
 
-                                Image(
-                                    painter = painterResource(Res.drawable.ic_settings_black),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(40.dp).align(Alignment.TopEnd)
-                                        .clickable {
-                                            navController.navigate(NavRoutes.SETTINGS.route)
-                                        }
-                                )
+                                Row(
+                                    modifier = Modifier.align(Alignment.TopEnd),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+
+                                    Image(
+                                        painter = painterResource(Res.drawable.ic_be_friend),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(35.dp)
+                                            .clickable {
+                                                navController.navigate(NavRoutes.FRIEND_REQUESTS.route)
+                                            }
+                                    )
+                                    Spacer(modifier = Modifier.size(8.dp))
+
+                                    Image(
+                                        painter = painterResource(Res.drawable.ic_settings_black),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(35.dp)
+                                            .clickable {
+                                                navController.navigate(NavRoutes.SETTINGS.route)
+                                            }
+                                    )
+
+
+                                }
 
                             }
-
                         }
 
                         item {

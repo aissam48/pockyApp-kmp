@@ -53,6 +53,7 @@ import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.Constant
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.screens.home.navigations.profile.ImagePost
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -63,6 +64,7 @@ import pockyapp.composeapp.generated.resources.compose_multiplatform
 import pockyapp.composeapp.generated.resources.ic_add_black
 import pockyapp.composeapp.generated.resources.ic_add_post_black
 import pockyapp.composeapp.generated.resources.ic_back_black
+import pockyapp.composeapp.generated.resources.ic_be_friend
 import pockyapp.composeapp.generated.resources.ic_chat_bleu
 import pockyapp.composeapp.generated.resources.ic_chat_request_blue
 import pockyapp.composeapp.generated.resources.ic_location_black
@@ -88,6 +90,8 @@ fun ProfilePreviewScreen(
     )
 
     val profileState by viewModel.profileState.collectAsState()
+    val beFriendState by viewModel.beFriendState.collectAsState()
+    val unFriendState by viewModel.unFriendState.collectAsState()
     val myProfileState by viewModel.myProfileState.collectAsState()
     val postsState by viewModel.postsState.collectAsState()
     val sendChatRequestState by viewModel.sendChatRequestState.collectAsState()
@@ -95,97 +99,104 @@ fun ProfilePreviewScreen(
 
     // Trigger initial data load
     LaunchedEffect(Unit) {
+        viewModel.getMyProfile()
         viewModel.getProfile(id = id)
         viewModel.getPosts(id = id)
-        viewModel.getMyProfile()
     }
 
-    LaunchedEffect(responseChatRequestState) {
+    LaunchedEffect(responseChatRequestState, beFriendState, unFriendState, sendChatRequestState) {
         viewModel.getProfile(id = id)
     }
 
     Scaffold(topBar = {
         val status = profileState
-        if (status is ProfilePreviewUiState.Success && status.profile.itRequested != null && status.profile.itRequested.status == "NOT_YET") {
+        if (status is ProfilePreviewUiState.Success
+            && status.profile.chatRequest != null
+            && status.profile.chatRequest.status == "NOT_YET"
+            && myProfileState?.id == status.profile.chatRequest.senderID
+        ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    "Request of chat",
+                    "You requested chat",
                     color = MaterialTheme.colorScheme.primary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold
                 )
 
                 Spacer(modifier = Modifier.size(15.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    Box(
-                        modifier = Modifier.background(
-                            color = Color.Green,
-                            shape = RoundedCornerShape(10.dp)
-                        ).height(40.dp).width(120.dp).clickable {
-                            viewModel.responseRequestChat(
-                                status.profile.itRequested.id,
-                                status.profile.itRequested.senderID,
-                                true
-                            )
-                        },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Accept",
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier.background(
-                            color = Color.Red,
-                            shape = RoundedCornerShape(10.dp)
-                        ).height(40.dp).width(120.dp).clickable {
-                            viewModel.responseRequestChat(
-                                status.profile.itRequested.id,
-                                status.profile.itRequested.senderID,
-                                false
-                            )
-                        },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Reject",
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.size(15.dp))
 
             }
         } else {
-            if (status is ProfilePreviewUiState.Success && status.profile.iamRequested != null && status.profile.iamRequested.status == "NOT_YET") {
+            if (status is ProfilePreviewUiState.Success
+                && status.profile.chatRequest != null
+                && status.profile.chatRequest.status == "NOT_YET" &&
+                myProfileState?.id?.isNotEmpty() == true && myProfileState?.id != status.profile.chatRequest.senderID
+            ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.size(10.dp))
                     Text(
-                        "You requested chat",
+                        "Request of chat",
                         color = MaterialTheme.colorScheme.primary,
-                        fontSize = 18.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold
                     )
 
                     Spacer(modifier = Modifier.size(15.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        Box(
+                            modifier = Modifier.background(
+                                color = Color.Green,
+                                shape = RoundedCornerShape(10.dp)
+                            ).height(30.dp).width(90.dp).clickable {
+                                viewModel.responseRequestChat(
+                                    status.profile.chatRequest.id,
+                                    true
+                                )
+                            },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Accept",
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier.background(
+                                color = Color.Red,
+                                shape = RoundedCornerShape(10.dp)
+                            ).height(30.dp).width(90.dp).clickable {
+                                viewModel.responseRequestChat(
+                                    status.profile.chatRequest.id,
+                                    false
+                                )
+                            },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Reject",
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.size(10.dp))
 
                 }
+
             }
         }
 
@@ -208,50 +219,43 @@ fun ProfilePreviewScreen(
                     sheetBackgroundColor = Color.LightGray,
                     sheetContent = {
                         Column(
-                            modifier = Modifier.fillMaxWidth().height(150.dp)
+                            modifier = Modifier.fillMaxWidth().height(100.dp)
                         ) {
                             Spacer(modifier = Modifier.size(20.dp))
                             Row(
                                 modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                                     .clickable {
-
+                                        if (beFriendState.isEmpty() && state.profile.friend == "NO") {
+                                            viewModel.beFriend(state.profile.id)
+                                        } else {
+                                            if (state.profile.friend == "YES") {
+                                                viewModel.removeFriend(state.profile.id)
+                                            }
+                                        }
+                                        scope.launch {
+                                            scaffoldState.bottomSheetState.collapse()
+                                        }
                                     },
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Icon(
-                                    painter = painterResource(Res.drawable.is_add_story_black),
+                                    painter = painterResource(Res.drawable.ic_be_friend),
                                     contentDescription = null
                                 )
                                 Spacer(modifier = Modifier.size(10.dp))
                                 Text(
                                     fontWeight = FontWeight.Bold,
-                                    text = "button1",
+                                    text = if (beFriendState.isEmpty() && state.profile.friend == "NO")
+                                        "Be friend"
+                                    else
+                                        if (state.profile.friend == "YES")
+                                            "Remove friend" else
+                                            "Request has sent",
                                     color = Color.Black,
                                     fontSize = 15.sp
                                 )
                             }
 
-                            Spacer(modifier = Modifier.size(10.dp))
-
-                            Row(
-                                modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-                                    .clickable {
-
-                                    },
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_add_post_black),
-                                    contentDescription = null
-                                )
-                                Spacer(modifier = Modifier.size(10.dp))
-                                Text(
-                                    fontWeight = FontWeight.Bold,
-                                    text = "button2",
-                                    color = Color.Black,
-                                    fontSize = 15.sp
-                                )
-                            }
                         }
 
                     }
@@ -278,13 +282,15 @@ fun ProfilePreviewScreen(
                                 Box(modifier = Modifier.size(150.dp)) {
                                     Image(
                                         contentScale = ContentScale.Crop,
-                                        modifier = Modifier.size(150.dp).clip(CircleShape).clickable {
-                                            val modulesJson =
-                                                Json.encodeToString(listOf(state.profile)).replace("/", "%")
-                                            navController.navigate(
-                                                NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/" + { false }
-                                            )
-                                        },
+                                        modifier = Modifier.size(150.dp).clip(CircleShape)
+                                            .clickable {
+                                                val modulesJson =
+                                                    Json.encodeToString(listOf(state.profile))
+                                                        .replace("/", "%")
+                                                navController.navigate(
+                                                    NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/" + { false }
+                                                )
+                                            },
                                         painter = if (state.profile.photoID.isEmpty()) painterResource(
                                             Res.drawable.compose_multiplatform
                                         ) else rememberAsyncImagePainter("http://${Constant.BASE_URL}:3000/api/v1/stream/media/${state.profile.photoID}"),
@@ -295,7 +301,7 @@ fun ProfilePreviewScreen(
                                 Row(modifier = Modifier.align(Alignment.TopEnd)) {
 
                                     when (true) {
-                                        (state.profile.itRequested == null && state.profile.iamRequested == null) -> {
+                                        (state.profile.chatRequest == null) -> {
                                             Image(
                                                 painter = painterResource(Res.drawable.ic_chat_request_blue),
                                                 contentDescription = null,
@@ -308,18 +314,7 @@ fun ProfilePreviewScreen(
                                             )
                                         }
 
-                                        (state.profile.itRequested != null && state.profile.itRequested.status == "ACCEPTED") -> {
-                                            Image(
-                                                painter = painterResource(Res.drawable.ic_chat_bleu),
-                                                contentDescription = null,
-                                                modifier = Modifier.size(40.dp)
-                                                    .clickable {
-                                                        navController.navigate(NavRoutes.CHAT.route + "/${state.profile.conversationID}" + "/${state.profile.id}")
-                                                    }
-                                            )
-                                        }
-
-                                        (state.profile.itRequested == null && state.profile.iamRequested != null && state.profile.iamRequested.status == "ACCEPTED") -> {
+                                        (state.profile.chatRequest.status == "ACCEPTED") -> {
                                             Image(
                                                 painter = painterResource(Res.drawable.ic_chat_bleu),
                                                 contentDescription = null,
@@ -413,7 +408,7 @@ fun ProfilePreviewScreen(
                             ) {
 
                                 item.forEachIndexed { index, postModel ->
-                                    ImagePost(screenSize.value.first, item[index].postID){
+                                    ImagePost(screenSize.value.first, item[index].postID) {
                                         navController.navigate(NavRoutes.POST.route + "/${item[index].postID}" + "/${myProfileState?.id}")
                                     }
                                     if (postModel != item.last()) {
