@@ -40,6 +40,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.Constant
+import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
@@ -100,7 +101,7 @@ fun DiscoverScreen(
                 items(friendsMomentsState, key = { it.id }) { item: ProfileModel ->
 
                     if (item.moments.isEmpty()) {
-                        return@items
+                        //return@items
                     }
                     Row(modifier = Modifier.height(70.dp).width(70.dp)) {
                         val checkIfSeeAllMoments =
@@ -125,18 +126,26 @@ fun DiscoverScreen(
                                 ),
                         ) {
                             AsyncImage(
-                                model = "http://${Constant.BASE_URL}:3000/api/v1/stream/media/${item.moments[0].postID}",
+                                model = if (item.moments.isEmpty()) getUrl(item.photoID) else getUrl(
+                                    item.moments[0].postID
+                                ),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.size(60.dp).clip(CircleShape).clickable {
-                                    val modulesJson =
-                                        Json.encodeToString(friendsMomentsState).replace("/", "%")
-                                    navController.navigate(
-                                        NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${
-                                            friendsMomentsState.indexOf(
-                                                item
-                                            )
-                                        }" + "/" + { false }
-                                    )
+                                    if (item.moments.isEmpty()) {
+                                        navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${item.id}")
+                                    } else {
+                                        val modulesJson =
+                                            Json.encodeToString(friendsMomentsState)
+                                                .replace("/", "%")
+                                        navController.navigate(
+                                            NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${
+                                                friendsMomentsState.indexOf(
+                                                    item
+                                                )
+                                            }" + "/" + { false }
+                                        )
+                                    }
+
                                 },
                                 contentDescription = null
                             )

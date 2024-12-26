@@ -317,7 +317,7 @@ fun EditProfileScreen(
                                         viewModel.phone = phone.value
                                         viewModel.email = email.value
                                         viewModel.description = description.value
-                                        viewModel.editProfile(null)
+                                        viewModel.editProfile(photo.value)
                                     },
                                 contentAlignment = Alignment.Center // Center the Text inside the Box
                             ) {
