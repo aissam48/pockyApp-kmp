@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant
+import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.network.models.model.PostModel
 import kotlinx.coroutines.*
 import org.jetbrains.compose.resources.DrawableResource
@@ -106,7 +107,7 @@ fun StoryView(
     ) {
         // Story Image
         AsyncImage(
-            model = "http://${Constant.BASE_URL}:3000/api/v1/stream/media/${story.postID}",
+            model = getUrl(story.postID),
             contentDescription = "Story Image",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -125,7 +126,7 @@ fun StoryView(
             ) {
                 // User Avatar
                 AsyncImage(
-                    model = "http://${Constant.BASE_URL}:3000/api/v1/stream/media/${story.postID}",
+                    model = getUrl(story.postID),
                     contentDescription = "User Avatar",
                     modifier = Modifier
                         .size(40.dp)

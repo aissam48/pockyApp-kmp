@@ -2,6 +2,7 @@ package com.world.pockyapp.screens.profile_preview
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,21 +40,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
-import com.world.pockyapp.Constant
+import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
-import com.world.pockyapp.screens.home.navigations.profile.ImagePost
-import kotlinx.coroutines.delay
+import com.world.pockyapp.screens.profile.ImagePost
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -61,16 +59,12 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.compose_multiplatform
-import pockyapp.composeapp.generated.resources.ic_add_black
-import pockyapp.composeapp.generated.resources.ic_add_post_black
 import pockyapp.composeapp.generated.resources.ic_back_black
 import pockyapp.composeapp.generated.resources.ic_be_friend
 import pockyapp.composeapp.generated.resources.ic_chat_bleu
 import pockyapp.composeapp.generated.resources.ic_chat_request_blue
 import pockyapp.composeapp.generated.resources.ic_location_black
 import pockyapp.composeapp.generated.resources.ic_more_black
-import pockyapp.composeapp.generated.resources.ic_settings_black
-import pockyapp.composeapp.generated.resources.is_add_story_black
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -282,22 +276,49 @@ fun ProfilePreviewScreen(
                             Box(modifier = Modifier.fillMaxWidth()) {
 
                                 Box(modifier = Modifier.size(150.dp)) {
-                                    Image(
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.size(150.dp).clip(CircleShape)
-                                            .clickable {
-                                                val modulesJson =
-                                                    Json.encodeToString(listOf(state.profile))
-                                                        .replace("/", "%")
-                                                navController.navigate(
-                                                    NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/" + { false }
-                                                )
-                                            },
-                                        painter = if (state.profile.photoID.isEmpty()) painterResource(
-                                            Res.drawable.compose_multiplatform
-                                        ) else rememberAsyncImagePainter("http://${Constant.BASE_URL}:3000/api/v1/stream/media/${state.profile.photoID}"),
-                                        contentDescription = null
-                                    )
+
+
+                                    val checkIfSeeAllMoments =
+                                        state.profile.moments.find { !it.viewed }
+                                    Box(
+                                        modifier = Modifier
+                                            .size(150.dp)
+                                            .border(
+                                                width = 5.dp,
+                                                brush = Brush.linearGradient(
+                                                    colors = if (checkIfSeeAllMoments != null) listOf(
+                                                        Color.Red,
+                                                        Color.Yellow,
+                                                        Color.White
+                                                    ) else listOf(
+                                                        Color.Gray,
+                                                        Color.Gray,
+                                                        Color.Gray
+                                                    )
+                                                ),
+                                                shape = CircleShape
+                                            ),
+                                    ) {
+                                        Image(
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.size(150.dp).clip(CircleShape)
+                                                .clickable {
+                                                    if (state.profile.moments.isEmpty()){
+                                                        return@clickable
+                                                    }
+                                                    val modulesJson =
+                                                        Json.encodeToString(listOf(state.profile))
+                                                            .replace("/", "%")
+                                                    navController.navigate(
+                                                        NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/${myProfileState?.id}"
+                                                    )
+                                                },
+                                            painter = if (state.profile.photoID.isEmpty()) painterResource(
+                                                Res.drawable.compose_multiplatform
+                                            ) else rememberAsyncImagePainter(getUrl(state.profile.photoID)),
+                                            contentDescription = null
+                                        )
+                                    }
                                 }
 
                                 Row(modifier = Modifier.align(Alignment.TopEnd)) {

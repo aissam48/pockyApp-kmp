@@ -45,6 +45,7 @@ import coil3.compose.AsyncImage
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.world.pockyapp.Constant
+import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -144,7 +145,7 @@ fun EditProfileScreen(
                         } else {
                             if (photo.value == null && profile?.photoID != null) {
                                 AsyncImage(
-                                    model = "http://${Constant.BASE_URL}:3000/api/v1/stream/media/${profile?.photoID}",
+                                    model = getUrl(profile?.photoID),
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.size(150.dp).clip(CircleShape),
                                     contentDescription = null

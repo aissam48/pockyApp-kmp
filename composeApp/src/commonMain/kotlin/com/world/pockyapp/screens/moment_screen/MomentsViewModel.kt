@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
@@ -21,6 +22,15 @@ class MomentsViewModel(private val sdk: ApiManager) :
     private val _viewMomentState = MutableStateFlow<String>("")
     val viewMomentState: StateFlow<String> = _viewMomentState
 
+    private val _likeState = MutableStateFlow<String>("")
+    val likeState = _likeState.asStateFlow()
+
+    private val _unLikeState = MutableStateFlow<String>("")
+    val unLikeState = _unLikeState.asStateFlow()
+
+    private val _deleteState = MutableStateFlow<String>("")
+    val deleteState = _deleteState.asStateFlow()
+
     fun viewMoment(momentID: String, ownerID: String) {
         viewModelScope.launch {
             sdk.viewMoment(momentID, ownerID, { success ->
@@ -28,6 +38,37 @@ class MomentsViewModel(private val sdk: ApiManager) :
 
             }, { error ->
                 _viewMomentState.value = error
+            })
+        }
+    }
+
+
+    fun deleteMoment(momentID: String) {
+        viewModelScope.launch {
+            sdk.deleteMoment(momentID, { success ->
+                _deleteState.value = success
+            }, { error ->
+                _deleteState.value = ""
+            })
+        }
+    }
+
+    fun like(momentID: String) {
+        viewModelScope.launch {
+            sdk.likeMoment(momentID, { success ->
+                _likeState.value = success
+            }, { error ->
+                _likeState.value = ""
+            })
+        }
+    }
+
+    fun unLike(momentID: String) {
+        viewModelScope.launch {
+            sdk.unLikeMoment(momentID, { success ->
+                _unLikeState.value = success
+            }, { error ->
+                _unLikeState.value = ""
             })
         }
     }

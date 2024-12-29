@@ -45,14 +45,28 @@ import pockyapp.composeapp.generated.resources.ic_close_black
 import pockyapp.composeapp.generated.resources.ic_edit_black
 
 @Composable
-fun SettingsScreen(navController: NavHostController, viewModel: SettingsViewModel = koinViewModel()) {
+fun SettingsScreen(
+    navController: NavHostController,
+    viewModel: SettingsViewModel = koinViewModel()
+) {
 
     val logout = viewModel.logoutState.collectAsState()
+    val deleteAccount = viewModel.deleteAccountState.collectAsState()
 
-    LaunchedEffect(logout.value){
-        if (logout.value == "logout"){
-            navController.navigate(NavRoutes.SPLASH.route){
-                popUpTo(NavRoutes.SPLASH.route){
+    LaunchedEffect(logout.value) {
+        if (logout.value == "logout") {
+            navController.navigate(NavRoutes.SPLASH.route) {
+                popUpTo(NavRoutes.SPLASH.route) {
+                    inclusive = true
+                }
+            }
+
+        }
+    }
+    LaunchedEffect(deleteAccount.value) {
+        if (deleteAccount.value == "deleteAccount") {
+            navController.navigate(NavRoutes.LOGIN.route) {
+                popUpTo(NavRoutes.LOGIN.route) {
                     inclusive = true
                 }
             }
@@ -93,10 +107,10 @@ fun SettingsScreen(navController: NavHostController, viewModel: SettingsViewMode
                 Box(
                     modifier = Modifier.fillMaxWidth()
                         .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
-                        .height(50.dp).padding(start = 15.dp)
+                        .height(50.dp)
                         .clickable {
                             navController.navigate(NavRoutes.EDIT_PROFILE.route)
-                        }) {
+                        }.padding(start = 15.dp)) {
                     Text(
                         text = "Edit profile",
                         color = Color.Black,
@@ -114,10 +128,10 @@ fun SettingsScreen(navController: NavHostController, viewModel: SettingsViewMode
                 Box(
                     modifier = Modifier.fillMaxWidth()
                         .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
-                        .height(50.dp).padding(start = 15.dp)
+                        .height(50.dp)
                         .clickable {
                             navController.navigate(NavRoutes.CHANGE_PASSWORD.route)
-                        }) {
+                        }.padding(start = 15.dp)) {
                     Text(
                         text = "Password",
                         color = Color.Black,
@@ -135,10 +149,10 @@ fun SettingsScreen(navController: NavHostController, viewModel: SettingsViewMode
                 Box(
                     modifier = Modifier.fillMaxWidth()
                         .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
-                        .height(50.dp).padding(start = 15.dp)
+                        .height(50.dp)
                         .clickable {
                             navController.navigate(NavRoutes.EDIT_LOCATION.route)
-                        }) {
+                        }.padding(start = 15.dp)) {
                     Text(
                         text = "Location",
                         color = Color.Black,
@@ -156,10 +170,10 @@ fun SettingsScreen(navController: NavHostController, viewModel: SettingsViewMode
                 Box(
                     modifier = Modifier.fillMaxWidth()
                         .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
-                        .height(50.dp).padding(start = 15.dp)
+                        .height(50.dp)
                         .clickable {
                             viewModel.logout()
-                        }) {
+                        }.padding(start = 15.dp)) {
                     Text(
                         text = "Logout",
                         color = Color.Black,
@@ -177,10 +191,10 @@ fun SettingsScreen(navController: NavHostController, viewModel: SettingsViewMode
                 Box(
                     modifier = Modifier.fillMaxWidth()
                         .background(color = Color.Red, shape = RoundedCornerShape(15.dp))
-                        .height(50.dp).padding(start = 15.dp)
+                        .height(50.dp)
                         .clickable {
-
-                        }) {
+                            viewModel.deleteAccount()
+                        }.padding(start = 15.dp)) {
                     Text(
                         text = "Delete account",
                         color = Color.White,

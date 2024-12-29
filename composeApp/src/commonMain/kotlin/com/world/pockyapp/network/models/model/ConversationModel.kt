@@ -7,6 +7,7 @@ data class ConversationModel(
     val id: String="",
     val members: List<String> = emptyList(),
     val createdAt: String = "",
+    val chatRequestID: String = "",
     val expired: Boolean = false,
     val profile: ProfileModel = ProfileModel(),
     val lastMessage: MessageModel? = MessageModel()

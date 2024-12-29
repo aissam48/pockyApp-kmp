@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -26,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant
+import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ProfileModel
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +37,9 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_back_black
+import pockyapp.composeapp.generated.resources.ic_delete
+import pockyapp.composeapp.generated.resources.ic_like
+import pockyapp.composeapp.generated.resources.ic_unlike_black
 import pockyapp.composeapp.generated.resources.ic_view
 
 
@@ -46,7 +50,7 @@ fun StoriesViewer(
     initialUserIndex: Int = 0,
     onStoriesFinished: () -> Unit,
     navController: NavHostController,
-    back: Boolean,
+    myID: String,
     viewModel: MomentsViewModel
 ) {
     var currentUserIndex by remember { mutableStateOf(initialUserIndex) }
@@ -125,7 +129,7 @@ fun StoriesViewer(
                     }
                 },
                 navController = navController,
-                back = back,
+                myID = myID,
                 viewModel = viewModel
             )
         }
@@ -140,11 +144,14 @@ fun StoryPage(
     onTapLeft: () -> Unit,
     onTapRight: () -> Unit,
     navController: NavHostController,
-    back: Boolean,
+    myID: String,
     viewModel: MomentsViewModel
 ) {
+    val deleteState by viewModel.deleteState.collectAsState()
+    val likeState by viewModel.likeState.collectAsState()
+    val unlikeState by viewModel.unLikeState.collectAsState()
 
-    if (currentStoryIndex > userStories.moments.size-1){
+    if (currentStoryIndex > userStories.moments.size - 1) {
         navController.popBackStack()
         return
     }
@@ -179,7 +186,7 @@ fun StoryPage(
     Box(modifier = Modifier.fillMaxSize()) {
         // Story Image
         AsyncImage(
-            model = "http://${Constant.BASE_URL}:3000/api/v1/stream/media/${story.postID}",
+            model = getUrl(story.postID),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -254,8 +261,8 @@ fun StoryPage(
                 .padding(8.dp)
                 .padding(top = 48.dp)
                 .clickable {
-                    if (back) {
-                        navController.popBackStack()
+                    if (userStories.id == myID) {
+                        navController.navigate(NavRoutes.MY_PROFILE.route)
                     } else {
                         navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${userStories.id}")
                     }
@@ -273,7 +280,7 @@ fun StoryPage(
             Spacer(modifier = Modifier.width(15.dp))
             Row {
                 AsyncImage(
-                    model = "http://${Constant.BASE_URL}:3000/api/v1/stream/media/${userStories.photoID}",
+                    model = getUrl(userStories.photoID),
                     contentDescription = null,
                     modifier = Modifier
                         .size(32.dp)
@@ -295,10 +302,69 @@ fun StoryPage(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.size(15.dp))
-            Text(text = "${story.views.size}", color = Color.Yellow, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = "${story.views.size}",
+                color = Color.Yellow,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
             Spacer(modifier = Modifier.size(5.dp))
-            Image(painter = painterResource(Res.drawable.ic_view), contentDescription = null, modifier = Modifier.size(25.dp))
+            Image(
+                painter = painterResource(Res.drawable.ic_view),
+                contentDescription = null,
+                modifier = Modifier.size(25.dp)
+            )
 
+        }
+
+        Column(
+            modifier = Modifier.align(Alignment.BottomEnd).padding(end = 10.dp, bottom = 30.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Image(
+                colorFilter = ColorFilter.tint(color = Color.White),
+                painter = if (story.liked)
+                    painterResource(Res.drawable.ic_like)
+                else painterResource(
+                    Res.drawable.ic_unlike_black
+                ),
+                modifier = Modifier.size(40.dp).clickable {
+                    if (story.likes.contains(myID)) {
+                        story.likes.remove(myID)
+                        viewModel.unLike(story.postID)
+                        story.liked = false
+                    } else {
+                        story.likes.add(myID)
+                        viewModel.like(story.postID)
+                        story.liked = true
+                    }
+                },
+                contentDescription = null
+            )
+
+            Spacer(modifier = Modifier.size(5.dp))
+
+            androidx.compose.material.Text(
+                text = story.likes.size.toString(),
+                color = Color.Gray,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp
+            )
+
+            Spacer(modifier = Modifier.size(20.dp))
+
+            if (myID == story.ownerID) {
+                Image(
+                    painter = painterResource(Res.drawable.ic_delete),
+                    modifier = Modifier.size(35.dp).clickable {
+                        viewModel.deleteMoment(story.postID)
+                    },
+                    contentDescription = null
+                )
+            }
+
+            Spacer(modifier = Modifier.size(50.dp))
         }
     }
 }
@@ -309,7 +375,7 @@ fun MomentsScreen(
     navController: NavHostController,
     moments: List<ProfileModel>,
     index: String?,
-    back: Boolean,
+    myID: String?,
     viewModel: MomentsViewModel = koinViewModel()
 ) {
     val sampleUsers = moments
@@ -321,7 +387,7 @@ fun MomentsScreen(
         },
         initialUserIndex = index?.toIntOrNull() ?: 0,
         navController = navController,
-        back = back,
+        myID = myID ?: "",
         viewModel = viewModel
     )
 }

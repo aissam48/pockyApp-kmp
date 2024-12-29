@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Colors
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -28,7 +29,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.Constant
+import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.network.models.model.MessageModel
+import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -45,6 +48,7 @@ fun ChatScreen(
     navController: NavHostController,
     conversationID: String,
     profileID: String,
+    chatRequestID: String,
     viewModel: ChatViewModel = koinViewModel()
 ) {
 
@@ -55,11 +59,19 @@ fun ChatScreen(
     val newMessageState by viewModel.newMessageState.collectAsState()
     val me by viewModel.myProfileState.collectAsState()
     val profile by viewModel.profileState.collectAsState()
+    val cancelConversation by viewModel.cancelConversationState.collectAsState()
 
     viewModel.conversationID = conversationID
 
     LaunchedEffect(newMessages) {
         messages.addAll(newMessages)
+    }
+
+    LaunchedEffect(cancelConversation) {
+        if (cancelConversation.isNotEmpty()){
+            navController.popBackStack()
+        }
+
     }
 
     LaunchedEffect(Unit) {
@@ -94,25 +106,18 @@ fun ChatScreen(
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.size(15.dp))
-                if (profile?.photoID?.isEmpty() == true) {
-                    Image(
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(35.dp)
-                            .clip(CircleShape),
-                        painter = painterResource(Res.drawable.compose_multiplatform),
-                        contentDescription = null
-                    )
-                } else {
-                    Image(
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(35.dp)
-                            .clip(CircleShape),
-                        painter = rememberAsyncImagePainter("http://${Constant.BASE_URL}:3000/api/v1/stream/media/${profile?.photoID}"),
-                        contentDescription = null
-                    )
-                }
+                Image(
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(35.dp)
+                        .clip(CircleShape),
+                    painter = rememberAsyncImagePainter(profile?.photoID?.let { it1 ->
+                        getUrl(
+                            it1
+                        )
+                    }),
+                    contentDescription = null
+                )
 
                 Spacer(modifier = Modifier.size(15.dp))
                 Text(
@@ -121,6 +126,23 @@ fun ChatScreen(
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.weight(1f))
+
+                Box(
+                    modifier = Modifier.width(70.dp).height(30.dp)
+                        .background(color = Color.Red, shape = RoundedCornerShape(8.dp))
+                        .clickable {
+                            viewModel.cancelConversation(conversationID, chatRequestID)
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Cancel chat",
+                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 10.sp
+                    )
+                }
             }
 
             LazyColumn(
@@ -133,19 +155,31 @@ fun ChatScreen(
                 items(messages) { item: MessageModel ->
                     Column(
                         modifier = Modifier
-                            .widthIn(min = 100.dp, max = 300.dp)
+                            .fillMaxWidth()
                     ) {
                         Box(
                             modifier = Modifier
                                 .background(
-                                    color = if (item.senderID == profileID) Color.LightGray else Color.Gray,
+                                    color = if (item.senderID == profileID) Color(0XFFA3B288)
+                                    else Color(0XFF8EB288),
                                     shape = RoundedCornerShape(10.dp)
                                 )
-                                .padding(10.dp)
+                                .padding(10.dp).align(
+                                    if (item.senderID != profileID) Alignment.End
+                                    else Alignment.Start
+                                ).widthIn(min = 80.dp, max = 300.dp)
                         ) {
                             Text(item.content, color = Color.Black, fontSize = 15.sp)
                         }
-                        Text("1 min", color = Color.LightGray, fontSize = 12.sp)
+                        Text(
+                            formatCreatedAt(item.createdAt),
+                            color = Color.LightGray,
+                            fontSize = 12.sp,
+                            modifier = Modifier.align(
+                                if (item.senderID != profileID) Alignment.End
+                                else Alignment.Start
+                            )
+                        )
                         Spacer(modifier = Modifier.size(15.dp))
                     }
                 }

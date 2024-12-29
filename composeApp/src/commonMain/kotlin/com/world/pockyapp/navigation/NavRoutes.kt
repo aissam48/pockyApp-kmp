@@ -15,6 +15,7 @@ enum class NavRoutes(val route: String) {
     EDIT_LOCATION("edit_location"),
     MOMENTS("moments"),
     SEARCH("search"),
+    MY_PROFILE("my_profile"),
     PROFILE_PREVIEW("profile_preview"),
     CHANGE_PASSWORD("change_password"),
     CHAT("chat"),

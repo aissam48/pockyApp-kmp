@@ -19,6 +19,7 @@ import com.world.pockyapp.screens.chat.ChatScreen
 import com.world.pockyapp.screens.friend_request.FriendRequestsScreen
 import com.world.pockyapp.screens.moment_preview.MomentPreview
 import com.world.pockyapp.screens.post_preview.PostPreview
+import com.world.pockyapp.screens.profile.ProfileScreen
 import com.world.pockyapp.screens.profile_preview.ProfilePreviewScreen
 import com.world.pockyapp.screens.search.SearchScreen
 import com.world.pockyapp.screens.settings.SettingsScreen
@@ -63,10 +64,6 @@ fun NavigationHost(navController: NavHostController) {
             PostPreview(navController)
         }
 
-        composable(NavRoutes.POST_PREVIEW.route) {
-            PostPreview(navController)
-        }
-
         composable(NavRoutes.SETTINGS.route) {
             SettingsScreen(navController)
         }
@@ -91,9 +88,13 @@ fun NavigationHost(navController: NavHostController) {
             FriendRequestsScreen(navController)
         }
 
-        composable(route = "${NavRoutes.MOMENTS.route}/{moments}/{index}/{back}") { backStackEntry ->
+        composable(NavRoutes.MY_PROFILE.route) {
+            ProfileScreen(navController)
+        }
+
+        composable(route = "${NavRoutes.MOMENTS.route}/{moments}/{index}/{myID}") { backStackEntry ->
             val index = backStackEntry.arguments?.getString("index")
-            val back = backStackEntry.arguments?.getBoolean("back") ?: false
+            val myID = backStackEntry.arguments?.getString("myID")
             println("---------------- $index")
             val modulesJson = backStackEntry.arguments?.getString("moments")?.replace("%", "/")
             val moments = modulesJson?.let {
@@ -101,7 +102,7 @@ fun NavigationHost(navController: NavHostController) {
             } ?: emptyList()
 
 
-            MomentsScreen(navController, moments, index, back)
+            MomentsScreen(navController, moments, index, myID)
         }
 
         composable(route = "${NavRoutes.SHOW_MOMENTS.route}/{moments}") { backStackEntry ->
@@ -128,10 +129,11 @@ fun NavigationHost(navController: NavHostController) {
             ViewPostScreen(navController, postID = id, myID = myID)
         }
 
-        composable(route = "${NavRoutes.CHAT.route}/{conversationID}/{profileID}") { navBackStackEntry ->
+        composable(route = "${NavRoutes.CHAT.route}/{conversationID}/{profileID}/{chatRequestID}") { navBackStackEntry ->
             val conversationID = navBackStackEntry.arguments?.getString("conversationID") ?: ""
             val profileID = navBackStackEntry.arguments?.getString("profileID") ?: ""
-            ChatScreen(navController, conversationID = conversationID, profileID = profileID)
+            val chatRequestID = navBackStackEntry.arguments?.getString("chatRequestID") ?: ""
+            ChatScreen(navController, conversationID = conversationID, profileID = profileID, chatRequestID = chatRequestID)
         }
     }
 }

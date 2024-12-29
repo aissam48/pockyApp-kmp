@@ -4,10 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.MessageModel
-import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
-import com.world.pockyapp.screens.home.navigations.profile.ProfileUiState
-import com.world.pockyapp.screens.profile_preview.ProfilePreviewUiState
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.delay
@@ -43,6 +40,23 @@ class ChatViewModel(private val sdk: ApiManager) :
 
     private val _newMessageState = MutableStateFlow<MessageModel?>(null)
     val newMessageState: StateFlow<MessageModel?> = _newMessageState
+
+    private val _cancelConversationState = MutableStateFlow<String>("")
+    val cancelConversationState: StateFlow<String> = _cancelConversationState.asStateFlow()
+
+    fun cancelConversation(
+        conversationID: String,
+        chatRequestID: String,
+    ) {
+        viewModelScope.launch {
+            sdk.cancelConversation(conversationID, chatRequestID, { succes ->
+                _cancelConversationState.value = succes
+            }, { error ->
+                _cancelConversationState.value = ""
+            })
+
+        }
+    }
 
     fun getMessages(conversationID: String) {
         viewModelScope.launch {

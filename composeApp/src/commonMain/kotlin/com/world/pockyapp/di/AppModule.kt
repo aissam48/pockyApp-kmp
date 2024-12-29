@@ -12,7 +12,7 @@ import com.world.pockyapp.screens.friend_request.FriendRequestsViewModel
 import com.world.pockyapp.screens.home.HomeViewModel
 import com.world.pockyapp.screens.home.navigations.conversations.ConversationsViewModel
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverViewModel
-import com.world.pockyapp.screens.home.navigations.profile.ProfileViewModel
+import com.world.pockyapp.screens.profile.ProfileViewModel
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.post_preview.PostViewModel
 import com.world.pockyapp.screens.profile_preview.ProfilePreviewViewModel
@@ -45,6 +45,6 @@ val appModule = module {
     viewModel { MomentsViewModel(sdk = get()) }
     viewModel { ViewPostViewModel(sdk = get()) }
     viewModel { FriendRequestsViewModel(sdk = get()) }
-    viewModel { SettingsViewModel(dataStore = get()) }
+    viewModel { SettingsViewModel(sdk = get(),dataStore = get()) }
 
 }

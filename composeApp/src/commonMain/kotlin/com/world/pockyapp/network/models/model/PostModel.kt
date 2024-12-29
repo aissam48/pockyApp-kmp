@@ -11,5 +11,7 @@ data class PostModel(
     val profile: ProfileModel = ProfileModel(),
     val likes: MutableList<String> = mutableListOf(),
     var viewed: Boolean = false,
-    val views: MutableList<String> = mutableListOf()
-)
+    var liked: Boolean = false,
+    val views: MutableList<String> = mutableListOf(),
+) {
+}

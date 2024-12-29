@@ -1,6 +1,5 @@
 package com.world.pockyapp.screens.home.navigations.conversations
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,12 +36,17 @@ import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ChatRequestModel
 import com.world.pockyapp.network.models.model.ConversationModel
+import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.delay
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.format.FormatStringsInDatetimeFormats
+import kotlinx.datetime.format.byUnicodePattern
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.compose_multiplatform
 
+@OptIn(FormatStringsInDatetimeFormats::class)
 @Composable
 fun ChatScreen(
     navController: NavHostController,
@@ -65,15 +69,21 @@ fun ChatScreen(
 
         item {
 
-            Text(
-                text = "Chat's requests",
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
+            if (chatRequestsMoments.isNotEmpty()){
+                Text(
+                    text = "Chat's requests",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            }
+
         }
         item {
-            Spacer(modifier = Modifier.size(10.dp))
+            if (chatRequestsMoments.isNotEmpty()){
+                Spacer(modifier = Modifier.size(10.dp))
+            }
+
         }
         item {
             LazyRow {
@@ -94,7 +104,7 @@ fun ChatScreen(
                             Spacer(modifier = Modifier.size(5.dp))
 
                             Text(
-                                text = "${item.sendProfile?.firstName} ${item.sendProfile?.lastName}",
+                                text = "${item.sendProfile.firstName} ${item.sendProfile.lastName}",
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Normal,
                                 fontSize = 13.sp,
@@ -128,7 +138,7 @@ fun ChatScreen(
         items(conversationsState) { item: ConversationModel ->
 
             Column(modifier = Modifier.clickable {
-                navController.navigate(NavRoutes.CHAT.route + "/${item.id}" + "/${item.profile.id}")
+                navController.navigate(NavRoutes.CHAT.route + "/${item.id}" + "/${item.profile.id}" + "/${item.chatRequestID}")
 
             }) {
                 Row(
@@ -170,7 +180,7 @@ fun ChatScreen(
                         }
 
                         Text(
-                            text = item.lastMessage?.createdAt ?: "",
+                            text = formatCreatedAt(item.lastMessage?.createdAt),
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.ExtraLight,
                             fontSize = 12.sp,

@@ -97,6 +97,8 @@ kotlin {
             // For CIO engine
             implementation("io.ktor:ktor-client-cio:3.0.1")
 
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
+
         }
     }
 }

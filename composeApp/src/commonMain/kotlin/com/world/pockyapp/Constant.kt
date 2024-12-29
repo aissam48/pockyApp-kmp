@@ -1,7 +1,18 @@
 package com.world.pockyapp
 
 object Constant {
-    val BASE_URL = "192.168.111.40"
+    val set = "env"
+    val DEV_ENV = "http://192.168.112.248:443/api/v1"
+    val PROD_ENV = "https://pockyappbackend.onrender.com/api/v1"
 
-    fun getUrl(id:String):String = "http://$BASE_URL:3000/api/v1/stream/media/$id"
+    val DEV_ENV_HOST = "192.168.112.248:443"
+    val PROD_ENV_HOST = "pockyappbackend.onrender.com"
+
+
+    var SHARED_LINK = DEV_ENV
+    var SHARED_LINK_HOST = DEV_ENV_HOST
+
+    val ws = "ws://${Constant.SHARED_LINK_HOST}/ws"
+
+    fun getUrl(id:String?):String = "$SHARED_LINK/stream/media/$id"
 }

@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
@@ -26,7 +28,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -35,15 +36,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.world.pockyapp.navigation.NavRoutes
-import com.world.pockyapp.screens.auth.login.LoginUiState
 import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverScreen
-import com.world.pockyapp.screens.home.navigations.profile.ProfileScreen
+import com.world.pockyapp.screens.profile.ProfileScreen
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.compose_multiplatform
 import pockyapp.composeapp.generated.resources.ic_chat_black
 import pockyapp.composeapp.generated.resources.ic_discover_black
 import pockyapp.composeapp.generated.resources.ic_profile_black
@@ -71,10 +70,11 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
         modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.onPrimary)
     ) {
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp)
+        Column(
+            modifier = Modifier.fillMaxWidth()
+                .padding(top = 15.dp, start = 10.dp, end = 10.dp)
         ) {
+
             Text(
                 "AroundMe",
                 fontSize = 25.sp,
@@ -82,26 +82,39 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
             )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp)
-        ) {
 
-            Image(
-                painter = painterResource(Res.drawable.ic_search_black),
-                modifier = Modifier.size(25.dp).clickable {
-                    navController.navigate(NavRoutes.SEARCH.route)
-                },
-                contentDescription = null,
-            )
-        }
+            Spacer(modifier = Modifier.height(15.dp))
 
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Image(
+                    painter = painterResource(Res.drawable.ic_profile_black),
+                    modifier = Modifier.size(33.dp).clickable {
+                        navController.navigate(NavRoutes.MY_PROFILE.route)
+                    },
+                    contentDescription = null,
+                )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Image(
+                    painter = painterResource(Res.drawable.ic_search_black),
+                    modifier = Modifier.size(28.dp).clickable {
+                        navController.navigate(NavRoutes.SEARCH.route)
+                    },
+                    contentDescription = null,
+                )
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+
+        }
 
         Scaffold(
             bottomBar = {
                 NavigationBar(
-                    containerColor = Color.White,
+                    containerColor = Color(0XFFFAF9F6),
                     contentColor = Color.Yellow
                 ) {
                     BottomNavigationItem(
@@ -132,26 +145,11 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                         }
                     )
 
-                    BottomNavigationItem(
-                        selected = selected == 2,
-                        onClick = {
-                            selected = 2
-                            viewModel.selectedScreen = 2
-                        },
-                        icon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_profile_black),
-                                contentDescription = null
-                            )
-                        }
-                    )
                 }
             }
         ) {
 
             Column() {
-
-                Spacer(modifier = Modifier.size(20.dp))
                 when (selected) {
                     0 -> {
                         DiscoverScreen(navController)
@@ -160,20 +158,9 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                     1 -> {
                         ChatScreen(navController)
                     }
-
-                    2 -> {
-                        ProfileScreen(navController)
-                    }
                 }
-
-
             }
 
-
         }
-
-
     }
-
-
 }

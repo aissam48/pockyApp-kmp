@@ -18,6 +18,8 @@ class ConversationsViewModel(val sdk: ApiManager) : ViewModel() {
     private val _conversationsState = MutableStateFlow<List<ConversationModel>>(emptyList())
     val conversationsState: StateFlow<List<ConversationModel>> = _conversationsState.asStateFlow()
 
+
+
     fun loadChatRequests() {
         viewModelScope.launch {
             sdk.getChatRequests({ succes ->

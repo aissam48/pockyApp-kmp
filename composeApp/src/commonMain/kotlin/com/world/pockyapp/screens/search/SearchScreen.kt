@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.Constant
+import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ProfileModel
 import kotlinx.coroutines.CoroutineScope
@@ -135,7 +136,7 @@ fun SearchScreen(navController: NavHostController, viewModel: SearchViewModel = 
                             Image(
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.size(70.dp).clip(CircleShape),
-                                painter = rememberAsyncImagePainter("http://${Constant.BASE_URL}:3000/api/v1/stream/media/${item.photoID}"),
+                                painter = rememberAsyncImagePainter(getUrl(item.photoID)),
                                 contentDescription = null
                             )
                             Spacer(modifier = Modifier.size(10.dp))

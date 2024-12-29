@@ -70,7 +70,8 @@ import kotlinx.serialization.json.Json
 
 class ApiManager(val dataStore: DataStore<Preferences>) {
 
-    private val baseUrl = "http://${Constant.BASE_URL}:3000/api/v1"
+    private val baseUrl = Constant.SHARED_LINK
+
 
     private val client = if (getPlatform().name.contains("Android")) {
         HttpClient(CIO) {
@@ -606,7 +607,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         try {
             val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
             scope.launch {
-                ws = client.webSocketSession("ws://${Constant.BASE_URL}:3000/ws")
+                ws = client.webSocketSession(Constant.ws)
             }
         } catch (e: Exception) {
 
@@ -823,6 +824,33 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     }
 
+    suspend fun likeMoment(
+        momentID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.post("$baseUrl/operations/likemoment") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("momentID" to momentID))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: String = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
     suspend fun unLike(
         postID: String,
         onSuccess: (String) -> Unit,
@@ -833,6 +861,33 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 val token = getToken()
                 contentType(ContentType.Application.Json)
                 setBody(mapOf("postID" to postID))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: String = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun unLikeMoment(
+        momentID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.put("$baseUrl/operations/unlikemoment") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("momentID" to momentID))
                 headers { append(HttpHeaders.Authorization, "Bearer $token") }
             }
 
@@ -915,6 +970,33 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 val token = getToken()
                 contentType(ContentType.Application.Json)
                 parameter("postID", postID)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.message)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun deleteMoment(
+        momentID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.delete("$baseUrl/operations/moment") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("momentID", momentID)
                 headers { append(HttpHeaders.Authorization, "Bearer $token") }
             }
 
@@ -1048,6 +1130,60 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 val token = getToken()
                 contentType(ContentType.Application.Json)
                 parameter("requestId", requestID)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.message)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun cancelConversation(
+        conversationID: String,
+        chatRequestID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.delete("$baseUrl/operations/cancelconversation") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("chatRequestID", chatRequestID)
+                parameter("conversationID", conversationID)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.message)
+            } else {
+                val errorMessage: String = response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun deleteAccount(
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.delete("$baseUrl/operations/deleteaccount") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
                 headers { append(HttpHeaders.Authorization, "Bearer $token") }
             }
 

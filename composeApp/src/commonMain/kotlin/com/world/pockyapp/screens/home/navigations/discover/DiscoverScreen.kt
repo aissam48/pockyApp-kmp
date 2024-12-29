@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -44,6 +45,7 @@ import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.delay
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -67,11 +69,6 @@ fun DiscoverScreen(
     val unLikeState by viewModel.unLikePost.collectAsState()
     val likeState by viewModel.likePost.collectAsState()
     val profileState by viewModel.profileState.collectAsState()
-
-    println("DiscoverScreen $friendsMomentsState")
-    println("DiscoverScreen $nearbyMomentsState")
-    println("DiscoverScreen $nearbyPostsState")
-    println("DiscoverScreen $profileState")
 
     LaunchedEffect(Unit) {
         viewModel.getProfile()
@@ -98,11 +95,62 @@ fun DiscoverScreen(
         }
         item {
             LazyRow {
+
+                item {
+                    Row (verticalAlignment = Alignment.CenterVertically){
+                        val checkIfSeeAllMoments =
+                            profileState?.moments?.find { !it.viewed }
+                        Box(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .border(
+                                    width = 2.dp,
+                                    brush = Brush.linearGradient(
+                                        colors = if (checkIfSeeAllMoments != null) listOf(
+                                            Color.Red,
+                                            Color.Yellow,
+                                            Color.White
+                                        ) else listOf(
+                                            Color.Gray,
+                                            Color.Gray,
+                                            Color.Gray
+                                        )
+                                    ),
+                                    shape = CircleShape
+                                ),
+                        ) {
+                            AsyncImage(
+                                model = if (profileState?.moments?.isEmpty() == true) getUrl(profileState?.photoID) else getUrl(
+                                    profileState?.moments?.get(0)?.postID
+                                ),
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.size(60.dp).clip(CircleShape).clickable {
+                                    if (profileState?.moments?.isEmpty() == true) {
+                                        navController.navigate(NavRoutes.MY_PROFILE.route)
+                                    } else {
+                                        val modulesJson =
+                                            Json.encodeToString(listOf(profileState))
+                                                .replace("/", "%")
+                                        navController.navigate(
+                                            NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${
+                                                0
+                                            }" + "/${profileState?.id}"
+                                        )
+                                    }
+
+                                },
+                                contentDescription = null
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Divider(modifier = Modifier.height(45.dp).width(1.dp), color = Color.Black)
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+
+                }
+
                 items(friendsMomentsState, key = { it.id }) { item: ProfileModel ->
 
-                    if (item.moments.isEmpty()) {
-                        //return@items
-                    }
                     Row(modifier = Modifier.height(70.dp).width(70.dp)) {
                         val checkIfSeeAllMoments =
                             item.moments.find { !it.viewed }
@@ -142,7 +190,7 @@ fun DiscoverScreen(
                                                 friendsMomentsState.indexOf(
                                                     item
                                                 )
-                                            }" + "/" + { false }
+                                            }" + "/${profileState?.id}"
                                         )
                                     }
 
@@ -160,18 +208,22 @@ fun DiscoverScreen(
         item {
             Spacer(modifier = Modifier.size(15.dp))
         }
-        item {
 
-            Text(
-                text = "Nearby moments >",
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
+        if (nearbyMomentsState.isNotEmpty()){
+            item {
+
+                Text(
+                    text = "Nearby moments >",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            }
+            item {
+                Spacer(modifier = Modifier.size(10.dp))
+            }
         }
-        item {
-            Spacer(modifier = Modifier.size(10.dp))
-        }
+
         item {
             LazyRow {
 
@@ -212,7 +264,7 @@ fun DiscoverScreen(
 
                             ) {
                                 AsyncImage(
-                                    model = "http://${Constant.BASE_URL}:3000/api/v1/stream/media/${item.moments[0].postID}",
+                                    model = getUrl(item.moments[0].postID),
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize().clickable {
                                         val modulesJson =
@@ -224,7 +276,7 @@ fun DiscoverScreen(
                                                 nearbyMomentsState.indexOf(
                                                     item
                                                 )
-                                            }" + "/${false}"
+                                            }" + "/${profileState?.id}"
                                         )
 
                                     },
@@ -244,17 +296,20 @@ fun DiscoverScreen(
         item {
             Spacer(modifier = Modifier.size(15.dp))
         }
-        item {
 
-            Text(
-                text = "Nearby posts >",
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
-        }
-        item {
-            Spacer(modifier = Modifier.size(10.dp))
+        if (nearbyPostsState.isNotEmpty()){
+            item {
+
+                Text(
+                    text = "Nearby posts >",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            }
+            item {
+                Spacer(modifier = Modifier.size(10.dp))
+            }
         }
 
         items(nearbyPostsState, key = { it.postID }) { item: PostModel ->
@@ -268,8 +323,11 @@ fun DiscoverScreen(
                     }
                 },
                 onProfileClick = { userId ->
-                    navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/$userId")
-
+                    if (userId == profileState?.id) {
+                        navController.navigate(NavRoutes.MY_PROFILE.route)
+                    } else {
+                        navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/$userId")
+                    }
                 },
             )
         }
@@ -297,7 +355,7 @@ fun PostItem(
                 .clickable { post.profile.id.let { onProfileClick(it) } }
         ) {
             AsyncImage(
-                model = "http://${Constant.BASE_URL}:3000/api/v1/stream/media/${post.profile.photoID}",
+                model = getUrl(post.profile.photoID),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(35.dp)
@@ -324,7 +382,7 @@ fun PostItem(
                 .fillMaxWidth()
         ) {
             AsyncImage(
-                model = "http://${Constant.BASE_URL}:3000/api/v1/stream/media/${post.postID}",
+                model = getUrl(post.postID),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
                 contentDescription = "Post Image"
@@ -356,6 +414,14 @@ fun PostItem(
             Spacer(modifier = Modifier.size(5.dp))
             Text(
                 text = post.likes.size.toString(),
+                color = Color.Black,
+                fontSize = 14.sp
+            )
+
+            Spacer(modifier=Modifier.weight(1f))
+
+            Text(
+                text = formatCreatedAt(post.createdAt),
                 color = Color.Black,
                 fontSize = 14.sp
             )

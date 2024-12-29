@@ -1,12 +1,9 @@
-package com.world.pockyapp.screens.home.navigations.profile
+package com.world.pockyapp.screens.profile
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,14 +35,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
@@ -53,9 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
-import com.world.pockyapp.Constant
+import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -66,6 +59,7 @@ import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.compose_multiplatform
 import pockyapp.composeapp.generated.resources.ic_add_black
 import pockyapp.composeapp.generated.resources.ic_add_post_black
+import pockyapp.composeapp.generated.resources.ic_back_black
 import pockyapp.composeapp.generated.resources.ic_be_friend
 import pockyapp.composeapp.generated.resources.ic_location_black
 import pockyapp.composeapp.generated.resources.ic_settings_black
@@ -109,9 +103,10 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                     sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                     scaffoldState = scaffoldState,
                     sheetBackgroundColor = Color.LightGray,
+                    sheetPeekHeight = 0.dp,
                     sheetContent = {
                         Column(
-                            modifier = Modifier.fillMaxWidth().height(200.dp)
+                            modifier = Modifier.fillMaxWidth().height(150.dp)
                         ) {
                             Spacer(modifier = Modifier.size(20.dp))
                             Row(
@@ -160,6 +155,19 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                     }
                 ) {
                     LazyColumn(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
+                        item {
+                            Spacer(modifier = Modifier.size(20.dp))
+                        }
+
+                        item {
+                            Image(
+                                modifier = Modifier.size(23.dp).clickable {
+                                    navController.popBackStack()
+                                },
+                                painter = painterResource(Res.drawable.ic_back_black),
+                                contentDescription = null
+                            )
+                        }
 
                         item {
 
@@ -192,16 +200,19 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier.size(150.dp).clip(CircleShape)
                                                 .clickable {
+                                                    if (state.profile.moments.isEmpty()){
+                                                        return@clickable
+                                                    }
                                                     val modulesJson =
                                                         Json.encodeToString(listOf(state.profile))
                                                             .replace("/", "%")
                                                     navController.navigate(
-                                                        NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/" + { true }
+                                                        NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/${state.profile.id}"
                                                     )
                                                 },
                                             painter = if (state.profile.photoID.isEmpty()) painterResource(
                                                 Res.drawable.compose_multiplatform
-                                            ) else rememberAsyncImagePainter("http://${Constant.BASE_URL}:3000/api/v1/stream/media/${state.profile.photoID}"),
+                                            ) else rememberAsyncImagePainter(getUrl(state.profile.photoID)),
                                             contentDescription = null
                                         )
                                     }
@@ -214,7 +225,7 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                             scope.launch {
                                                 scaffoldState.bottomSheetState.expand()
                                             }
-                                        }.size(40.dp)
+                                        }.size(40.dp).background(color = Color.White, shape = CircleShape)
                                     )
                                 }
 
