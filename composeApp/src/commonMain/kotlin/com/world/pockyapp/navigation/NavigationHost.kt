@@ -7,7 +7,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
-import com.world.pockyapp.screens.ImagePicker
 import com.world.pockyapp.screens.moment_screen.MomentsScreen
 import com.world.pockyapp.screens.camera.CameraView
 import com.world.pockyapp.screens.edit_location.EditLocationScreen
@@ -54,10 +53,6 @@ fun NavigationHost(navController: NavHostController) {
 
         composable(NavRoutes.CAMERA.route) {
             CameraView(navController)
-        }
-
-        composable(NavRoutes.PICKER.route) {
-            ImagePicker(navController)
         }
 
         composable(NavRoutes.POST_PREVIEW.route) {

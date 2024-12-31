@@ -10,15 +10,4 @@ import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
 
 @Composable
-fun MomentPreview(navController: NavHostController, path: String){
-
-    Box(modifier = Modifier.fillMaxSize()){
-        Image(
-            painter = rememberAsyncImagePainter(path.replace("=", "/")),
-            contentDescription = "Captured Image",
-            modifier = Modifier.fillMaxSize(),
-            contentScale= ContentScale.FillHeight
-        )
-    }
-
-}
+expect fun MomentPreview(navController: NavHostController, path: String)

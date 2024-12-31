@@ -30,6 +30,7 @@ import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -259,7 +260,7 @@ fun StoryPage(
         Row(
             modifier = Modifier
                 .padding(8.dp)
-                .padding(top = 48.dp)
+                .padding(top = 15.dp)
                 .clickable {
                     if (userStories.id == myID) {
                         navController.navigate(NavRoutes.MY_PROFILE.route)
@@ -293,27 +294,15 @@ fun StoryPage(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                 )
+
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = formatCreatedAt(story.createdAt),
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                )
             }
-
-        }
-
-        Row(
-            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(50.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(modifier = Modifier.size(15.dp))
-            Text(
-                text = "${story.views.size}",
-                color = Color.Yellow,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.size(5.dp))
-            Image(
-                painter = painterResource(Res.drawable.ic_view),
-                contentDescription = null,
-                modifier = Modifier.size(25.dp)
-            )
 
         }
 
@@ -364,6 +353,25 @@ fun StoryPage(
                 )
             }
 
+            Spacer(modifier = Modifier.size(20.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${story.views.size}",
+                    color = Color.Yellow,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.size(5.dp))
+                Image(
+                    painter = painterResource(Res.drawable.ic_view),
+                    contentDescription = null,
+                    modifier = Modifier.size(25.dp)
+                )
+
+            }
             Spacer(modifier = Modifier.size(50.dp))
         }
     }

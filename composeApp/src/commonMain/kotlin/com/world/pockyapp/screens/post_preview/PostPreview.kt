@@ -92,12 +92,9 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                     shape = RoundedCornerShape(15.dp)
                 )
                     .padding(10.dp).align(Alignment.CenterEnd).clickable {
-                        println("pppppppppppppp")
                         if (photo.value != null) {
-                            println("pppppppppppppp2")
                             viewModel.setPost(photo.value!!)
                         }
-
                     }
 
             ) {
