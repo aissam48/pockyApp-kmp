@@ -37,29 +37,35 @@ actual fun MomentPreview(
 
     val imageData = convertImageToByteArray(Uri.parse(path.replace("$", "/")), LocalContext.current)
     println("MomentPreview $imageData")
-    Box(modifier = Modifier.fillMaxSize()){
+    Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = rememberAsyncImagePainter(path.replace("$", "/")),
             contentDescription = "Captured Image",
             modifier = Modifier.fillMaxSize(),
-            contentScale= ContentScale.FillHeight
+            contentScale = ContentScale.FillHeight
         )
 
-        Box(modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).padding(20.dp)) {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .align(Alignment.BottomCenter)
+            .padding(20.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(15.dp)
-                )
-                    .padding(10.dp).align(Alignment.CenterEnd).clickable {
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        shape = RoundedCornerShape(15.dp)
+                    )
+                    .padding(10.dp)
+                    .align(Alignment.CenterEnd)
+                    .clickable {
                         /*if (photo.value != null) {
                             //viewModel.setPost(photo.value!!)
                         }*/
                     }
 
             ) {
-                Text("Share moment", color = MaterialTheme.colorScheme.onPrimary)
+                Text("Share moment", color = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.size(15.dp))
                 Image(
                     painter = painterResource(Res.drawable.ic_arrow_right_white),
@@ -79,7 +85,7 @@ private fun convertImageToByteArray(uri: Uri, context: Context): ByteArray {
 
     return contentUri?.let { it ->
         context.contentResolver.openInputStream(it)?.use {
-        it.readBytes()
-    }
+            it.readBytes()
+        }
     } ?: ByteArray(0)
 }
