@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +41,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_back_black
+import com.world.pockyapp.screens.friend_request.UiState
 
 @Composable
 fun FriendRequestsScreen(
@@ -54,10 +57,14 @@ fun FriendRequestsScreen(
         viewModel.getFriendRequests()
     }
     LaunchedEffect(acceptRequestState.value) {
-        viewModel.getFriendRequests()
+        if (acceptRequestState.value is UiState.Success) {
+            viewModel.getFriendRequests()
+        }
     }
     LaunchedEffect(rejectRequestState.value) {
-        viewModel.getFriendRequests()
+        if (rejectRequestState.value is UiState.Success) {
+            viewModel.getFriendRequests()
+        }
     }
 
     Scaffold(modifier = Modifier.fillMaxSize()) {
@@ -82,74 +89,95 @@ fun FriendRequestsScreen(
             }
             Spacer(modifier = Modifier.size(25.dp))
 
-            LazyColumn {
+            when (val state = friendRequestsState.value) {
+                is UiState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
 
-                items(friendRequestsState.value) { item: FriendRequestModel ->
+                is UiState.Success -> {
+                    LazyColumn {
+                        items(state.data) { item: FriendRequestModel ->
 
-                    Column {
+                            Column {
 
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable {
-                            navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${item.profile.id}")
-                        }) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.clickable {
+                                        navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${item.profile.id}")
+                                    }) {
 
-                            Image(
-                                painter = rememberAsyncImagePainter(getUrl(item.profile.photoID)),
-                                modifier = Modifier.size(40.dp).clip(CircleShape),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                            )
-                            Spacer(modifier = Modifier.size(5.dp))
+                                    Image(
+                                        painter = rememberAsyncImagePainter(getUrl(item.profile.photoID)),
+                                        modifier = Modifier.size(40.dp).clip(CircleShape),
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                    )
+                                    Spacer(modifier = Modifier.size(5.dp))
 
-                            Text(
-                                text = "${item.profile.firstName} ${item.profile.lastName}",
-                                color = Color.Black,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 12.sp
-                            )
-                            Spacer(modifier = Modifier.weight(1f))
+                                    Text(
+                                        text = "${item.profile.firstName} ${item.profile.lastName}",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 12.sp
+                                    )
+                                    Spacer(modifier = Modifier.weight(1f))
 
-                            Box(
-                                modifier = Modifier.background(
-                                    color = Color.Green,
-                                    shape = RoundedCornerShape(10.dp)
-                                ).height(30.dp).width(60.dp).clickable {
-                                    viewModel.acceptFriendRequest(item.id)
-                                },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "Accept",
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
+                                    Box(
+                                        modifier = Modifier.background(
+                                            color = Color.Green,
+                                            shape = RoundedCornerShape(10.dp)
+                                        ).height(30.dp).width(60.dp).clickable {
+                                            viewModel.acceptFriendRequest(item.id)
+                                        },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "Accept",
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    }
 
-                            Spacer(modifier = Modifier.size(8.dp))
-                            Box(
-                                modifier = Modifier.background(
-                                    color = Color.Red,
-                                    shape = RoundedCornerShape(10.dp)
-                                ).height(30.dp).width(60.dp).clickable {
-                                    viewModel.rejectFriendRequest(item.id)
-                                },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "Reject",
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
+                                    Spacer(modifier = Modifier.size(8.dp))
+                                    Box(
+                                        modifier = Modifier.background(
+                                            color = Color.Red,
+                                            shape = RoundedCornerShape(10.dp)
+                                        ).height(30.dp).width(60.dp).clickable {
+                                            viewModel.rejectFriendRequest(item.id)
+                                        },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "Reject",
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    }
+
+                                }
+                                Spacer(modifier = Modifier.size(15.dp))
                             }
 
                         }
-                        Spacer(modifier = Modifier.size(15.dp))
                     }
+                }
 
+                is UiState.Error -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = state.message,
+                            color = Color.Red,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
     }
-
 }

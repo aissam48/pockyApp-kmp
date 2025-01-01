@@ -29,6 +29,7 @@ class PostViewModel(private val sdk: ApiManager) :
     val uiState: StateFlow<PostUiState> = _uiState
 
     fun setPost(byteArray: ByteArray) {
+        _uiState.value = PostUiState.Loading
         viewModelScope.launch {
             sdk.setPost(byteArray, { success ->
                 _uiState.value = PostUiState.Success(data = "Post successful")

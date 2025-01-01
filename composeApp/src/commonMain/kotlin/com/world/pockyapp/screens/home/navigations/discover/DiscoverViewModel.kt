@@ -12,123 +12,147 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 sealed class UiState<out T> {
-    object Loading : UiState<Nothing>()
+    data object Loading : UiState<Nothing>()
     data class Success<T>(val data: T) : UiState<T>()
     data class Error(val message: String) : UiState<Nothing>()
 }
 
+data class LikeAction(
+    val postId: String,
+    val isLiked: Boolean
+)
+
 class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
 
-    private val _friendsMoments = MutableStateFlow<List<ProfileModel>>(emptyList())
-    val friendsMoments: StateFlow<List<ProfileModel>> = _friendsMoments.asStateFlow()
+    private val _profileState = MutableStateFlow<UiState<ProfileModel>>(UiState.Loading)
+    val profileState: StateFlow<UiState<ProfileModel>> = _profileState.asStateFlow()
 
-    private val _nearbyMoments = MutableStateFlow<List<ProfileModel>>(emptyList())
-    val nearbyMoments: StateFlow<List<ProfileModel>> = _nearbyMoments.asStateFlow()
+    private val _friendsMomentsState = MutableStateFlow<UiState<List<ProfileModel>>>(UiState.Loading)
+    val friendsMomentsState: StateFlow<UiState<List<ProfileModel>>> = _friendsMomentsState.asStateFlow()
 
-    private val _nearbyPosts = MutableStateFlow<MutableList<PostModel>>(mutableListOf())
-    val nearbyPosts: StateFlow<MutableList<PostModel>> = _nearbyPosts.asStateFlow()
+    private val _nearbyMomentsState = MutableStateFlow<UiState<List<ProfileModel>>>(UiState.Loading)
+    val nearbyMomentsState: StateFlow<UiState<List<ProfileModel>>> = _nearbyMomentsState.asStateFlow()
 
-    private val _likePost = MutableStateFlow<String>("")
-    val likePost: StateFlow<String> = _likePost.asStateFlow()
+    private val _nearbyPostsState = MutableStateFlow<UiState<List<PostModel>>>(UiState.Loading)
+    val nearbyPostsState: StateFlow<UiState<List<PostModel>>> = _nearbyPostsState.asStateFlow()
 
-    private val _unLikePost = MutableStateFlow<String>("")
-    val unLikePost: StateFlow<String> = _unLikePost.asStateFlow()
+    private val _likeActionState = MutableStateFlow<UiState<LikeAction>?>(null)
+    val likeActionState: StateFlow<UiState<LikeAction>?> = _likeActionState.asStateFlow()
 
-    private val _profileState = MutableStateFlow<ProfileModel?>(ProfileModel())
-    val profileState: StateFlow<ProfileModel?> = _profileState.asStateFlow()
+    init {
+        loadInitialData()
+    }
+
+    private fun loadInitialData() {
+        getProfile()
+        loadFriendsMoments()
+        loadNearbyMoments()
+        loadNearbyPosts()
+    }
+
+    fun refresh() {
+        loadInitialData()
+    }
 
     fun getProfile() {
         viewModelScope.launch {
-            sdk.getMyProfile({ success ->
-                _profileState.value = success
-            }, { error ->
-                _profileState.value = null
-            })
-        }
-    }
-
-    fun likePost(postID:String) {
-        viewModelScope.launch {
-            sdk.like(postID,{ succes ->
-                _likePost.value = succes
-            }, { error ->
-                _likePost.value = error
-            })
-
-        }
-    }
-
-    fun unLikePost(postID:String) {
-        viewModelScope.launch {
-            sdk.unLike(postID,{ succes ->
-                _unLikePost.value = succes
-            }, { error ->
-                _unLikePost.value = error
-            })
-
+            _profileState.value = UiState.Loading
+            try {
+                sdk.getMyProfile(
+                    onSuccess = { profile ->
+                        _profileState.value = UiState.Success(profile)
+                    },
+                    onFailure = { error ->
+                        _profileState.value = UiState.Error(error)
+                    }
+                )
+            } catch (e: Exception) {
+                _profileState.value = UiState.Error(e.message ?: "Unknown error occurred")
+            }
         }
     }
 
     fun loadFriendsMoments() {
         viewModelScope.launch {
-            sdk.getFriendsMoments({ succes ->
-                _friendsMoments.value = succes
-            }, { error ->
-                _friendsMoments.value = emptyList()
-            })
-
+            _friendsMomentsState.value = UiState.Loading
+            try {
+                sdk.getFriendsMoments(
+                    onSuccess = { moments ->
+                        _friendsMomentsState.value = UiState.Success(moments)
+                    },
+                    onFailure = { error ->
+                        _friendsMomentsState.value = UiState.Error(error)
+                    }
+                )
+            } catch (e: Exception) {
+                _friendsMomentsState.value = UiState.Error(e.message ?: "Unknown error occurred")
+            }
         }
     }
 
     fun loadNearbyMoments() {
         viewModelScope.launch {
-            sdk.getNearbyMoments({ succes ->
-                _nearbyMoments.value = succes
-            }, { error ->
-                _nearbyMoments.value = emptyList()
-            })
-
+            _nearbyMomentsState.value = UiState.Loading
+            try {
+                sdk.getNearbyMoments(
+                    onSuccess = { moments ->
+                        _nearbyMomentsState.value = UiState.Success(moments)
+                    },
+                    onFailure = { error ->
+                        _nearbyMomentsState.value = UiState.Error(error)
+                    }
+                )
+            } catch (e: Exception) {
+                _nearbyMomentsState.value = UiState.Error(e.message ?: "Unknown error occurred")
+            }
         }
     }
 
     fun loadNearbyPosts() {
         viewModelScope.launch {
-            sdk.getNearbyPosts({ succes ->
-                _nearbyPosts.value = succes.toMutableList()
-            }, { error ->
-                _nearbyPosts.value = mutableListOf()
-            })
-
-
+            _nearbyPostsState.value = UiState.Loading
+            try {
+                sdk.getNearbyPosts(
+                    onSuccess = { posts ->
+                        _nearbyPostsState.value = UiState.Success(posts)
+                    },
+                    onFailure = { error ->
+                        _nearbyPostsState.value = UiState.Error(error)
+                    }
+                )
+            } catch (e: Exception) {
+                _nearbyPostsState.value = UiState.Error(e.message ?: "Unknown error occurred")
+            }
         }
     }
 
     fun toggleLike(postId: String, userId: String) {
         viewModelScope.launch {
-            _nearbyPosts.update { posts ->
-                posts.map { post ->
+            _likeActionState.value = UiState.Loading
+            try {
+                val currentPosts = (_nearbyPostsState.value as? UiState.Success)?.data ?: return@launch
+                val updatedPosts = currentPosts.map { post ->
                     if (post.postID == postId) {
                         val updatedLikes = post.likes.toMutableList()
-                        if (updatedLikes.contains(userId)) {
+                        val isLiked = if (updatedLikes.contains(userId)) {
                             updatedLikes.remove(userId)
-                            this@DiscoverViewModel.sdk.unLike(postId,{},{})
+                            sdk.unLike(postId, {}, {})
+                            false
                         } else {
                             updatedLikes.add(userId)
-                            this@DiscoverViewModel.sdk.like(postId,{},{})
+                            sdk.like(postId, {}, {})
+                            true
                         }
+                        _likeActionState.value = UiState.Success(LikeAction(postId, isLiked))
                         post.copy(likes = updatedLikes)
                     } else {
                         post
                     }
-                }.toMutableList()
+                }
+                _nearbyPostsState.value = UiState.Success(updatedPosts)
+            } catch (e: Exception) {
+                _likeActionState.value = UiState.Error(e.message ?: "Failed to update like status")
             }
         }
-
     }
-}
-
-sealed class DiscoverUiState {
-    object Loading : DiscoverUiState()
-    data class Success(val profile: ProfileModel) : DiscoverUiState()
-    data class Error(val message: String) : DiscoverUiState()
 }

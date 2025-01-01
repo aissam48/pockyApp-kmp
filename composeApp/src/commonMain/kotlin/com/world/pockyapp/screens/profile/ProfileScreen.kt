@@ -50,6 +50,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -84,93 +85,99 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
     // Trigger initial data load
     LaunchedEffect(Unit) {
         viewModel.getProfile()
+        delay(1000)
         viewModel.getMyPosts()
     }
 
     Scaffold { padding ->
-        when (val state = profileState) {
-            is ProfileUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+
+        BottomSheetScaffold(
+            sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            scaffoldState = scaffoldState,
+            sheetBackgroundColor = Color.LightGray,
+            sheetPeekHeight = 0.dp,
+            sheetContent = {
+                Column(
+                    modifier = Modifier.fillMaxWidth().height(150.dp)
                 ) {
-                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.size(20.dp))
+                    Row(
+                        modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                            .clickable {
+                                navController.navigate(NavRoutes.CAMERA.route)
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.is_add_story_black),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text(
+                            fontWeight = FontWeight.Bold,
+                            text = "Share Moment",
+                            color = Color.Black,
+                            fontSize = 15.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.size(10.dp))
+
+                    Row(
+                        modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                            .clickable {
+                                navController.navigate(NavRoutes.POST_PREVIEW.route)
+                            },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_add_post_black),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text(
+                            fontWeight = FontWeight.Bold,
+                            text = "Share Post",
+                            color = Color.Black,
+                            fontSize = 15.sp
+                        )
+                    }
                 }
+
             }
+        ) {
 
-            is ProfileUiState.Success -> {
-                BottomSheetScaffold(
-                    sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                    scaffoldState = scaffoldState,
-                    sheetBackgroundColor = Color.LightGray,
-                    sheetPeekHeight = 0.dp,
-                    sheetContent = {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().height(150.dp)
-                        ) {
-                            Spacer(modifier = Modifier.size(20.dp))
-                            Row(
-                                modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-                                    .clickable {
-                                        navController.navigate(NavRoutes.CAMERA.route)
-                                    },
-                                verticalAlignment = Alignment.CenterVertically,
+            LazyColumn(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
+                item {
+                    Spacer(modifier = Modifier.size(20.dp))
+                }
+
+                item {
+                    Image(
+                        modifier = Modifier.size(23.dp).clickable {
+                            navController.popBackStack()
+                        },
+                        painter = painterResource(Res.drawable.ic_back_black),
+                        contentDescription = null
+                    )
+                }
+
+                when (val state = profileState) {
+                    is ProfileUiState.Loading -> {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.is_add_story_black),
-                                    contentDescription = null
-                                )
-                                Spacer(modifier = Modifier.size(10.dp))
-                                Text(
-                                    fontWeight = FontWeight.Bold,
-                                    text = "Share Moment",
-                                    color = Color.Black,
-                                    fontSize = 15.sp
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.size(10.dp))
-
-                            Row(
-                                modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-                                    .clickable {
-                                        navController.navigate(NavRoutes.POST_PREVIEW.route)
-                                    },
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_add_post_black),
-                                    contentDescription = null
-                                )
-                                Spacer(modifier = Modifier.size(10.dp))
-                                Text(
-                                    fontWeight = FontWeight.Bold,
-                                    text = "Share Post",
-                                    color = Color.Black,
-                                    fontSize = 15.sp
-                                )
+                                CircularProgressIndicator()
                             }
                         }
 
                     }
-                ) {
-                    LazyColumn(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
-                        item {
-                            Spacer(modifier = Modifier.size(20.dp))
-                        }
+
+                    is ProfileUiState.Success -> {
 
                         item {
-                            Image(
-                                modifier = Modifier.size(23.dp).clickable {
-                                    navController.popBackStack()
-                                },
-                                painter = painterResource(Res.drawable.ic_back_black),
-                                contentDescription = null
-                            )
-                        }
-
-                        item {
-
                             Box(modifier = Modifier.fillMaxWidth()) {
 
                                 Box(modifier = Modifier.size(150.dp)) {
@@ -198,9 +205,10 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                     ) {
                                         Image(
                                             contentScale = ContentScale.Crop,
-                                            modifier = Modifier.size(150.dp).clip(CircleShape)
+                                            modifier = Modifier.size(150.dp)
+                                                .clip(CircleShape)
                                                 .clickable {
-                                                    if (state.profile.moments.isEmpty()){
+                                                    if (state.profile.moments.isEmpty()) {
                                                         return@clickable
                                                     }
                                                     val modulesJson =
@@ -221,11 +229,15 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                     Icon(
                                         painterResource(Res.drawable.ic_add_black),
                                         null,
-                                        modifier = Modifier.align(Alignment.BottomEnd).clickable {
-                                            scope.launch {
-                                                scaffoldState.bottomSheetState.expand()
-                                            }
-                                        }.size(40.dp).background(color = Color.White, shape = CircleShape)
+                                        modifier = Modifier.align(Alignment.BottomEnd)
+                                            .clickable {
+                                                scope.launch {
+                                                    scaffoldState.bottomSheetState.expand()
+                                                }
+                                            }.size(40.dp).background(
+                                                color = Color.White,
+                                                shape = CircleShape
+                                            )
                                     )
                                 }
 
@@ -315,7 +327,40 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                             Spacer(modifier = Modifier.size(20.dp))
                         }
 
-                        items(postsState.chunked(3)) { item ->
+                    }
+
+                    is ProfileUiState.Error -> {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Error: ${state.message}",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+
+                    }
+                }
+
+                when (val posts = postsState) {
+                    is PostsUiState.Loading -> {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+
+                    }
+
+                    is PostsUiState.Success -> {
+
+                        items(posts.posts.chunked(3)) { item ->
 
                             Row(
                                 modifier = Modifier.fillMaxWidth()
@@ -323,7 +368,8 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
 
                                 item.forEachIndexed { index, postModel ->
                                     ImagePost(screenSize.value.first, item[index].postID) {
-                                        navController.navigate(NavRoutes.POST.route + "/${item[index].postID}" + "/${state.profile.id}")
+                                        navController.navigate(NavRoutes.POST.route + "/${item[index].postID}" + "/${(profileState as ProfileUiState.Success).profile.id}")
+
                                     }
                                     if (postModel != item.last()) {
                                         Spacer(modifier = Modifier.size(3.dp))
@@ -339,41 +385,51 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                             Spacer(modifier = Modifier.size(80.dp))
                         }
 
+                        item {
+                            Layout(
+                                modifier = Modifier.fillMaxWidth().height(0.dp),
+                                measurePolicy = { measurables, constraints ->
+                                    // Use the max width and height from the constraints
+                                    val width = constraints.maxWidth
+                                    val height = constraints.maxHeight
+
+                                    screenSize.value = Pair(width, height)
+                                    println("Width: $width, height: $height")
+
+                                    layout(width, height) {
+
+                                    }
+                                }
+                            )
+                        }
+
                     }
-                    Layout(
-                        modifier = Modifier.fillMaxWidth().height(0.dp),
-                        measurePolicy = { measurables, constraints ->
-                            // Use the max width and height from the constraints
-                            val width = constraints.maxWidth
-                            val height = constraints.maxHeight
 
-                            screenSize.value = Pair(width, height)
-                            println("Width: $width, height: $height")
-
-                            layout(width, height) {
-
+                    is PostsUiState.Error -> {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Error: ${posts.message}",
+                                    color = MaterialTheme.colorScheme.error
+                                )
                             }
                         }
-                    )
+
+                    }
                 }
+
+
             }
 
-            is ProfileUiState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Error: ${state.message}",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
+
         }
     }
 
-
 }
+
 
 @Composable
 fun convertPxToDp(px: Int): Float {

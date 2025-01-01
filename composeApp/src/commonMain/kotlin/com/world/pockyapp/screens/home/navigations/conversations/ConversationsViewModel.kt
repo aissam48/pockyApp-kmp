@@ -10,36 +10,39 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+sealed class UIState<out T> {
+    object Loading : UIState<Nothing>()
+    data class Success<out T>(val data: T) : UIState<T>()
+    data class Error(val message: String) : UIState<Nothing>()
+}
+
 class ConversationsViewModel(val sdk: ApiManager) : ViewModel() {
 
-    private val _chatRequestsMoments = MutableStateFlow<List<ChatRequestModel>>(emptyList())
-    val chatRequestsMoments: StateFlow<List<ChatRequestModel>> = _chatRequestsMoments.asStateFlow()
+    private val _chatRequestsMoments = MutableStateFlow<UIState<List<ChatRequestModel>>>(UIState.Loading)
+    val chatRequestsMoments: StateFlow<UIState<List<ChatRequestModel>>> = _chatRequestsMoments.asStateFlow()
 
-    private val _conversationsState = MutableStateFlow<List<ConversationModel>>(emptyList())
-    val conversationsState: StateFlow<List<ConversationModel>> = _conversationsState.asStateFlow()
-
-
+    private val _conversationsState = MutableStateFlow<UIState<List<ConversationModel>>>(UIState.Loading)
+    val conversationsState: StateFlow<UIState<List<ConversationModel>>> = _conversationsState.asStateFlow()
 
     fun loadChatRequests() {
         viewModelScope.launch {
-            sdk.getChatRequests({ succes ->
-                _chatRequestsMoments.value = succes
+            _chatRequestsMoments.value = UIState.Loading
+            sdk.getChatRequests({ success ->
+                _chatRequestsMoments.value = UIState.Success(success)
             }, { error ->
-                _chatRequestsMoments.value = emptyList()
+                _chatRequestsMoments.value = UIState.Error(error ?: "Unknown error")
             })
-
         }
     }
 
     fun loadConversations() {
         viewModelScope.launch {
-            sdk.getConversations({ succes ->
-                _conversationsState.value = succes
+            _conversationsState.value = UIState.Loading
+            sdk.getConversations({ success ->
+                _conversationsState.value = UIState.Success(success)
             }, { error ->
-                _conversationsState.value = emptyList()
+                _conversationsState.value = UIState.Error(error ?: "Unknown error")
             })
-
         }
     }
-
 }

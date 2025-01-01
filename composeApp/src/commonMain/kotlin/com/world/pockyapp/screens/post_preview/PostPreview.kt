@@ -8,12 +8,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,6 +46,7 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
         mutableStateOf<ByteArray?>(null)
     }
 
+    val state by viewModel.uiState.collectAsState()
 
     val singleImagePicker = rememberImagePickerLauncher(
         selectionMode = SelectionMode.Single,
@@ -51,7 +57,6 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
             }
         }
     )
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (photo.value != null) {
@@ -90,7 +95,7 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                 modifier = Modifier.background(
                     color = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(15.dp)
-                )
+                ).height(50.dp).width(130.dp)
                     .padding(10.dp).align(Alignment.CenterEnd).clickable {
                         if (photo.value != null) {
                             viewModel.setPost(photo.value!!)
@@ -98,13 +103,56 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                     }
 
             ) {
-                Text("Share post", color = MaterialTheme.colorScheme.onPrimary)
-                Spacer(modifier = Modifier.size(15.dp))
-                Image(
-                    painter = painterResource(Res.drawable.ic_arrow_right_white),
-                    contentDescription = null,
-                    modifier = Modifier.size(30.dp)
-                )
+
+                when (state) {
+                    is PostUiState.Loading -> {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.height(50.dp).width(130.dp)
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    is PostUiState.Success -> {
+                        Text("Share post", color = MaterialTheme.colorScheme.onPrimary)
+
+                        Spacer(modifier = Modifier.size(15.dp))
+
+                        Image(
+                            painter = painterResource(Res.drawable.ic_arrow_right_white),
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp)
+                        )
+                        navController.popBackStack()
+                    }
+
+                    is PostUiState.Error -> {
+                        Text("Share post", color = MaterialTheme.colorScheme.onPrimary)
+
+                        Spacer(modifier = Modifier.size(15.dp))
+
+                        Image(
+                            painter = painterResource(Res.drawable.ic_arrow_right_white),
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+
+                    PostUiState.Idle -> {
+                        Text("Share post", color = MaterialTheme.colorScheme.onPrimary)
+
+                        Spacer(modifier = Modifier.size(15.dp))
+
+                        Image(
+                            painter = painterResource(Res.drawable.ic_arrow_right_white),
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                }
+
+
             }
         }
     }
