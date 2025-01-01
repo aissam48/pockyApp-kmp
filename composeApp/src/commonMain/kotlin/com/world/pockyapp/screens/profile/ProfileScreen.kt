@@ -352,7 +352,7 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                //CircularProgressIndicator()
                             }
                         }
 

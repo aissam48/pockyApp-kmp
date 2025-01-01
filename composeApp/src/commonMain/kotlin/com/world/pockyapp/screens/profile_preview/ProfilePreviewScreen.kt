@@ -107,7 +107,7 @@ fun ProfilePreviewScreen(
         if (status is ProfilePreviewUiState.Success
             && status.profile.chatRequest != null
             && status.profile.chatRequest.status == "NOT_YET"
-            && myProfileState?.id == status.profile.chatRequest.senderID
+            && (myProfileState as MyProfileState.Success).profile.id == status.profile.chatRequest.senderID
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -125,10 +125,9 @@ fun ProfilePreviewScreen(
 
             }
         } else {
-            if (status is ProfilePreviewUiState.Success
-                && status.profile.chatRequest != null
-                && status.profile.chatRequest.status == "NOT_YET" &&
-                myProfileState?.id?.isNotEmpty() == true && myProfileState?.id != status.profile.chatRequest.senderID
+            if ((status is ProfilePreviewUiState.Success  && myProfileState is MyProfileState.Success
+                        && status.profile.chatRequest != null
+                        && status.profile.chatRequest.status == "NOT_YET") && (myProfileState as MyProfileState.Success).profile.id.isNotEmpty() && (myProfileState as MyProfileState.Success).profile.id != status.profile.chatRequest.senderID
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -221,7 +220,7 @@ fun ProfilePreviewScreen(
                             Row(
                                 modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                                     .clickable {
-                                        if (beFriendState.isEmpty() && state.profile.friend == "NO") {
+                                        if (state.profile.friend == "NO") {
                                             viewModel.beFriend(state.profile.id)
                                         } else {
                                             if (state.profile.friend == "YES") {
@@ -241,7 +240,7 @@ fun ProfilePreviewScreen(
                                 Spacer(modifier = Modifier.size(10.dp))
                                 Text(
                                     fontWeight = FontWeight.Bold,
-                                    text = if (beFriendState.isEmpty() && state.profile.friend == "NO")
+                                    text = if (state.profile.friend == "NO")
                                         "Be friend"
                                     else
                                         if (state.profile.friend == "YES")
@@ -310,7 +309,7 @@ fun ProfilePreviewScreen(
                                                         Json.encodeToString(listOf(state.profile))
                                                             .replace("/", "%")
                                                     navController.navigate(
-                                                        NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/${myProfileState?.id}"
+                                                        NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/${(myProfileState as MyProfileState.Success).profile.id}"
                                                     )
                                                 },
                                             painter = if (state.profile.photoID.isEmpty()) painterResource(
@@ -424,24 +423,35 @@ fun ProfilePreviewScreen(
                             Spacer(modifier = Modifier.size(20.dp))
                         }
 
-                        items(postsState.chunked(3)) { item ->
+                        when(postsState){
+                            is PostsState.Loading->{
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
+                            }
+                            is PostsState.Success->{
+                                items((postsState as PostsState.Success).posts.chunked(3)) { item ->
 
-                                item.forEachIndexed { index, postModel ->
-                                    ImagePost(screenSize.value.first, item[index].postID) {
-                                        navController.navigate(NavRoutes.POST.route + "/${item[index].postID}" + "/${myProfileState?.id}")
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+
+                                        item.forEachIndexed { index, postModel ->
+                                            ImagePost(screenSize.value.first, item[index].postID) {
+                                                navController.navigate(NavRoutes.POST.route + "/${item[index].postID}" + "/${(myProfileState as MyProfileState.Success).profile.id }")
+                                            }
+                                            if (postModel != item.last()) {
+                                                Spacer(modifier = Modifier.size(3.dp))
+                                            }
+                                        }
+
                                     }
-                                    if (postModel != item.last()) {
-                                        Spacer(modifier = Modifier.size(3.dp))
-                                    }
+                                    Spacer(modifier = Modifier.size(3.dp))
+
                                 }
 
                             }
-                            Spacer(modifier = Modifier.size(3.dp))
+                            is PostsState.Error->{
 
+                            }
                         }
 
                         item {
