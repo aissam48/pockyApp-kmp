@@ -30,6 +30,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.Constant
 import com.world.pockyapp.Constant.getUrl
+import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.MessageModel
 import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.launch
@@ -124,7 +125,10 @@ fun ChatScreen(
                     text = "${profile?.firstName} ${profile?.lastName}",
                     color = Color.Black,
                     fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable {
+                        navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${profile?.id}")
+                    }
                 )
                 Spacer(modifier = Modifier.weight(1f))
 
