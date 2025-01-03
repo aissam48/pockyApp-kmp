@@ -10,19 +10,23 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -32,6 +36,7 @@ import com.world.pockyapp.navigation.NavRoutes
 import org.jetbrains.compose.resources.painterResource
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_capture_white
+import pockyapp.composeapp.generated.resources.ic_change_camera
 import pockyapp.composeapp.generated.resources.ic_close_white
 import java.io.File
 import java.util.UUID
@@ -45,7 +50,21 @@ actual fun CameraView(navController: NavHostController) {
     val previewView = remember { PreviewView(context) }
     val imageCapture = remember { ImageCapture.Builder().build() }
 
+    val lensFacing = remember {
+        mutableIntStateOf(CameraSelector.LENS_FACING_BACK)
+    }
+
     var savedUri by remember { mutableStateOf<Uri?>(null) }
+
+    val cameraProvider = remember { mutableStateOf<ProcessCameraProvider?>(null) }
+
+    DisposableEffect(Unit) {
+        val cameraProviderInstance = cameraProviderFuture.get()
+        cameraProvider.value = cameraProviderInstance
+        onDispose {
+            cameraProviderInstance.unbindAll()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -53,16 +72,12 @@ actual fun CameraView(navController: NavHostController) {
             factory = { previewView },
             modifier = Modifier.fillMaxSize(),
             update = {
-                val cameraProvider = cameraProviderFuture.get()
-                val preview = Preview.Builder().build()
-                preview.setSurfaceProvider(previewView.surfaceProvider)
-                val cameraSelector =
-                    CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                        .build()
-                cameraProvider.bindToLifecycle(
-                    lifeCycleOwner, cameraSelector, preview,
-                    imageCapture
-                )
+                val preview = Preview.Builder().build().apply {
+                    setSurfaceProvider(previewView.surfaceProvider)
+                }
+                val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing.intValue).build()
+
+                cameraProvider.value?.bindToLifecycle(lifeCycleOwner, cameraSelector, preview, imageCapture)
             })
 
         DisposableEffect(Unit) {
@@ -97,7 +112,8 @@ actual fun CameraView(navController: NavHostController) {
         Image(
             painter = painterResource(Res.drawable.ic_close_white),
             contentDescription = null,
-            modifier = Modifier.padding(start = 15.dp, top = 15.dp)
+            modifier = Modifier
+                .padding(start = 15.dp, top = 15.dp)
                 .align(Alignment.TopStart)
                 .size(40.dp)
                 .clickable {
@@ -108,7 +124,7 @@ actual fun CameraView(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 60.dp)
+                .padding(bottom = 60.dp, end = 20.dp, start = 20.dp)
         ) {
 
             Image(
@@ -119,6 +135,22 @@ actual fun CameraView(navController: NavHostController) {
                     .size(80.dp)
                     .clickable {
                         capturePhoto()
+                    })
+
+            Image(
+                painter = painterResource(Res.drawable.ic_change_camera),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(30.dp)
+                    .background(color = Color.White, shape = CircleShape)
+                    .clickable {
+                        cameraProvider.value?.unbindAll()
+                        if (lensFacing.intValue == CameraSelector.LENS_FACING_BACK) {
+                            lensFacing.intValue = CameraSelector.LENS_FACING_FRONT
+                        } else {
+                            lensFacing.intValue = CameraSelector.LENS_FACING_BACK
+                        }
                     })
         }
 

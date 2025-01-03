@@ -73,22 +73,23 @@ fun ViewPostScreen(
         viewModel.getPost(postID)
     }
 
-    var showDialog by remember { mutableStateOf(false) }
+    LaunchedEffect(deletePostState) {
+        when (deletePostState) {
+            is DeleteResultState.Loading -> {
 
+            }
 
-    when (deletePostState) {
-        is DeleteResultState.Loading -> {
+            is DeleteResultState.Success -> {
+                navController.popBackStack()
+            }
 
-        }
+            is DeleteResultState.Error -> {
 
-        is DeleteResultState.Success -> {
-            navController.popBackStack()
-        }
-
-        is DeleteResultState.Error -> {
-
+            }
         }
     }
+
+    var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
         CustomDialog(

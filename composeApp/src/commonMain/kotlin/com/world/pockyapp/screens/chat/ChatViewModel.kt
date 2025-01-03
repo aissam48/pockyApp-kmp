@@ -23,6 +23,13 @@ sealed class ChatUiState {
     data class Error(val message: String) : ChatUiState()
 }
 
+sealed class CancelChatUiState {
+    data object Idle : CancelChatUiState()
+    data object Loading : CancelChatUiState()
+    data class Success(val data: String = "", val message: String = "") : CancelChatUiState()
+    data class Error(val message: String) : CancelChatUiState()
+}
+
 class ChatViewModel(private val sdk: ApiManager) :
     ViewModel() {
 
@@ -41,8 +48,10 @@ class ChatViewModel(private val sdk: ApiManager) :
     private val _newMessageState = MutableStateFlow<MessageModel?>(null)
     val newMessageState: StateFlow<MessageModel?> = _newMessageState
 
-    private val _cancelConversationState = MutableStateFlow<String>("")
-    val cancelConversationState: StateFlow<String> = _cancelConversationState.asStateFlow()
+    private val _cancelConversationState =
+        MutableStateFlow<CancelChatUiState>(CancelChatUiState.Idle)
+    val cancelConversationState: StateFlow<CancelChatUiState> =
+        _cancelConversationState.asStateFlow()
 
     fun cancelConversation(
         conversationID: String,
@@ -50,9 +59,9 @@ class ChatViewModel(private val sdk: ApiManager) :
     ) {
         viewModelScope.launch {
             sdk.cancelConversation(conversationID, chatRequestID, { succes ->
-                _cancelConversationState.value = succes
+                _cancelConversationState.value = CancelChatUiState.Success()
             }, { error ->
-                _cancelConversationState.value = ""
+                _cancelConversationState.value = CancelChatUiState.Error(error)
             })
 
         }
@@ -98,7 +107,7 @@ class ChatViewModel(private val sdk: ApiManager) :
                 try {
                     val textContent = frame.readText()
                     val message = Json.decodeFromString<MessageModel>(textContent)
-                    if (message.conversationID == conversationID){
+                    if (message.conversationID == conversationID) {
                         _newMessageState.value = message
                     }
                 } catch (e: SerializationException) {

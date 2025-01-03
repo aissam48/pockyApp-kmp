@@ -12,10 +12,13 @@ import kotlinx.coroutines.launch
 
 class SplashViewModel (private val dataStore: DataStore<Preferences>):ViewModel(){
 
-    private val _splashState = MutableStateFlow<String>("login")
+    private val _splashState = MutableStateFlow<String>("")
     val splashState = _splashState.asStateFlow()
 
-    fun checkToken(){
+    init {
+        checkToken()
+    }
+    private fun checkToken(){
         viewModelScope.launch {
             val preferences = dataStore.edit { }
             val token = preferences[stringPreferencesKey("token")].toString()

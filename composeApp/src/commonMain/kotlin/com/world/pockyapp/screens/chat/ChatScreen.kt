@@ -32,6 +32,8 @@ import com.world.pockyapp.Constant
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.MessageModel
+import com.world.pockyapp.screens.components.CustomDialog
+import com.world.pockyapp.screens.components.CustomDialogSuccess
 import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -68,13 +70,6 @@ fun ChatScreen(
         messages.addAll(newMessages)
     }
 
-    LaunchedEffect(cancelConversation) {
-        if (cancelConversation.isNotEmpty()){
-            navController.popBackStack()
-        }
-
-    }
-
     LaunchedEffect(Unit) {
         viewModel.getMyProfile()
         viewModel.getProfile(profileID)
@@ -88,6 +83,57 @@ fun ChatScreen(
     // Add scroll state and coroutine scope
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+
+    var showDialog by remember { mutableStateOf(false) }
+
+    var showDialogResult by remember { mutableStateOf(false) }
+
+    val title = remember {
+        mutableStateOf("")
+    }
+
+    if (showDialog) {
+        CustomDialogSuccess(
+            title = title.value,
+            action = "Cancel",
+            onCancel = {
+                showDialog = false
+            }
+        )
+    }
+
+    if (showDialogResult) {
+        CustomDialog(
+            title = "Are you sure you want to cancel this chat?",
+            action1 = "No",
+            action2 = "Yes",
+            onCancel = { showDialogResult = false },
+            onDelete = {
+                showDialogResult = false
+                viewModel.cancelConversation(conversationID, chatRequestID)
+            }
+        )
+    }
+    LaunchedEffect(cancelConversation) {
+        when (val state = cancelConversation) {
+            is CancelChatUiState.Loading -> {
+
+            }
+
+            is CancelChatUiState.Success -> {
+                showDialog = true
+                title.value = "This chat has canceled successfully"
+            }
+
+            is CancelChatUiState.Error -> {
+                showDialog = true
+                title.value = state.message
+            }
+
+            is CancelChatUiState.Idle -> {}
+        }
+    }
+
 
     Scaffold(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -136,7 +182,7 @@ fun ChatScreen(
                     modifier = Modifier.width(70.dp).height(30.dp)
                         .background(color = Color.Red, shape = RoundedCornerShape(8.dp))
                         .clickable {
-                            viewModel.cancelConversation(conversationID, chatRequestID)
+                            showDialogResult = true
                         },
                     contentAlignment = Alignment.Center
                 ) {

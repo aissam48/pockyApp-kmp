@@ -105,7 +105,7 @@ fun SearchScreen(navController: NavHostController, viewModel: SearchViewModel = 
                         viewModel.search(it)
                     }
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 colors = TextFieldDefaults.textFieldColors(
                     textColor = MaterialTheme.colorScheme.primary,
                     cursorColor = MaterialTheme.colorScheme.primary,

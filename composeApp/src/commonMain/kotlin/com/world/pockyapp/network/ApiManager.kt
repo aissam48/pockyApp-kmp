@@ -1201,5 +1201,47 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     }
 
+    suspend fun shareMoment(
+        byteArray: ByteArray?,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.submitFormWithBinaryData(
+                url = "$baseUrl/operations/sharemoment",
+                formData {
+                    if (byteArray != null) {
+                        append("file", byteArray, Headers.build {
+                            println("Original size ${byteArray.size} bytes")
+                            append(HttpHeaders.ContentType, "image/jpg")
+                            append(HttpHeaders.ContentDisposition, "filename=file")
+                        })
+                    }
+
+                }) {
+                val token = getToken()
+                println("token-----> $token")
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+                onUpload { bytesSentTotal, contentLength ->
+                    println("Sent $bytesSentTotal bytes from $contentLength")
+                }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: String =
+                    response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: String =
+                    response.bodyAsText()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
 }
 

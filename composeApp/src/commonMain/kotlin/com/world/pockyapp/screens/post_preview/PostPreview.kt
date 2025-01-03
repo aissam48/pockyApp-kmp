@@ -17,6 +17,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,22 +78,24 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
         )
     }
 
-    when (val state = uiState) {
-        is PostUiState.Loading -> {
+    LaunchedEffect(uiState){
+        when (val state = uiState) {
+            is PostUiState.Loading -> {
 
+            }
+
+            is PostUiState.Success -> {
+                title.value = "Your post has shared successfully"
+                showDialog = true
+            }
+
+            is PostUiState.Error -> {
+                title.value = state.message
+                showDialog = true
+            }
+
+            is PostUiState.Idle -> {}
         }
-
-        is PostUiState.Success -> {
-            title.value = "Your post has shared successfully"
-            showDialog = true
-        }
-
-        is PostUiState.Error -> {
-            title.value = state.message
-            showDialog = true
-        }
-
-        is PostUiState.Idle -> {}
     }
 
 
@@ -134,7 +137,7 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                     color = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(15.dp)
                 ).height(50.dp).width(130.dp)
-                    .padding(10.dp).align(Alignment.CenterEnd).clickable {
+                    .padding(5.dp).align(Alignment.CenterEnd).clickable {
                         if (photo.value != null) {
                             viewModel.setPost(photo.value!!)
                         }
@@ -148,7 +151,7 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                             contentAlignment = Alignment.Center,
                             modifier = Modifier.height(50.dp).width(130.dp)
                         ) {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(modifier = Modifier.size(30.dp))
                         }
                     }
 

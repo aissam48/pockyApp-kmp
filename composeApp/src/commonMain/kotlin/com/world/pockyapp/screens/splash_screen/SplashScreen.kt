@@ -31,6 +31,7 @@ fun SplashScreen(navController: NavHostController, viewModel: SplashViewModel = 
         }
     }
 
+
     Box(modifier = Modifier.fillMaxSize()) {
 
 
