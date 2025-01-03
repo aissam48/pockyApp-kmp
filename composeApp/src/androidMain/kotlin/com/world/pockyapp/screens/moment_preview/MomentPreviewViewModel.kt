@@ -27,11 +27,11 @@ class MomentPreviewViewModel(private val sdk: ApiManager) :
     val uiState: StateFlow<MomentPreviewUiState> = _uiState
 
 
-    fun shareMoment(byteArray: ByteArray?) {
+    fun shareMoment(byteArray: ByteArray?, isNearby: Boolean) {
 
         viewModelScope.launch {
             _uiState.value = MomentPreviewUiState.Loading
-            sdk.shareMoment(byteArray, { success ->
+            sdk.shareMoment(byteArray,isNearby, { success ->
                 _uiState.value = MomentPreviewUiState.Success()
 
             }, { error ->

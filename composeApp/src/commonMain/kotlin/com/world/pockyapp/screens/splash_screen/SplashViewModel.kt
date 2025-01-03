@@ -21,8 +21,9 @@ class SplashViewModel (private val dataStore: DataStore<Preferences>):ViewModel(
     private fun checkToken(){
         viewModelScope.launch {
             val preferences = dataStore.edit { }
-            val token = preferences[stringPreferencesKey("token")].toString()
-            if (token.isEmpty()){
+            val token = preferences[stringPreferencesKey("token")]
+            println("SplashViewModel $token")
+            if (token?.isEmpty() == true || token == null){
                 _splashState.value = "login"
             }else{
                 _splashState.value = "home"

@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -27,19 +30,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.screens.components.CustomDialogSuccess
-import com.world.pockyapp.screens.post_preview.PostUiState
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_arrow_right_white
+import pockyapp.composeapp.generated.resources.ic_close_black
 import java.io.File
 
 @OptIn(KoinExperimentalAPI::class)
@@ -52,6 +57,8 @@ actual fun MomentPreview(
     val viewModel: MomentPreviewViewModel = koinViewModel()
     val imageData = convertImageToByteArray(Uri.parse(path.replace("$", "/")), LocalContext.current)
     println("MomentPreview $imageData")
+
+    var isChecked by remember { mutableStateOf(false) }
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -72,7 +79,7 @@ actual fun MomentPreview(
         )
     }
 
-    LaunchedEffect(uiState){
+    LaunchedEffect(uiState) {
         when (val state = uiState) {
             is MomentPreviewUiState.Loading -> {
 
@@ -92,59 +99,100 @@ actual fun MomentPreview(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = rememberAsyncImagePainter(path.replace("$", "/")),
-            contentDescription = "Captured Image",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillHeight
-        )
-
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .align(Alignment.BottomCenter)
-            .padding(20.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+    Box(modifier = Modifier.fillMaxSize()){
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.DarkGray)
+        ) {
+            Image(
+                painter = rememberAsyncImagePainter(path.replace("$", "/")),
+                contentDescription = "Captured Image",
                 modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(15.dp)
-                    ).height(50.dp).width(130.dp)
-                    .padding(5.dp)
-                    .align(Alignment.CenterEnd)
-                    .clickable {
-                        viewModel.shareMoment(imageData)
-                    }
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentScale = ContentScale.FillHeight,
 
+                )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
             ) {
 
-                when (uiState) {
-                    is MomentPreviewUiState.Loading -> {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.height(50.dp).width(130.dp)
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(30.dp))
-                        }
-                    }
+                Row(modifier = Modifier.align(Alignment.CenterStart), verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "Share to nearby", color = Color.White, fontSize = 13.sp)
 
-                    else -> {
-                        Text("Share moment", color = MaterialTheme.colorScheme.onPrimary)
+                    Spacer(modifier = Modifier.width(10.dp))
 
-                        Spacer(modifier = Modifier.size(15.dp))
-
-                        Image(
-                            painter = painterResource(Res.drawable.ic_arrow_right_white),
-                            contentDescription = null,
-                            modifier = Modifier.size(30.dp)
+                    Switch(
+                        checked = isChecked,
+                        onCheckedChange = { isChecked = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color(0xFFF3C623),
+                            uncheckedThumbColor = Color.Gray
                         )
-                    }
+                    )
+                }
 
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(15.dp)
+                        )
+                        .height(50.dp)
+                        .width(130.dp)
+                        .padding(5.dp)
+                        .align(Alignment.CenterEnd)
+                        .clickable {
+                            viewModel.shareMoment(imageData, isChecked)
+                        }
+
+                ) {
+
+                    when (uiState) {
+                        is MomentPreviewUiState.Loading -> {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .height(50.dp)
+                                    .width(130.dp)
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(30.dp))
+                            }
+                        }
+
+                        else -> {
+                            Text("Share moment", color = MaterialTheme.colorScheme.onPrimary)
+
+                            Spacer(modifier = Modifier.size(15.dp))
+
+                            Image(
+                                painter = painterResource(Res.drawable.ic_arrow_right_white),
+                                contentDescription = null,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+
+                    }
                 }
             }
         }
+
+        Image(
+            painter = painterResource(Res.drawable.ic_close_black),
+            contentDescription = null,
+            modifier = Modifier.padding(start = 15.dp, top = 15.dp)
+                .align(Alignment.TopStart)
+                .size(40.dp)
+                .clickable {
+                    navController.popBackStack()
+                })
     }
+
 
 }
 

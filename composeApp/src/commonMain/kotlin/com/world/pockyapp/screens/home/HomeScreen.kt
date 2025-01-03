@@ -76,7 +76,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
         ) {
 
             Text(
-                "AroundMe",
+                "PockyApp",
                 fontSize = 25.sp,
                 fontStyle = FontStyle.Italic,
                 fontFamily = FontFamily.Monospace,

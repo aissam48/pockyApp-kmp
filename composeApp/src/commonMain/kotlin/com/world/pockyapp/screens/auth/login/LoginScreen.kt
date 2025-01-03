@@ -93,7 +93,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.padding(top = 100.dp))
 
             Text(
-                text = "AroundMe",
+                text = "PockyApp",
                 fontFamily = FontFamily.Monospace,
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 50.sp,

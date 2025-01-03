@@ -198,6 +198,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun setPost(
         byteArray: ByteArray,
+        isNearby: Boolean,
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
     ) {
@@ -210,6 +211,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                     append(HttpHeaders.ContentType, "image/jpg")
                     append(HttpHeaders.ContentDisposition, "filename=file")
                 })
+                append("isNearby", isNearby)
             }) {
             val token = getToken()
             println("token-----> $token")
@@ -1203,6 +1205,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun shareMoment(
         byteArray: ByteArray?,
+        isNearby: Boolean,
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
     ) {
@@ -1216,6 +1219,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                             append(HttpHeaders.ContentType, "image/jpg")
                             append(HttpHeaders.ContentDisposition, "filename=file")
                         })
+                        append("isNearby",isNearby)
                     }
 
                 }) {

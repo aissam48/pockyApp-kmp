@@ -1,8 +1,12 @@
 package com.world.pockyapp.screens.camera
 
+import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -19,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +62,33 @@ actual fun CameraView(navController: NavHostController) {
     var savedUri by remember { mutableStateOf<Uri?>(null) }
 
     val cameraProvider = remember { mutableStateOf<ProcessCameraProvider?>(null) }
+    val permissionState = remember { mutableStateOf(false) } // Track permission state
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            permissionState.value = isGranted
+            if (!isGranted) {
+                Toast.makeText(
+                    context,
+                    "Camera permission is required to use this feature.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+        if (hasPermission) {
+            permissionState.value = true
+        } else {
+            launcher.launch(android.Manifest.permission.CAMERA)
+        }
+    }
 
     DisposableEffect(Unit) {
         val cameraProviderInstance = cameraProviderFuture.get()
@@ -64,6 +96,10 @@ actual fun CameraView(navController: NavHostController) {
         onDispose {
             cameraProviderInstance.unbindAll()
         }
+    }
+
+    if (!permissionState.value){
+        return
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -75,9 +111,15 @@ actual fun CameraView(navController: NavHostController) {
                 val preview = Preview.Builder().build().apply {
                     setSurfaceProvider(previewView.surfaceProvider)
                 }
-                val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing.intValue).build()
+                val cameraSelector =
+                    CameraSelector.Builder().requireLensFacing(lensFacing.intValue).build()
 
-                cameraProvider.value?.bindToLifecycle(lifeCycleOwner, cameraSelector, preview, imageCapture)
+                cameraProvider.value?.bindToLifecycle(
+                    lifeCycleOwner,
+                    cameraSelector,
+                    preview,
+                    imageCapture
+                )
             })
 
         DisposableEffect(Unit) {

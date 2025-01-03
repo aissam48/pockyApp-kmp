@@ -19,10 +19,10 @@ class PostViewModel(private val sdk: ApiManager) : ViewModel() {
     private val _uiState = MutableStateFlow<PostUiState>(PostUiState.Idle)
     val uiState: StateFlow<PostUiState> = _uiState
 
-    fun setPost(byteArray: ByteArray) {
+    fun setPost(byteArray: ByteArray, isNearby: Boolean) {
         _uiState.value = PostUiState.Loading
         viewModelScope.launch {
-            sdk.setPost(byteArray, {
+            sdk.setPost(byteArray,isNearby, {
                 _uiState.value = PostUiState.Success()
             }, { error ->
                 _uiState.value = PostUiState.Error(error)

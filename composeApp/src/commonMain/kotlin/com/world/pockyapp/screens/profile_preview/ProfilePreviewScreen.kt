@@ -369,7 +369,7 @@ fun ProfilePreviewScreen(
                                                 contentDescription = null,
                                                 modifier = Modifier.size(40.dp)
                                                     .clickable {
-                                                        navController.navigate(NavRoutes.CHAT.route + "/${profile.value.conversationID}" + "/${profile.value.id}")
+                                                        navController.navigate(NavRoutes.CHAT.route + "/${profile.value.conversationID}" + "/${profile.value.id}" + "/${profile.value.chatRequest?.id}")
                                                     }
                                             )
                                         }
