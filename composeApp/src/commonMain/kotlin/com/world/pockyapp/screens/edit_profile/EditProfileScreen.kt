@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +48,8 @@ import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.world.pockyapp.Constant
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.screens.components.CustomDialog
+import com.world.pockyapp.screens.components.CustomDialogSuccess
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -84,6 +87,7 @@ fun EditProfileScreen(
         mutableStateOf(profile?.description ?: "")
     }
 
+
     firstName.value = profile?.firstName ?: ""
     lastName.value = profile?.lastName ?: ""
     phone.value = profile?.phone ?: ""
@@ -99,19 +103,34 @@ fun EditProfileScreen(
             }
         }
     )
+    var showDialog by remember { mutableStateOf(false) }
+
+    val title = remember {
+        mutableStateOf("")
+    }
+
+    if (showDialog) {
+        CustomDialogSuccess(
+            title = title.value,
+            action = "Cancel",
+            onCancel = { showDialog = false }
+        )
+    }
 
     LaunchedEffect(uiState) {
-        when (uiState) {
+        when (val state = uiState) {
             EditProfileUiState.Loading -> {
 
             }
 
             is EditProfileUiState.Success -> {
-
+                title.value = "Your profile has updated successfully"
+                showDialog = true
             }
 
             is EditProfileUiState.Error -> {
-
+                title.value = state.message
+                showDialog = true
             }
 
             else -> Unit

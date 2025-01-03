@@ -39,20 +39,6 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
     private val _likeActionState = MutableStateFlow<UiState<LikeAction>?>(null)
     val likeActionState: StateFlow<UiState<LikeAction>?> = _likeActionState.asStateFlow()
 
-    init {
-        loadInitialData()
-    }
-
-    private fun loadInitialData() {
-        getProfile()
-        loadFriendsMoments()
-        loadNearbyMoments()
-        loadNearbyPosts()
-    }
-
-    fun refresh() {
-        loadInitialData()
-    }
 
     fun getProfile() {
         viewModelScope.launch {

@@ -12,37 +12,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import coil3.compose.AsyncImage
-import com.preat.peekaboo.image.picker.SelectionMode
-import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.screens.components.CustomDialog
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.compose_multiplatform
 import pockyapp.composeapp.generated.resources.ic_back_black
-import pockyapp.composeapp.generated.resources.ic_close_black
-import pockyapp.composeapp.generated.resources.ic_edit_black
 
 @Composable
 fun SettingsScreen(
@@ -52,6 +44,9 @@ fun SettingsScreen(
 
     val logout = viewModel.logoutState.collectAsState()
     val deleteAccount = viewModel.deleteAccountState.collectAsState()
+
+    var showDialogLogout by remember { mutableStateOf(false) }
+    var showDialogDeleteAccount by remember { mutableStateOf(false) }
 
     LaunchedEffect(logout.value) {
         if (logout.value == "logout") {
@@ -72,6 +67,32 @@ fun SettingsScreen(
             }
 
         }
+    }
+
+    if (showDialogLogout) {
+        CustomDialog(
+            title = "Are you sure you want to logout?",
+            action1 = "Cancel",
+            action2 = "Logout",
+            onCancel = { showDialogLogout = false },
+            onDelete = {
+                showDialogLogout = false
+                viewModel.logout()
+            }
+        )
+    }
+
+    if (showDialogDeleteAccount) {
+        CustomDialog(
+            title = "Are you sure you want to delete your account?",
+            action1 = "Cancel",
+            action2 = "Delete",
+            onCancel = { showDialogDeleteAccount = false },
+            onDelete = {
+                showDialogDeleteAccount = false
+                viewModel.deleteAccount()
+            }
+        )
     }
 
     Scaffold(modifier = Modifier.fillMaxSize()) {
@@ -172,7 +193,8 @@ fun SettingsScreen(
                         .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
                         .height(50.dp)
                         .clickable {
-                            viewModel.logout()
+                            //viewModel.logout()
+                            showDialogLogout = true
                         }.padding(start = 15.dp)) {
                     Text(
                         text = "Logout",
@@ -193,7 +215,8 @@ fun SettingsScreen(
                         .background(color = Color.Red, shape = RoundedCornerShape(15.dp))
                         .height(50.dp)
                         .clickable {
-                            viewModel.deleteAccount()
+                            showDialogDeleteAccount = true
+                            //viewModel.deleteAccount()
                         }.padding(start = 15.dp)) {
                     Text(
                         text = "Delete account",

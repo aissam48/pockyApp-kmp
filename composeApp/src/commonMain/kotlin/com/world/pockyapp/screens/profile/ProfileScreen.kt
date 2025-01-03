@@ -50,6 +50,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.network.models.model.ProfileModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -87,6 +88,10 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
         viewModel.getProfile()
         delay(1000)
         viewModel.getMyPosts()
+    }
+
+    val profile = remember {
+        mutableStateOf(ProfileModel())
     }
 
     Scaffold { padding ->
@@ -176,6 +181,8 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                     }
 
                     is ProfileUiState.Success -> {
+
+                        profile.value = state.profile
 
                         item {
                             Box(modifier = Modifier.fillMaxWidth()) {
@@ -368,7 +375,7 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
 
                                 item.forEachIndexed { index, postModel ->
                                     ImagePost(screenSize.value.first, item[index].postID) {
-                                        navController.navigate(NavRoutes.POST.route + "/${item[index].postID}" + "/${(profileState as ProfileUiState.Success).profile.id}")
+                                        navController.navigate(NavRoutes.POST.route + "/${item[index].postID}" + "/${profile.value.id}")
 
                                     }
                                     if (postModel != item.last()) {

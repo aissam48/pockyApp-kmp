@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -30,6 +31,7 @@ import androidx.navigation.NavHostController
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.preat.peekaboo.image.picker.toImageBitmap
+import com.world.pockyapp.screens.components.CustomDialogSuccess
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinNavViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -46,7 +48,7 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
         mutableStateOf<ByteArray?>(null)
     }
 
-    val state by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     val singleImagePicker = rememberImagePickerLauncher(
         selectionMode = SelectionMode.Single,
@@ -57,6 +59,42 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
             }
         }
     )
+
+    var showDialog by remember { mutableStateOf(false) }
+
+    val title = remember {
+        mutableStateOf("")
+    }
+
+    if (showDialog) {
+        CustomDialogSuccess(
+            title = title.value,
+            action = "Close",
+            onCancel = {
+                showDialog = false
+                navController.popBackStack()
+            }
+        )
+    }
+
+    when (val state = uiState) {
+        is PostUiState.Loading -> {
+
+        }
+
+        is PostUiState.Success -> {
+            title.value = "Your post has shared successfully"
+            showDialog = true
+        }
+
+        is PostUiState.Error -> {
+            title.value = state.message
+            showDialog = true
+        }
+
+        is PostUiState.Idle -> {}
+    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (photo.value != null) {
@@ -104,7 +142,7 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
 
             ) {
 
-                when (state) {
+                when (uiState) {
                     is PostUiState.Loading -> {
                         Box(
                             contentAlignment = Alignment.Center,
@@ -114,20 +152,7 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                         }
                     }
 
-                    is PostUiState.Success -> {
-                        Text("Share post", color = MaterialTheme.colorScheme.onPrimary)
-
-                        Spacer(modifier = Modifier.size(15.dp))
-
-                        Image(
-                            painter = painterResource(Res.drawable.ic_arrow_right_white),
-                            contentDescription = null,
-                            modifier = Modifier.size(30.dp)
-                        )
-                        navController.popBackStack()
-                    }
-
-                    is PostUiState.Error -> {
+                    else -> {
                         Text("Share post", color = MaterialTheme.colorScheme.onPrimary)
 
                         Spacer(modifier = Modifier.size(15.dp))
@@ -139,17 +164,6 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                         )
                     }
 
-                    PostUiState.Idle -> {
-                        Text("Share post", color = MaterialTheme.colorScheme.onPrimary)
-
-                        Spacer(modifier = Modifier.size(15.dp))
-
-                        Image(
-                            painter = painterResource(Res.drawable.ic_arrow_right_white),
-                            contentDescription = null,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
                 }
 
 

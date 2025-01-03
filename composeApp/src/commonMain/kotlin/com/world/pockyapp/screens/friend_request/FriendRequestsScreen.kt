@@ -41,12 +41,10 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_back_black
-import com.world.pockyapp.screens.friend_request.UiState
 
 @Composable
 fun FriendRequestsScreen(
-    navController: NavHostController,
-    viewModel: FriendRequestsViewModel = koinViewModel()
+    navController: NavHostController, viewModel: FriendRequestsViewModel = koinViewModel()
 ) {
 
     val friendRequestsState = viewModel.friendRequestsState.collectAsState()
@@ -56,16 +54,35 @@ fun FriendRequestsScreen(
     LaunchedEffect(Unit) {
         viewModel.getFriendRequests()
     }
-    LaunchedEffect(acceptRequestState.value) {
-        if (acceptRequestState.value is UiState.Success) {
+
+    when (val state = acceptRequestState.value) {
+        is AcceptRequestsUiState.Loading -> {
+
+        }
+
+        is AcceptRequestsUiState.Success -> {
             viewModel.getFriendRequests()
         }
-    }
-    LaunchedEffect(rejectRequestState.value) {
-        if (rejectRequestState.value is UiState.Success) {
-            viewModel.getFriendRequests()
+
+        is AcceptRequestsUiState.Error -> {
+
         }
     }
+
+    when (val state = rejectRequestState.value) {
+        is RejectRequestsUiState.Loading -> {
+
+        }
+
+        is RejectRequestsUiState.Success -> {
+            viewModel.getFriendRequests()
+        }
+
+        is RejectRequestsUiState.Error -> {
+
+        }
+    }
+
 
     Scaffold(modifier = Modifier.fillMaxSize()) {
 
@@ -90,20 +107,19 @@ fun FriendRequestsScreen(
             Spacer(modifier = Modifier.size(25.dp))
 
             when (val state = friendRequestsState.value) {
-                is UiState.Loading -> {
+                is FriendRequestsUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 }
 
-                is UiState.Success -> {
+                is FriendRequestsUiState.Success -> {
                     LazyColumn {
                         items(state.data) { item: FriendRequestModel ->
 
                             Column {
 
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
+                                Row(verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.clickable {
                                         navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${item.profile.id}")
                                     }) {
@@ -126,12 +142,10 @@ fun FriendRequestsScreen(
 
                                     Box(
                                         modifier = Modifier.background(
-                                            color = Color.Green,
-                                            shape = RoundedCornerShape(10.dp)
+                                            color = Color.Green, shape = RoundedCornerShape(10.dp)
                                         ).height(30.dp).width(60.dp).clickable {
                                             viewModel.acceptFriendRequest(item.id)
-                                        },
-                                        contentAlignment = Alignment.Center
+                                        }, contentAlignment = Alignment.Center
                                     ) {
                                         Text(
                                             text = "Accept",
@@ -144,12 +158,10 @@ fun FriendRequestsScreen(
                                     Spacer(modifier = Modifier.size(8.dp))
                                     Box(
                                         modifier = Modifier.background(
-                                            color = Color.Red,
-                                            shape = RoundedCornerShape(10.dp)
+                                            color = Color.Red, shape = RoundedCornerShape(10.dp)
                                         ).height(30.dp).width(60.dp).clickable {
                                             viewModel.rejectFriendRequest(item.id)
-                                        },
-                                        contentAlignment = Alignment.Center
+                                        }, contentAlignment = Alignment.Center
                                     ) {
                                         Text(
                                             text = "Reject",
@@ -167,7 +179,7 @@ fun FriendRequestsScreen(
                     }
                 }
 
-                is UiState.Error -> {
+                is FriendRequestsUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             text = state.message,

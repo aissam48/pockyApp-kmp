@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +52,8 @@ import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.world.pockyapp.Constant
 import com.world.pockyapp.network.models.model.DataModel
+import com.world.pockyapp.screens.change_password.ChangePasswordUiState
+import com.world.pockyapp.screens.components.CustomDialogSuccess
 import com.world.pockyapp.screens.edit_profile.EditProfileUiState
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -94,19 +97,34 @@ fun EditLocationScreen(
     country.value = profile?.country ?: ""
     city.value = profile?.city ?: ""
 
+    var showDialog by remember { mutableStateOf(false) }
+
+    val title = remember {
+        mutableStateOf("")
+    }
+
+    if (showDialog) {
+        CustomDialogSuccess(
+            title = title.value,
+            action = "Cancel",
+            onCancel = { showDialog = false }
+        )
+    }
 
     LaunchedEffect(uiState) {
-        when (uiState) {
+        when (val state = uiState) {
             is EditLocationUiState.Loading -> {
 
             }
 
             is EditLocationUiState.Success -> {
-
+                title.value = "Your location has updated successfully"
+                showDialog = true
             }
 
             is EditLocationUiState.Error -> {
-
+                title.value = state.message
+                showDialog = true
             }
 
             else -> Unit

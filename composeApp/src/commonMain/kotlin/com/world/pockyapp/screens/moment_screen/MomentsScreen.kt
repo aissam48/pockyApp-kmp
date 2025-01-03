@@ -30,6 +30,8 @@ import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.components.CustomDialog
+import com.world.pockyapp.screens.components.CustomDialogSuccess
 import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -182,6 +184,21 @@ fun StoryPage(
             progressValue = progressAnimation.value
         }
 
+    }
+
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        CustomDialog(
+            title = "Are you sure you want to delete this moment?",
+            action1 = "Cancel",
+            action2 = "Delete",
+            onCancel = { showDialog = false },
+            onDelete = {
+                showDialog = false
+                viewModel.deleteMoment(story.postID)
+            }
+        )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -347,7 +364,8 @@ fun StoryPage(
                 Image(
                     painter = painterResource(Res.drawable.ic_delete),
                     modifier = Modifier.size(35.dp).clickable {
-                        viewModel.deleteMoment(story.postID)
+                        //viewModel.deleteMoment(story.postID)
+                        showDialog = true
                     },
                     contentDescription = null
                 )
@@ -386,10 +404,9 @@ fun MomentsScreen(
     myID: String?,
     viewModel: MomentsViewModel = koinViewModel()
 ) {
-    val sampleUsers = moments
 
     StoriesViewer(
-        users = sampleUsers,
+        users = moments,
         onStoriesFinished = {
             navController.popBackStack()
         },

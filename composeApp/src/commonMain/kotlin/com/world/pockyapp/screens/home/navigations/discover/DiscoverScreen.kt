@@ -53,6 +53,12 @@ fun DiscoverScreen(
     val nearbyMomentsState by viewModel.nearbyMomentsState.collectAsState()
     val nearbyPostsState by viewModel.nearbyPostsState.collectAsState()
 
+    LaunchedEffect(Unit){
+        viewModel.getProfile()
+        viewModel.loadFriendsMoments()
+        viewModel.loadNearbyMoments()
+        viewModel.loadNearbyPosts()
+    }
     LazyColumn(
         modifier = Modifier.padding(start = 10.dp, end = 10.dp)
     ) {

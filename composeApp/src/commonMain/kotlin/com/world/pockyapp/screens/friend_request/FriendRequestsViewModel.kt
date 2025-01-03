@@ -9,52 +9,72 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-sealed class UiState<out T> {
-    object Loading : UiState<Nothing>()
-    data class Success<out T>(val data: T) : UiState<T>()
-    data class Error(val message: String) : UiState<Nothing>()
+sealed class FriendRequestsUiState {
+    data object Loading : FriendRequestsUiState()
+    data class Success(val data: List<FriendRequestModel> = listOf(), val message: String = "") :
+        FriendRequestsUiState()
+
+    data class Error(val message: String) : FriendRequestsUiState()
+}
+
+sealed class AcceptRequestsUiState {
+    data object Loading : AcceptRequestsUiState()
+    data class Success(val data: String = "", val message: String = "") : AcceptRequestsUiState()
+    data class Error(val message: String) : AcceptRequestsUiState()
+}
+
+sealed class RejectRequestsUiState {
+    data object Loading : RejectRequestsUiState()
+    data class Success(val data: String = "", val message: String = "") : RejectRequestsUiState()
+    data class Error(val message: String) : RejectRequestsUiState()
 }
 
 class FriendRequestsViewModel(val sdk: ApiManager) : ViewModel() {
 
-    private val _friendRequestsState = MutableStateFlow<UiState<List<FriendRequestModel>>>(UiState.Loading)
-    val friendRequestsState: StateFlow<UiState<List<FriendRequestModel>>> = _friendRequestsState.asStateFlow()
+    private val _friendRequestsState =
+        MutableStateFlow<FriendRequestsUiState>(FriendRequestsUiState.Loading)
+    val friendRequestsState: StateFlow<FriendRequestsUiState> = _friendRequestsState.asStateFlow()
 
-    private val _acceptRequestState = MutableStateFlow<UiState<String>>(UiState.Loading)
-    val acceptRequestState: StateFlow<UiState<String>> = _acceptRequestState.asStateFlow()
+    private val _acceptRequestState =
+        MutableStateFlow<AcceptRequestsUiState>(AcceptRequestsUiState.Loading)
+    val acceptRequestState: StateFlow<AcceptRequestsUiState> = _acceptRequestState.asStateFlow()
 
-    private val _rejectRequestState = MutableStateFlow<UiState<String>>(UiState.Loading)
-    val rejectRequestState: StateFlow<UiState<String>> = _rejectRequestState.asStateFlow()
+    private val _rejectRequestState =
+        MutableStateFlow<RejectRequestsUiState>(RejectRequestsUiState.Loading)
+    val rejectRequestState: StateFlow<RejectRequestsUiState> = _rejectRequestState.asStateFlow()
 
     fun getFriendRequests() {
-        _friendRequestsState.value = UiState.Loading
+        _friendRequestsState.value = FriendRequestsUiState.Loading
         viewModelScope.launch {
             sdk.getFriendRequests({ success ->
-                _friendRequestsState.value = UiState.Success(success)
+                _friendRequestsState.value = FriendRequestsUiState.Success(success)
             }, { error ->
-                _friendRequestsState.value = UiState.Error(error ?: "An error occurred")
+                _friendRequestsState.value =
+                    FriendRequestsUiState.Error(error ?: "An error occurred")
             })
         }
     }
 
     fun acceptFriendRequest(requestID: String) {
-        _acceptRequestState.value = UiState.Loading
+        _acceptRequestState.value = AcceptRequestsUiState.Loading
         viewModelScope.launch {
             sdk.acceptFriendRequest(requestID, { success ->
-                _acceptRequestState.value = UiState.Success(success)
+                _acceptRequestState.value = AcceptRequestsUiState.Success(success)
             }, { error ->
-                _acceptRequestState.value = UiState.Error(error ?: "An error occurred")
+                _acceptRequestState.value =
+                    AcceptRequestsUiState.Error(error ?: "An error occurred")
             })
         }
     }
 
     fun rejectFriendRequest(requestID: String) {
-        _rejectRequestState.value = UiState.Loading
+        _rejectRequestState.value = RejectRequestsUiState.Loading
         viewModelScope.launch {
             sdk.rejectFriendRequest(requestID, { success ->
-                _rejectRequestState.value = UiState.Success(success)
+                _rejectRequestState.value = RejectRequestsUiState.Success(success)
             }, { error ->
-                _rejectRequestState.value = UiState.Error(error ?: "An error occurred")
+                _rejectRequestState.value =
+                    RejectRequestsUiState.Error(error ?: "An error occurred")
             })
         }
     }
