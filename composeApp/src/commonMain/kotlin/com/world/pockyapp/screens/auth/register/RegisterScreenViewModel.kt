@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.DataModel
+import com.world.pockyapp.utils.Utils.isValidEmail
+import com.world.pockyapp.utils.Utils.isValidPhoneNumber
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -50,7 +52,7 @@ class RegisterScreenViewModel(
                 return@launch
             }
 
-            if (!isValidPhone(phone)) {
+            if (!isValidPhoneNumber(phone)) {
                 _uiState.value = RegisterUiState.Error("Invalid Phone")
                 return@launch
             }
@@ -118,15 +120,6 @@ class RegisterScreenViewModel(
         return name.isNotEmpty()
     }
 
-    private fun isValidEmail(email: String): Boolean {
-        //return Patterns.EMAIL_ADDRESS.matcher(email).matches()
-        return true
-    }
-
-    private fun isValidPhone(phone: String): Boolean {
-        //return Patterns.PHONE.matcher(phone).matches()
-        return true
-    }
 
     private fun isValidPassword(password: String): Boolean {
         return password.length >= 6

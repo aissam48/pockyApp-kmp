@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
+import com.world.pockyapp.utils.Utils.isValidEmail
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -73,11 +74,6 @@ class LoginScreenViewModel(private val sdk: ApiManager, private val dataStore: D
                 _uiState.value = LoginUiState.Error(error)
             })
         }
-    }
-
-    private fun isValidEmail(email: String): Boolean {
-        //return Patterns.EMAIL_ADDRESS.matcher(email).matches()
-        return true
     }
 
     private fun isValidPassword(password: String): Boolean {

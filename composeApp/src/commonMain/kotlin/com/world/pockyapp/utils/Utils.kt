@@ -47,4 +47,14 @@ object Utils {
         }
 
     }
+
+    fun isValidEmail(email: String): Boolean {
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+        return email.matches(emailRegex.toRegex())
+    }
+
+    fun isValidPhoneNumber(phone: String): Boolean {
+        val phoneRegex = "^[+]?[0-9]{10,15}$"
+        return phone.matches(phoneRegex.toRegex())
+    }
 }

@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.auth.register.RegisterScreenViewModel.RegisterUiState
+import com.world.pockyapp.utils.Utils.isValidEmail
+import com.world.pockyapp.utils.Utils.isValidPhoneNumber
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -59,12 +62,12 @@ class EditProfileViewModel(private val sdk: ApiManager) :
             return
         }
 
-        if (phone.isEmpty()) {
+        if (!isValidPhoneNumber(phone)) {
             _uiState.value = EditProfileUiState.Error("Invalid Phone")
             return
         }
 
-        if (email.isEmpty()) {
+        if (!isValidEmail(email)) {
             _uiState.value = EditProfileUiState.Error("Invalid Email")
             return
         }
