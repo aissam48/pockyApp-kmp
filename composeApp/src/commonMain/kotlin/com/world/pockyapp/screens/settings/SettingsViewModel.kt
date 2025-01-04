@@ -39,7 +39,7 @@ class SettingsViewModel(private val sdk:ApiManager,private val dataStore: DataSt
                 }
                 _deleteAccountState.value = "deleteAccount"
             },{error->
-                _deleteAccountState.value = ""
+                _deleteAccountState.value = error.message
             })
         }
     }

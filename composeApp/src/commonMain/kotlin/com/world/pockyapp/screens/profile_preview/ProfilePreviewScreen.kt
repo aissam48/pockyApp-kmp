@@ -513,7 +513,7 @@ fun ProfilePreviewScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Error: ${state.message}",
+                        text = "Error: ${state.error.message}",
                         color = MaterialTheme.colorScheme.error
                     )
                 }

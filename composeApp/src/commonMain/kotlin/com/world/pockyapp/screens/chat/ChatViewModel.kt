@@ -3,6 +3,7 @@ package com.world.pockyapp.screens.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
+import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.MessageModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import io.ktor.websocket.Frame
@@ -27,7 +28,7 @@ sealed class CancelChatUiState {
     data object Idle : CancelChatUiState()
     data object Loading : CancelChatUiState()
     data class Success(val data: String = "", val message: String = "") : CancelChatUiState()
-    data class Error(val message: String) : CancelChatUiState()
+    data class Error(val error: ErrorModel) : CancelChatUiState()
 }
 
 class ChatViewModel(private val sdk: ApiManager) :

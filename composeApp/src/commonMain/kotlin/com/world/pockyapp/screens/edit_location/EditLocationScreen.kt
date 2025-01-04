@@ -123,7 +123,7 @@ fun EditLocationScreen(
             }
 
             is EditLocationUiState.Error -> {
-                title.value = state.message
+                title.value = state.error.message
                 showDialog = true
             }
 

@@ -3,6 +3,7 @@ package com.world.pockyapp.screens.home.navigations.discover
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
+import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 sealed class UiState<out T> {
     data object Loading : UiState<Nothing>()
     data class Success<T>(val data: T) : UiState<T>()
-    data class Error(val message: String) : UiState<Nothing>()
+    data class Error(val error: ErrorModel) : UiState<Nothing>()
 }
 
 data class LikeAction(
@@ -27,11 +28,14 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
     private val _profileState = MutableStateFlow<UiState<ProfileModel>>(UiState.Loading)
     val profileState: StateFlow<UiState<ProfileModel>> = _profileState.asStateFlow()
 
-    private val _friendsMomentsState = MutableStateFlow<UiState<List<ProfileModel>>>(UiState.Loading)
-    val friendsMomentsState: StateFlow<UiState<List<ProfileModel>>> = _friendsMomentsState.asStateFlow()
+    private val _friendsMomentsState =
+        MutableStateFlow<UiState<List<ProfileModel>>>(UiState.Loading)
+    val friendsMomentsState: StateFlow<UiState<List<ProfileModel>>> =
+        _friendsMomentsState.asStateFlow()
 
     private val _nearbyMomentsState = MutableStateFlow<UiState<List<ProfileModel>>>(UiState.Loading)
-    val nearbyMomentsState: StateFlow<UiState<List<ProfileModel>>> = _nearbyMomentsState.asStateFlow()
+    val nearbyMomentsState: StateFlow<UiState<List<ProfileModel>>> =
+        _nearbyMomentsState.asStateFlow()
 
     private val _nearbyPostsState = MutableStateFlow<UiState<List<PostModel>>>(UiState.Loading)
     val nearbyPostsState: StateFlow<UiState<List<PostModel>>> = _nearbyPostsState.asStateFlow()
@@ -53,7 +57,12 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
                     }
                 )
             } catch (e: Exception) {
-                _profileState.value = UiState.Error(e.message ?: "Unknown error occurred")
+                _profileState.value = UiState.Error(
+                    error = ErrorModel(
+                        message = e.message ?: "Unknown error",
+                        code = 500
+                    )
+                )
             }
         }
     }
@@ -71,7 +80,12 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
                     }
                 )
             } catch (e: Exception) {
-                _friendsMomentsState.value = UiState.Error(e.message ?: "Unknown error occurred")
+                _friendsMomentsState.value = UiState.Error(
+                    error = ErrorModel(
+                        message = e.message ?: "Unknown error",
+                        code = 500
+                    )
+                )
             }
         }
     }
@@ -89,7 +103,12 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
                     }
                 )
             } catch (e: Exception) {
-                _nearbyMomentsState.value = UiState.Error(e.message ?: "Unknown error occurred")
+                _nearbyMomentsState.value = UiState.Error(
+                    error = ErrorModel(
+                        message = e.message ?: "Unknown error",
+                        code = 500
+                    )
+                )
             }
         }
     }
@@ -107,7 +126,12 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
                     }
                 )
             } catch (e: Exception) {
-                _nearbyPostsState.value = UiState.Error(e.message ?: "Unknown error occurred")
+                _nearbyPostsState.value = UiState.Error(
+                    error = ErrorModel(
+                        message = e.message ?: "Unknown error",
+                        code = 500
+                    )
+                )
             }
         }
     }
@@ -116,7 +140,8 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
         viewModelScope.launch {
             _likeActionState.value = UiState.Loading
             try {
-                val currentPosts = (_nearbyPostsState.value as? UiState.Success)?.data ?: return@launch
+                val currentPosts =
+                    (_nearbyPostsState.value as? UiState.Success)?.data ?: return@launch
                 val updatedPosts = currentPosts.map { post ->
                     if (post.postID == postId) {
                         val updatedLikes = post.likes.toMutableList()
@@ -137,7 +162,12 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
                 }
                 _nearbyPostsState.value = UiState.Success(updatedPosts)
             } catch (e: Exception) {
-                _likeActionState.value = UiState.Error(e.message ?: "Failed to update like status")
+                _likeActionState.value = UiState.Error(
+                    error = ErrorModel(
+                        message = e.message ?: "Unknown error",
+                        code = 500
+                    )
+                )
             }
         }
     }

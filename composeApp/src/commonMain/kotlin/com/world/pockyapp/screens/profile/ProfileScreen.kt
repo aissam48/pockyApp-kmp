@@ -343,7 +343,7 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Error: ${state.message}",
+                                    text = "Error: ${state.error.message}",
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
@@ -419,7 +419,7 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Error: ${posts.message}",
+                                    text = "Error: ${posts.error.message}",
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }

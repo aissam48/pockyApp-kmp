@@ -3,6 +3,7 @@ package com.world.pockyapp.screens.friend_request
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
+import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.FriendRequestModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,19 +15,19 @@ sealed class FriendRequestsUiState {
     data class Success(val data: List<FriendRequestModel> = listOf(), val message: String = "") :
         FriendRequestsUiState()
 
-    data class Error(val message: String) : FriendRequestsUiState()
+    data class Error(val error: ErrorModel) : FriendRequestsUiState()
 }
 
 sealed class AcceptRequestsUiState {
     data object Loading : AcceptRequestsUiState()
     data class Success(val data: String = "", val message: String = "") : AcceptRequestsUiState()
-    data class Error(val message: String) : AcceptRequestsUiState()
+    data class Error(val error: ErrorModel) : AcceptRequestsUiState()
 }
 
 sealed class RejectRequestsUiState {
     data object Loading : RejectRequestsUiState()
     data class Success(val data: String = "", val message: String = "") : RejectRequestsUiState()
-    data class Error(val message: String) : RejectRequestsUiState()
+    data class Error(val error: ErrorModel) : RejectRequestsUiState()
 }
 
 class FriendRequestsViewModel(val sdk: ApiManager) : ViewModel() {
@@ -50,7 +51,7 @@ class FriendRequestsViewModel(val sdk: ApiManager) : ViewModel() {
                 _friendRequestsState.value = FriendRequestsUiState.Success(success)
             }, { error ->
                 _friendRequestsState.value =
-                    FriendRequestsUiState.Error(error ?: "An error occurred")
+                    FriendRequestsUiState.Error(error)
             })
         }
     }
@@ -62,7 +63,7 @@ class FriendRequestsViewModel(val sdk: ApiManager) : ViewModel() {
                 _acceptRequestState.value = AcceptRequestsUiState.Success(success)
             }, { error ->
                 _acceptRequestState.value =
-                    AcceptRequestsUiState.Error(error ?: "An error occurred")
+                    AcceptRequestsUiState.Error(error)
             })
         }
     }
@@ -74,7 +75,7 @@ class FriendRequestsViewModel(val sdk: ApiManager) : ViewModel() {
                 _rejectRequestState.value = RejectRequestsUiState.Success(success)
             }, { error ->
                 _rejectRequestState.value =
-                    RejectRequestsUiState.Error(error ?: "An error occurred")
+                    RejectRequestsUiState.Error(error)
             })
         }
     }

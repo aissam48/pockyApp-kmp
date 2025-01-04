@@ -91,7 +91,7 @@ actual fun MomentPreview(
             }
 
             is MomentPreviewUiState.Error -> {
-                title.value = state.message
+                title.value = state.error.message
                 showDialog = true
             }
 

@@ -129,7 +129,7 @@ fun EditProfileScreen(
             }
 
             is EditProfileUiState.Error -> {
-                title.value = state.message
+                title.value = state.error.message
                 showDialog = true
             }
 

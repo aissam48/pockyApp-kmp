@@ -37,7 +37,7 @@ class MomentsViewModel(private val sdk: ApiManager) :
                 _viewMomentState.value = success.message
 
             }, { error ->
-                _viewMomentState.value = error
+                _viewMomentState.value = error.message
             })
         }
     }
@@ -48,7 +48,7 @@ class MomentsViewModel(private val sdk: ApiManager) :
             sdk.deleteMoment(momentID, { success ->
                 _deleteState.value = success
             }, { error ->
-                _deleteState.value = ""
+                _deleteState.value = error.message
             })
         }
     }
@@ -58,7 +58,7 @@ class MomentsViewModel(private val sdk: ApiManager) :
             sdk.likeMoment(momentID, { success ->
                 _likeState.value = success
             }, { error ->
-                _likeState.value = ""
+                _likeState.value = error.message
             })
         }
     }
@@ -68,7 +68,7 @@ class MomentsViewModel(private val sdk: ApiManager) :
             sdk.unLikeMoment(momentID, { success ->
                 _unLikeState.value = success
             }, { error ->
-                _unLikeState.value = ""
+                _unLikeState.value = error.message
             })
         }
     }

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.DataModel
+import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.utils.Utils.isValidEmail
 import com.world.pockyapp.utils.Utils.isValidPhoneNumber
 import kotlinx.coroutines.CoroutineScope
@@ -43,42 +44,82 @@ class RegisterScreenViewModel(
             _uiState.value = RegisterUiState.Loading
 
             if (!isValidName(firstName)) {
-                _uiState.value = RegisterUiState.Error("Invalid First Name")
+                _uiState.value = RegisterUiState.Error(
+                    error = ErrorModel(
+                        message = "Invalid First Name",
+                        code = 400
+                    )
+                )
                 return@launch
             }
 
             if (!isValidName(lastName)) {
-                _uiState.value = RegisterUiState.Error("Invalid Last Name")
+                _uiState.value = RegisterUiState.Error(
+                    error = ErrorModel(
+                        message = "Invalid Last Name",
+                        code = 400
+                    )
+                )
                 return@launch
             }
 
             if (!isValidPhoneNumber(phone)) {
-                _uiState.value = RegisterUiState.Error("Invalid Phone")
+                _uiState.value = RegisterUiState.Error(
+                    error = ErrorModel(
+                        message = "Invalid Phone",
+                        code = 400
+                    )
+                )
                 return@launch
             }
 
             if (!isValidEmail(email)) {
-                _uiState.value = RegisterUiState.Error("Invalid Email")
+                _uiState.value = RegisterUiState.Error(
+                    error = ErrorModel(
+                        message = "Invalid Email",
+                        code = 400
+                    )
+                )
                 return@launch
             }
 
             if (country.isEmpty()) {
-                _uiState.value = RegisterUiState.Error("Invalid Country")
+                _uiState.value = RegisterUiState.Error(
+                    error = ErrorModel(
+                        message = "Invalid Country",
+                        code = 400
+                    )
+                )
                 return@launch
             }
 
             if (city.isEmpty()) {
-                _uiState.value = RegisterUiState.Error("Invalid City")
+                _uiState.value = RegisterUiState.Error(
+                    error = ErrorModel(
+                        message = "Invalid City",
+                        code = 400
+                    )
+                )
                 return@launch
             }
 
             if (!isValidPassword(password)) {
-                _uiState.value = RegisterUiState.Error("Invalid Password")
+                _uiState.value = RegisterUiState.Error(
+                    error = ErrorModel(
+                        message = "Invalid Password",
+                        code = 400
+                    )
+                )
                 return@launch
             }
 
             if (password != confirmPassword) {
-                _uiState.value = RegisterUiState.Error("Passwords do not match")
+                _uiState.value = RegisterUiState.Error(
+                    error = ErrorModel(
+                        message = "Passwords do not match",
+                        code = 400
+                    )
+                )
                 return@launch
             }
 
@@ -130,6 +171,6 @@ class RegisterScreenViewModel(
         data object Idle : RegisterUiState()
         data object Loading : RegisterUiState()
         data class Success(val message: String) : RegisterUiState()
-        data class Error(val message: String) : RegisterUiState()
+        data class Error(val error: ErrorModel) : RegisterUiState()
     }
 }

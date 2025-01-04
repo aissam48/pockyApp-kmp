@@ -9,6 +9,7 @@ import com.world.pockyapp.getPlatform
 import com.world.pockyapp.network.models.model.ChatRequestModel
 import com.world.pockyapp.network.models.model.ConversationModel
 import com.world.pockyapp.network.models.model.DataModel
+import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.FriendRequestModel
 import com.world.pockyapp.network.models.model.MessageModel
 import com.world.pockyapp.network.models.model.PostModel
@@ -128,7 +129,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         country: String,
         city: String,
         onSuccess: (LoginResponseModel) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
 
         val registerRequestModel = RegisterRequestModel(
@@ -154,8 +155,9 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                     response.body() // Extract response body if request is successful
                 onSuccess(responseBody)
             } else {
-                val errorMessage: ResponseMessageModel = response.body() // Get the error message from the response
-                onFailure(errorMessage.message)
+                val errorMessage: ErrorModel =
+                    response.body() // Get the error message from the response
+                onFailure(errorMessage)
             }
         } catch (e: Exception) {
 
@@ -167,7 +169,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         email: String,
         password: String,
         onSuccess: (LoginResponseModel) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
 
         val loginRequestModel = LoginRequestModel(
@@ -187,8 +189,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                     response.body() // Extract response body if request is successful
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String =
-                    response.bodyAsText() // Get the error message from the response
+                val errorMessage: ErrorModel =
+                    response.body() // Get the error message from the response
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -200,7 +202,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         byteArray: ByteArray,
         isNearby: Boolean,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
 
         val response: HttpResponse = client.submitFormWithBinaryData(
@@ -227,8 +229,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             println("success-----> ${response.bodyAsText()}")
             onSuccess(responseBody)
         } else {
-            val errorMessage: String =
-                response.bodyAsText()
+            val errorMessage: ErrorModel =
+                response.body()
             onFailure(errorMessage)
         }
     }
@@ -241,7 +243,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         description: String,
         byteArray: ByteArray?,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.submitFormWithBinaryData(
@@ -275,8 +277,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String =
-                    response.bodyAsText()
+                val errorMessage: ErrorModel =
+                    response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -289,7 +291,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         country: String,
         city: String,
         onSuccess: (LocationRequestModel) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
 
         val locationRequestModel = LocationRequestModel(country, city)
@@ -306,7 +308,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -317,7 +319,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun getMyPosts(
         onSuccess: (List<PostModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.get("$baseUrl/operations/myposts") {
@@ -334,8 +336,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.posts)
             } else {
-                val errorMessage: String =
-                    response.bodyAsText()
+                val errorMessage: ErrorModel =
+                    response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -346,7 +348,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun getMyProfile(
         onSuccess: (ProfileModel) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
 
         val response: HttpResponse = client.get("$baseUrl/operations/me") {
@@ -363,15 +365,15 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             println("success-----> ${response.bodyAsText()}")
             onSuccess(responseBody.profile)
         } else {
-            val errorMessage: String =
-                response.bodyAsText()
+            val errorMessage: ErrorModel =
+                response.body()
             onFailure(errorMessage)
         }
     }
 
     suspend fun getCountriesAndCities(
         onSuccess: (List<DataModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse =
@@ -385,8 +387,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success countries ${response.bodyAsText()}")
                 onSuccess(responseBody.data)
             } else {
-                val errorMessage: String =
-                    response.bodyAsText()
+                val errorMessage: ErrorModel =
+                    response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -398,7 +400,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun getFriendsMoments(
         onSuccess: (List<ProfileModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.get("$baseUrl/operations/friendsmoments") {
@@ -415,8 +417,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String =
-                    response.bodyAsText()
+                val errorMessage: ErrorModel =
+                    response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -427,7 +429,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun getNearbyMoments(
         onSuccess: (List<ProfileModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.get("$baseUrl/operations/nearbymoments") {
@@ -444,8 +446,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String =
-                    response.bodyAsText()
+                val errorMessage: ErrorModel =
+                    response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -456,7 +458,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun getNearbyPosts(
         onSuccess: (List<PostModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.get("$baseUrl/operations/nearbyposts") {
@@ -473,8 +475,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String =
-                    response.bodyAsText()
+                val errorMessage: ErrorModel =
+                    response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -486,7 +488,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun search(
         keyword: String,
         onSuccess: (List<ProfileModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.get("$baseUrl/operations/search") {
@@ -503,8 +505,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.users)
             } else {
-                val errorMessage: String =
-                    response.bodyAsText()
+                val errorMessage: ErrorModel =
+                    response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -516,7 +518,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun getProfile(
         id: String,
         onSuccess: (ProfileModel) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.get("$baseUrl/operations/profile") {
@@ -533,8 +535,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.profile)
             } else {
-                val errorMessage: String =
-                    response.bodyAsText()
+                val errorMessage: ErrorModel =
+                    response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -546,7 +548,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun getPosts(
         id: String,
         onSuccess: (List<PostModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.get("$baseUrl/operations/posts") {
@@ -563,8 +565,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.posts)
             } else {
-                val errorMessage: String =
-                    response.bodyAsText()
+                val errorMessage: ErrorModel =
+                    response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -577,7 +579,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         currentPassword: String,
         newPassword: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
 
         val changePasswordRequestModel = ChangePasswordRequestModel(currentPassword, newPassword)
@@ -594,7 +596,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -620,7 +622,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun sendRequestChat(
         otherUserID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val sendChatRequestModel = SendChatRequestModel(otherUserID)
@@ -637,7 +639,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -649,12 +651,12 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun responseRequestChat(
         id: String,
         status: Boolean,
-        senderID:String,
+        senderID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
-            val responseChatRequestModel = ResponseChatRequestModel(id,senderID, status)
+            val responseChatRequestModel = ResponseChatRequestModel(id, senderID, status)
 
             val response: HttpResponse = client.post("$baseUrl/operations/responserequestchat") {
                 val token = getToken()
@@ -668,7 +670,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -680,7 +682,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun getAllChatRequests(
         onSuccess: (List<ChatRequestModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
 
         try {
@@ -695,7 +697,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -707,7 +709,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun getMessages(
         conversationID: String,
         onSuccess: (List<MessageModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
 
         try {
@@ -723,7 +725,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -735,7 +737,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun sendMessage(
         data: MessageModel,
         onSuccess: (List<MessageModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val jsonMessage = Json.encodeToString<MessageModel>(data)
@@ -751,7 +753,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun getChatRequests(
         onSuccess: (List<ChatRequestModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.get("$baseUrl/operations/chatrequests") {
@@ -765,7 +767,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -776,7 +778,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun getConversations(
         onSuccess: (List<ConversationModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.get("$baseUrl/operations/conversations") {
@@ -790,7 +792,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -802,7 +804,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun like(
         postID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.post("$baseUrl/operations/likepost") {
@@ -817,7 +819,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -829,7 +831,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun likeMoment(
         momentID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.post("$baseUrl/operations/likemoment") {
@@ -844,7 +846,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -856,7 +858,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun unLike(
         postID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.put("$baseUrl/operations/unlikepost") {
@@ -871,7 +873,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -883,7 +885,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun unLikeMoment(
         momentID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.put("$baseUrl/operations/unlikemoment") {
@@ -898,7 +900,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -911,7 +913,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         momentID: String,
         ownerID: String,
         onSuccess: (ResponseMessageModel) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.post("$baseUrl/operations/viewmoment") {
@@ -926,7 +928,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -938,7 +940,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun getPost(
         postID: String,
         onSuccess: (PostModel) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.get("$baseUrl/operations/post") {
@@ -953,7 +955,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.post)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -965,7 +967,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun deletePost(
         postID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.delete("$baseUrl/operations/post") {
@@ -980,7 +982,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.message)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -992,7 +994,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun deleteMoment(
         momentID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.delete("$baseUrl/operations/moment") {
@@ -1007,7 +1009,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.message)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -1019,7 +1021,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun beFriend(
         friendID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.post("$baseUrl/operations/befriend") {
@@ -1034,7 +1036,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.message)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -1046,7 +1048,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun unFriend(
         friendID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.delete("$baseUrl/operations/unfriend") {
@@ -1061,7 +1063,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.message)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -1072,7 +1074,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun getFriendRequests(
         onSuccess: (List<FriendRequestModel>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.get("$baseUrl/operations/friendrequests") {
@@ -1086,7 +1088,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -1098,7 +1100,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun acceptFriendRequest(
         requestID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.put("$baseUrl/operations/acceptfriend") {
@@ -1113,7 +1115,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.message)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -1125,7 +1127,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun rejectFriendRequest(
         requestID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.put("$baseUrl/operations/rejectfriend") {
@@ -1140,7 +1142,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.message)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -1153,7 +1155,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         conversationID: String,
         chatRequestID: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.delete("$baseUrl/operations/cancelconversation") {
@@ -1169,7 +1171,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.message)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -1180,7 +1182,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun deleteAccount(
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.delete("$baseUrl/operations/deleteaccount") {
@@ -1194,7 +1196,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody.message)
             } else {
-                val errorMessage: String = response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
@@ -1207,7 +1209,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         byteArray: ByteArray?,
         isNearby: Boolean,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (ErrorModel) -> Unit
     ) {
         try {
             val response: HttpResponse = client.submitFormWithBinaryData(
@@ -1219,7 +1221,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                             append(HttpHeaders.ContentType, "image/jpg")
                             append(HttpHeaders.ContentDisposition, "filename=file")
                         })
-                        append("isNearby",isNearby)
+                        append("isNearby", isNearby)
                     }
 
                 }) {
@@ -1237,8 +1239,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {
-                val errorMessage: String =
-                    response.bodyAsText()
+                val errorMessage: ErrorModel = response.body()
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {

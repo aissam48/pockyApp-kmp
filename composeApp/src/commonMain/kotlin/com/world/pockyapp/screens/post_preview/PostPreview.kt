@@ -95,7 +95,7 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
             }
 
             is PostUiState.Error -> {
-                title.value = state.message
+                title.value = state.error.message
                 showDialog = true
             }
 

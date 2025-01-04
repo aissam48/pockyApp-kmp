@@ -64,7 +64,7 @@ fun LoginScreen(
             is LoginUiState.Error -> {
                 coroutineScope.launch {
                     snackBarHostState.showSnackbar(
-                        message = (uiState as LoginUiState.Error).message,
+                        message = (uiState as LoginUiState.Error).error.message,
                         actionLabel = "Dismiss",
                         duration = SnackbarDuration.Short
                     )

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.DataModel
+import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.edit_profile.EditProfileUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,7 @@ sealed class ChangePasswordUiState {
     data object Idle : ChangePasswordUiState()
     data object Loading : ChangePasswordUiState()
     data class Success(val data: String = "", val message: String = "") : ChangePasswordUiState()
-    data class Error(val message: String) : ChangePasswordUiState()
+    data class Error(val error: ErrorModel) : ChangePasswordUiState()
 }
 
 class ChangePasswordViewModel(private val sdk: ApiManager) :
@@ -49,17 +50,32 @@ class ChangePasswordViewModel(private val sdk: ApiManager) :
     fun changePassword() {
 
         if (currentPassword.isEmpty()) {
-            _uiState.value = ChangePasswordUiState.Error("Invalid current password")
+            _uiState.value = ChangePasswordUiState.Error(
+                error = ErrorModel(
+                    message = "Invalid current password",
+                    code = 400
+                )
+            )
             return
         }
 
         if (newPassword.isEmpty() || newPassword.length < 6) {
-            _uiState.value = ChangePasswordUiState.Error("Invalid new password")
+            _uiState.value = ChangePasswordUiState.Error(
+                error = ErrorModel(
+                    message = "Invalid new password",
+                    code = 400
+                )
+            )
             return
         }
 
         if (confirmPassword != newPassword) {
-            _uiState.value = ChangePasswordUiState.Error("Invalid confirm password")
+            _uiState.value = ChangePasswordUiState.Error(
+                error = ErrorModel(
+                    message = "Invalid confirm password",
+                    code = 400
+                )
+            )
             return
         }
 

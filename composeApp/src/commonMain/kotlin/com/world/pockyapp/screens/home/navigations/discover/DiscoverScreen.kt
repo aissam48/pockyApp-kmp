@@ -86,7 +86,7 @@ fun DiscoverScreen(
                     }
                     is UiState.Error -> {
                         ErrorSection(
-                            message = (profileState as UiState.Error).message,
+                            message = (profileState as UiState.Error).error.message,
                             onRetry = { viewModel.getProfile() }
                         )
                     }
@@ -110,7 +110,7 @@ fun DiscoverScreen(
                     }
                     is UiState.Error -> {
                         ErrorSection(
-                            message = (friendsMomentsState as UiState.Error).message,
+                            message = (friendsMomentsState as UiState.Error).error.message,
                             onRetry = { viewModel.loadFriendsMoments() }
                         )
                     }
@@ -137,7 +137,7 @@ fun DiscoverScreen(
                 }
                 is UiState.Error -> {
                     ErrorSection(
-                        message = (nearbyMomentsState as UiState.Error).message,
+                        message = (nearbyMomentsState as UiState.Error).error.message,
                         onRetry = { viewModel.loadNearbyMoments() }
                     )
                 }
@@ -171,7 +171,7 @@ fun DiscoverScreen(
             is UiState.Error -> {
                 item {
                     ErrorSection(
-                        message = (nearbyPostsState as UiState.Error).message,
+                        message = (nearbyPostsState as UiState.Error).error.message,
                         onRetry = { viewModel.loadNearbyPosts() }
                     )
                 }

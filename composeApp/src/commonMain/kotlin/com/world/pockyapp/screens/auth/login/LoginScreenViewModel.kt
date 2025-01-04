@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
+import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.utils.Utils.isValidEmail
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +22,7 @@ sealed class LoginUiState {
     data object Idle : LoginUiState()
     data object Loading : LoginUiState()
     data class Success(val data: String = "", val message: String = "") : LoginUiState()
-    data class Error(val message: String) : LoginUiState()
+    data class Error(val error: ErrorModel) : LoginUiState()
 }
 
 class LoginScreenViewModel(private val sdk: ApiManager, private val dataStore: DataStore<Preferences>) :
@@ -50,12 +51,12 @@ class LoginScreenViewModel(private val sdk: ApiManager, private val dataStore: D
             _uiState.value = LoginUiState.Loading
 
             if (!isValidEmail(email)) {
-                _uiState.value = LoginUiState.Error("Invalid Email")
+                _uiState.value = LoginUiState.Error(ErrorModel(message = "Invalid Email", code = 400))
                 return@launch
             }
 
             if (!isValidPassword(password)) {
-                _uiState.value = LoginUiState.Error("Invalid Password")
+                _uiState.value = LoginUiState.Error(ErrorModel(message = "Invalid Password", code = 400))
                 return@launch
             }
 

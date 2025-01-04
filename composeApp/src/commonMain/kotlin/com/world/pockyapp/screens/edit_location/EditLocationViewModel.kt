@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.DataModel
+import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.edit_profile.EditProfileUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,7 @@ sealed class EditLocationUiState {
     data object Idle : EditLocationUiState()
     data object Loading : EditLocationUiState()
     data class Success(val data: String = "", val message: String = "") : EditLocationUiState()
-    data class Error(val message: String) : EditLocationUiState()
+    data class Error(val error: ErrorModel) : EditLocationUiState()
 }
 
 class EditLocationViewModel(private val sdk: ApiManager) :
@@ -48,12 +49,22 @@ class EditLocationViewModel(private val sdk: ApiManager) :
     fun editLocation() {
 
         if (country.isEmpty()) {
-            _uiState.value = EditLocationUiState.Error("Invalid country")
+            _uiState.value = EditLocationUiState.Error(
+                error = ErrorModel(
+                    message = "Invalid country",
+                    code = 400
+                )
+            )
             return
         }
 
         if (city.isEmpty() || city == "City") {
-            _uiState.value = EditLocationUiState.Error("Invalid city")
+            _uiState.value = EditLocationUiState.Error(
+                error = ErrorModel(
+                    message = "Invalid city",
+                    code = 400
+                )
+            )
             return
         }
 

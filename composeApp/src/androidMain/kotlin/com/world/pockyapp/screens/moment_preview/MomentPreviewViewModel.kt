@@ -3,6 +3,7 @@ package com.world.pockyapp.screens.moment_preview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
+import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,7 @@ sealed class MomentPreviewUiState {
     data object Idle : MomentPreviewUiState()
     data object Loading : MomentPreviewUiState()
     data class Success(val data: String = "", val message: String = "") : MomentPreviewUiState()
-    data class Error(val message: String) : MomentPreviewUiState()
+    data class Error(val error: ErrorModel) : MomentPreviewUiState()
 }
 
 class MomentPreviewViewModel(private val sdk: ApiManager) :

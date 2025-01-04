@@ -127,7 +127,7 @@ fun ChatScreen(
 
             is CancelChatUiState.Error -> {
                 showDialog = true
-                title.value = state.message
+                title.value = state.error.message
             }
 
             is CancelChatUiState.Idle -> {}

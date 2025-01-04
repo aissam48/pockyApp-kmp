@@ -182,7 +182,7 @@ fun FriendRequestsScreen(
                 is FriendRequestsUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = state.message,
+                            text = state.error.message,
                             color = Color.Red,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold

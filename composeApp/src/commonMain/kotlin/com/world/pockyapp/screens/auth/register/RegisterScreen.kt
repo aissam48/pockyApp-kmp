@@ -126,7 +126,7 @@ fun RegisterScreen(
             is RegisterScreenViewModel.RegisterUiState.Error -> {
                 scope.launch {
                     snackbarHostState.showSnackbar(
-                        message = (uiState as RegisterScreenViewModel.RegisterUiState.Error).message,
+                        message = (uiState as RegisterScreenViewModel.RegisterUiState.Error).error.message,
                         actionLabel = "Dismiss",
                         duration = SnackbarDuration.Short
                     )

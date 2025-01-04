@@ -3,6 +3,7 @@ package com.world.pockyapp.screens.view_post
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
+import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.PostModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,25 +13,25 @@ import kotlinx.coroutines.launch
 sealed class PostResultState {
     object Loading : PostResultState()
     data class Success(val post: PostModel) : PostResultState()
-    data class Error(val message: String) : PostResultState()
+    data class Error(val error: ErrorModel) : PostResultState()
 }
 
 sealed class LikeResultState {
     object Loading : LikeResultState()
     data class Success(val message: String) : LikeResultState()
-    data class Error(val message: String) : LikeResultState()
+    data class Error(val error: ErrorModel) : LikeResultState()
 }
 
 sealed class UnLikeResultState {
     object Loading : UnLikeResultState()
     data class Success(val message: String) : UnLikeResultState()
-    data class Error(val message: String) : UnLikeResultState()
+    data class Error(val error: ErrorModel) : UnLikeResultState()
 }
 
 sealed class DeleteResultState {
     object Loading : DeleteResultState()
     data class Success(val message: String) : DeleteResultState()
-    data class Error(val message: String) : DeleteResultState()
+    data class Error(val error: ErrorModel) : DeleteResultState()
 }
 
 class ViewPostViewModel(val sdk: ApiManager) : ViewModel() {
@@ -53,7 +54,7 @@ class ViewPostViewModel(val sdk: ApiManager) : ViewModel() {
             sdk.getPost(postID, { success ->
                 _postState.value = PostResultState.Success(success)
             }, { error ->
-                _postState.value = PostResultState.Error("Error: ${error}")
+                _postState.value = PostResultState.Error(error)
             })
         }
     }
@@ -64,7 +65,7 @@ class ViewPostViewModel(val sdk: ApiManager) : ViewModel() {
             sdk.deletePost(postID, { success ->
                 _deleteState.value = DeleteResultState.Success(success)
             }, { error ->
-                _deleteState.value = DeleteResultState.Error("Error: ${error}")
+                _deleteState.value = DeleteResultState.Error(error)
             })
         }
     }
@@ -75,7 +76,7 @@ class ViewPostViewModel(val sdk: ApiManager) : ViewModel() {
             sdk.like(postID, { success ->
                 _likeState.value = LikeResultState.Success(success)
             }, { error ->
-                _likeState.value = LikeResultState.Error("Error: ${error}")
+                _likeState.value = LikeResultState.Error(error)
             })
         }
     }
@@ -86,7 +87,7 @@ class ViewPostViewModel(val sdk: ApiManager) : ViewModel() {
             sdk.unLike(postID, { success ->
                 _unLikeState.value = UnLikeResultState.Success(success)
             }, { error ->
-                _unLikeState.value = UnLikeResultState.Error("Error: ${error}")
+                _unLikeState.value = UnLikeResultState.Error(error)
             })
         }
     }

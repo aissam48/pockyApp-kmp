@@ -3,6 +3,7 @@ package com.world.pockyapp.screens.edit_profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
+import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.auth.register.RegisterScreenViewModel.RegisterUiState
 import com.world.pockyapp.utils.Utils.isValidEmail
@@ -17,7 +18,7 @@ sealed class EditProfileUiState {
     data object Idle : EditProfileUiState()
     data object Loading : EditProfileUiState()
     data class Success(val data: String = "", val message: String = "") : EditProfileUiState()
-    data class Error(val message: String) : EditProfileUiState()
+    data class Error(val error: ErrorModel) : EditProfileUiState()
 }
 
 class EditProfileViewModel(private val sdk: ApiManager) :
@@ -53,22 +54,42 @@ class EditProfileViewModel(private val sdk: ApiManager) :
     fun editProfile(byteArray: ByteArray?) {
 
         if (firstName.isEmpty()) {
-            _uiState.value = EditProfileUiState.Error("Invalid First Name")
+            _uiState.value = EditProfileUiState.Error(
+                error = ErrorModel(
+                    message = "Invalid First Name",
+                    code = 400
+                )
+            )
             return
         }
 
         if (lastName.isEmpty()) {
-            _uiState.value = EditProfileUiState.Error("Invalid Last Name")
+            _uiState.value = EditProfileUiState.Error(
+                error = ErrorModel(
+                    message = "Invalid Last Name",
+                    code = 400
+                )
+            )
             return
         }
 
         if (!isValidPhoneNumber(phone)) {
-            _uiState.value = EditProfileUiState.Error("Invalid Phone")
+            _uiState.value = EditProfileUiState.Error(
+                error = ErrorModel(
+                    message = "Invalid Phone",
+                    code = 400
+                )
+            )
             return
         }
 
         if (!isValidEmail(email)) {
-            _uiState.value = EditProfileUiState.Error("Invalid Email")
+            _uiState.value = EditProfileUiState.Error(
+                error = ErrorModel(
+                    message = "Invalid Email",
+                    code = 400
+                )
+            )
             return
         }
 

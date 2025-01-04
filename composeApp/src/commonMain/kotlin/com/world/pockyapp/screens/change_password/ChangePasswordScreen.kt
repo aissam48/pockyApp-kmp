@@ -86,7 +86,7 @@ fun ChangePasswordScreen(navController: NavHostController, viewModel: ChangePass
             }
 
             is ChangePasswordUiState.Error -> {
-                title.value = state.message
+                title.value = state.error.message
                 showDialog = true
             }
 
