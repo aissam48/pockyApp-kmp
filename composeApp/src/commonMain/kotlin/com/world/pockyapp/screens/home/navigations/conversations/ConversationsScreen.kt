@@ -48,6 +48,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.compose_multiplatform
+import pockyapp.composeapp.generated.resources.ic_placeholder
 
 @OptIn(FormatStringsInDatetimeFormats::class)
 @Composable
@@ -104,10 +105,11 @@ fun ChatScreen(
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         AsyncImage(
                                             model = getUrl(item.sendProfile.photoID),
+                                            contentDescription = "",
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier.size(75.dp).clip(CircleShape),
-                                            placeholder = painterResource(Res.drawable.compose_multiplatform),
-                                            contentDescription = null
+                                            placeholder = painterResource(Res.drawable.ic_placeholder),
+                                            error = painterResource(Res.drawable.ic_placeholder),
                                         )
                                         Spacer(modifier = Modifier.size(5.dp))
 
@@ -178,10 +180,11 @@ fun ChatScreen(
                         ) {
                             AsyncImage(
                                 model = getUrl(item.profile.photoID),
+                                contentDescription = "",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.size(70.dp).clip(CircleShape),
-                                placeholder = painterResource(Res.drawable.compose_multiplatform),
-                                contentDescription = null
+                                placeholder = painterResource(Res.drawable.ic_placeholder),
+                                error = painterResource(Res.drawable.ic_placeholder),
                             )
                             Spacer(modifier = Modifier.size(10.dp))
 

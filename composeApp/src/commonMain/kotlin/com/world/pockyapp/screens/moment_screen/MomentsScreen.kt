@@ -36,12 +36,15 @@ import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_back_black
 import pockyapp.composeapp.generated.resources.ic_delete
 import pockyapp.composeapp.generated.resources.ic_like
+import pockyapp.composeapp.generated.resources.ic_placeholder
 import pockyapp.composeapp.generated.resources.ic_unlike_black
 import pockyapp.composeapp.generated.resources.ic_view
 
@@ -299,10 +302,13 @@ fun StoryPage(
             Row {
                 AsyncImage(
                     model = getUrl(userStories.photoID),
-                    contentDescription = null,
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(32.dp)
-                        .clip(CircleShape)
+                        .clip(CircleShape),
+                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                    error = painterResource(Res.drawable.ic_placeholder),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(

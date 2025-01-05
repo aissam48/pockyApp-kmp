@@ -56,6 +56,7 @@ import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.compose_multiplatform
 import pockyapp.composeapp.generated.resources.ic_close_black
 import pockyapp.composeapp.generated.resources.ic_edit_black
+import pockyapp.composeapp.generated.resources.ic_placeholder
 
 @Composable
 fun EditProfileScreen(
@@ -158,24 +159,28 @@ fun EditProfileScreen(
                             Image(
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.size(150.dp).clip(CircleShape),
-                                painter = painterResource(Res.drawable.compose_multiplatform),
+                                painter = painterResource(Res.drawable.ic_placeholder),
                                 contentDescription = null
                             )
                         } else {
                             if (photo.value == null && profile?.photoID != null) {
                                 AsyncImage(
                                     model = getUrl(profile?.photoID),
+                                    contentDescription = "",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.size(150.dp).clip(CircleShape),
-                                    contentDescription = null
+                                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                                    error = painterResource(Res.drawable.ic_placeholder),
                                 )
 
                             } else {
                                 AsyncImage(
                                     model = photo.value,
+                                    contentDescription = "",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.size(150.dp).clip(CircleShape),
-                                    contentDescription = null
+                                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                                    error = painterResource(Res.drawable.ic_placeholder),
                                 )
                             }
 

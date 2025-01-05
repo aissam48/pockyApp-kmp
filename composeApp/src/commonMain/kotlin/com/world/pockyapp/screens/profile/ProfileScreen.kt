@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
@@ -64,6 +65,7 @@ import pockyapp.composeapp.generated.resources.ic_add_post_black
 import pockyapp.composeapp.generated.resources.ic_back_black
 import pockyapp.composeapp.generated.resources.ic_be_friend
 import pockyapp.composeapp.generated.resources.ic_location_black
+import pockyapp.composeapp.generated.resources.ic_placeholder
 import pockyapp.composeapp.generated.resources.ic_settings_black
 import pockyapp.composeapp.generated.resources.is_add_story_black
 
@@ -210,7 +212,9 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                                 shape = CircleShape
                                             ),
                                     ) {
-                                        Image(
+                                        AsyncImage(
+                                            model = getUrl(state.profile.photoID),
+                                            contentDescription = "",
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier.size(150.dp)
                                                 .clip(CircleShape)
@@ -225,11 +229,10 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                                         NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/${state.profile.id}"
                                                     )
                                                 },
-                                            painter = if (state.profile.photoID.isEmpty()) painterResource(
-                                                Res.drawable.compose_multiplatform
-                                            ) else rememberAsyncImagePainter(getUrl(state.profile.photoID)),
-                                            contentDescription = null
+                                            placeholder = painterResource(Res.drawable.ic_placeholder),
+                                            error = painterResource(Res.drawable.ic_placeholder),
                                         )
+
                                     }
 
 

@@ -48,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
@@ -67,6 +68,7 @@ import pockyapp.composeapp.generated.resources.ic_chat_bleu
 import pockyapp.composeapp.generated.resources.ic_chat_request_blue
 import pockyapp.composeapp.generated.resources.ic_location_black
 import pockyapp.composeapp.generated.resources.ic_more_black
+import pockyapp.composeapp.generated.resources.ic_placeholder
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -153,7 +155,8 @@ fun ProfilePreviewScreen(
             if (profile.value.chatRequest != null
                 && profile.value.chatRequest?.status == "NOT_YET"
                 && myProfile.value.id.isNotEmpty()
-                && myProfile.value.id != profile.value.chatRequest?.senderID) {
+                && myProfile.value.id != profile.value.chatRequest?.senderID
+            ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -325,7 +328,9 @@ fun ProfilePreviewScreen(
                                                 shape = CircleShape
                                             ),
                                     ) {
-                                        Image(
+                                        AsyncImage(
+                                            model = getUrl(profile.value.photoID),
+                                            contentDescription = "",
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier.size(150.dp).clip(CircleShape)
                                                 .clickable {
@@ -339,10 +344,8 @@ fun ProfilePreviewScreen(
                                                         NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/${myProfile.value.id}"
                                                     )
                                                 },
-                                            painter = if (profile.value.photoID.isEmpty()) painterResource(
-                                                Res.drawable.compose_multiplatform
-                                            ) else rememberAsyncImagePainter(getUrl(profile.value.photoID)),
-                                            contentDescription = null
+                                            placeholder = painterResource(Res.drawable.ic_placeholder),
+                                            error = painterResource(Res.drawable.ic_placeholder),
                                         )
                                     }
                                 }

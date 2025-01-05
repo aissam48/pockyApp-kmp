@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
@@ -41,6 +42,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_back_black
+import pockyapp.composeapp.generated.resources.ic_placeholder
 
 @Composable
 fun FriendRequestsScreen(
@@ -124,11 +126,13 @@ fun FriendRequestsScreen(
                                         navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${item.profile.id}")
                                     }) {
 
-                                    Image(
-                                        painter = rememberAsyncImagePainter(getUrl(item.profile.photoID)),
-                                        modifier = Modifier.size(40.dp).clip(CircleShape),
-                                        contentDescription = null,
+                                    AsyncImage(
+                                        model = getUrl(item.profile.photoID),
+                                        contentDescription = "",
                                         contentScale = ContentScale.Crop,
+                                        modifier = Modifier.size(40.dp).clip(CircleShape),
+                                        placeholder = painterResource(Res.drawable.ic_placeholder),
+                                        error = painterResource(Res.drawable.ic_placeholder),
                                     )
                                     Spacer(modifier = Modifier.size(5.dp))
 

@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.Constant
 import com.world.pockyapp.Constant.getUrl
@@ -36,11 +37,14 @@ import com.world.pockyapp.screens.components.CustomDialog
 import com.world.pockyapp.screens.components.CustomDialogSuccess
 import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.compose_multiplatform
 import pockyapp.composeapp.generated.resources.ic_back_black
+import pockyapp.composeapp.generated.resources.ic_placeholder
 import pockyapp.composeapp.generated.resources.ic_send_bleu
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -153,19 +157,16 @@ fun ChatScreen(
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.size(15.dp))
-                Image(
+                AsyncImage(
+                    model = getUrl(profile?.photoID),
+                    contentDescription = "",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(35.dp)
                         .clip(CircleShape),
-                    painter = rememberAsyncImagePainter(profile?.photoID?.let { it1 ->
-                        getUrl(
-                            it1
-                        )
-                    }),
-                    contentDescription = null
+                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                    error = painterResource(Res.drawable.ic_placeholder),
                 )
-
                 Spacer(modifier = Modifier.size(15.dp))
                 Text(
                     text = "${profile?.firstName} ${profile?.lastName}",
