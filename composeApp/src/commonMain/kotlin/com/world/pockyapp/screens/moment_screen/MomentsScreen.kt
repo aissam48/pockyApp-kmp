@@ -89,7 +89,7 @@ fun StoriesViewer(
             StoryPage(
                 userStories = user,
                 currentStoryIndex = if (userIndex == currentUserIndex) {
-                    val momentID = user.moments[currentStoryIndex].postID
+                    val momentID = user.moments[currentStoryIndex].momentID
                     viewModel.viewMoment(momentID, user.id)
                     currentStoryIndex
                 } else {
@@ -196,7 +196,7 @@ fun StoryPage(
             onCancel = { showDialog = false },
             onDelete = {
                 showDialog = false
-                viewModel.deleteMoment(story.postID)
+                viewModel.deleteMoment(story.momentID)
             }
         )
     }
@@ -204,7 +204,7 @@ fun StoryPage(
     Box(modifier = Modifier.fillMaxSize()) {
         // Story Image
         AsyncImage(
-            model = getUrl(story.postID),
+            model = getUrl(story.momentID),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -338,11 +338,11 @@ fun StoryPage(
                 modifier = Modifier.size(40.dp).clickable {
                     if (story.likes.contains(myID)) {
                         story.likes.remove(myID)
-                        viewModel.unLike(story.postID)
+                        viewModel.unLike(story.momentID)
                         story.liked = false
                     } else {
                         story.likes.add(myID)
-                        viewModel.like(story.postID)
+                        viewModel.like(story.momentID)
                         story.liked = true
                     }
                 },

@@ -32,6 +32,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.utils.Utils.formatCreatedAt
@@ -86,8 +87,8 @@ fun DiscoverScreen(
                     }
                     is UiState.Error -> {
                         ErrorSection(
-                            message = (profileState as UiState.Error).error.message,
-                            onRetry = { viewModel.getProfile() }
+                            error = (profileState as UiState.Error).error,
+                            onRetry = { viewModel.loadFriendsMoments() }
                         )
                     }
                     is UiState.Success -> {
@@ -110,7 +111,7 @@ fun DiscoverScreen(
                     }
                     is UiState.Error -> {
                         ErrorSection(
-                            message = (friendsMomentsState as UiState.Error).error.message,
+                            error = (friendsMomentsState as UiState.Error).error,
                             onRetry = { viewModel.loadFriendsMoments() }
                         )
                     }
@@ -137,7 +138,7 @@ fun DiscoverScreen(
                 }
                 is UiState.Error -> {
                     ErrorSection(
-                        message = (nearbyMomentsState as UiState.Error).error.message,
+                        error = (nearbyMomentsState as UiState.Error).error,
                         onRetry = { viewModel.loadNearbyMoments() }
                     )
                 }
@@ -171,7 +172,7 @@ fun DiscoverScreen(
             is UiState.Error -> {
                 item {
                     ErrorSection(
-                        message = (nearbyPostsState as UiState.Error).error.message,
+                        error = (nearbyPostsState as UiState.Error).error,
                         onRetry = { viewModel.loadNearbyPosts() }
                     )
                 }
@@ -218,7 +219,7 @@ fun DiscoverScreen(
 
 @Composable
 fun ErrorSection(
-    message: String,
+    error: ErrorModel,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -226,18 +227,26 @@ fun ErrorSection(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = message,
-            color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.padding(16.dp)
-        )
-        Text(
-            text = "Retry",
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .clickable(onClick = onRetry)
-                .padding(8.dp)
-        )
+        when(error.code){
+            in 500..599->{
+
+            }
+            else->{
+                Text(
+                    text = error.message,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(16.dp)
+                )
+                Text(
+                    text = "Retry",
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .clickable(onClick = onRetry)
+                        .padding(8.dp)
+                )
+            }
+        }
+
     }
 }
 
@@ -263,7 +272,7 @@ fun ProfileSection(
             ),
     ) {
         AsyncImage(
-            model = if (profile.moments.isEmpty()) getUrl(profile.photoID) else getUrl(profile.moments[0].postID),
+            model = if (profile.moments.isEmpty()) getUrl(profile.photoID) else getUrl(profile.moments[0].momentID),
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(60.dp)
@@ -448,7 +457,7 @@ fun MomentItem(
                 model = if (profile.moments.isEmpty()) {
                     getUrl(profile.photoID)
                 } else {
-                    getUrl(profile.moments[0].postID)
+                    getUrl(profile.moments[0].momentID)
                 },
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -504,7 +513,7 @@ fun NearbyMomentItem(
                 .width(90.dp)
         ) {
             AsyncImage(
-                model = getUrl(profile.moments[0].postID),
+                model = getUrl(profile.moments[0].momentID),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()

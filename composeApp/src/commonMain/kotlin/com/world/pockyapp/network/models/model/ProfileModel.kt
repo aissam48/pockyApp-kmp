@@ -15,7 +15,7 @@ data class ProfileModel(
     val photoID: String = "",
     val isPhoneNumberVerified: Boolean = false,
     val isEmailVerified: Boolean = false,
-    val moments: List<PostModel> = emptyList(),
+    val moments: List<MomentModel> = emptyList(),
     val chatRequest: ChatRequestModel? = null,
     val conversationID: String = "",
     val friend: String = "NO",

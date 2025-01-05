@@ -57,4 +57,9 @@ object Utils {
         val phoneRegex = "^[+]?[0-9]{10,15}$"
         return phone.matches(phoneRegex.toRegex())
     }
+
+    fun isValidUsername(username: String): Boolean {
+        val usernameRegex = "^[a-zA-Z0-9_]+$"
+        return username.matches(usernameRegex.toRegex())
+    }
 }

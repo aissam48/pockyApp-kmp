@@ -19,18 +19,30 @@ sealed class UIState<out T> {
 
 class ConversationsViewModel(val sdk: ApiManager) : ViewModel() {
 
-    private val _chatRequestsMoments = MutableStateFlow<UIState<List<ChatRequestModel>>>(UIState.Loading)
-    val chatRequestsMoments: StateFlow<UIState<List<ChatRequestModel>>> = _chatRequestsMoments.asStateFlow()
+    private var isChatRequestLoadingFirstTime = true
+    private var isConversationsLoadingFirstTime = true
 
-    private val _conversationsState = MutableStateFlow<UIState<List<ConversationModel>>>(UIState.Loading)
-    val conversationsState: StateFlow<UIState<List<ConversationModel>>> = _conversationsState.asStateFlow()
+    private val _chatRequestsMoments =
+        MutableStateFlow<UIState<List<ChatRequestModel>>>(UIState.Loading)
+    val chatRequestsMoments: StateFlow<UIState<List<ChatRequestModel>>> =
+        _chatRequestsMoments.asStateFlow()
+
+    private val _conversationsState =
+        MutableStateFlow<UIState<List<ConversationModel>>>(UIState.Loading)
+    val conversationsState: StateFlow<UIState<List<ConversationModel>>> =
+        _conversationsState.asStateFlow()
 
     fun loadChatRequests() {
         viewModelScope.launch {
-            _chatRequestsMoments.value = UIState.Loading
+            if (isChatRequestLoadingFirstTime) {
+                _chatRequestsMoments.value = UIState.Loading
+            }
+
             sdk.getChatRequests({ success ->
+                isChatRequestLoadingFirstTime = false
                 _chatRequestsMoments.value = UIState.Success(success)
             }, { error ->
+                isChatRequestLoadingFirstTime = true
                 _chatRequestsMoments.value = UIState.Error(error)
             })
         }
@@ -38,10 +50,14 @@ class ConversationsViewModel(val sdk: ApiManager) : ViewModel() {
 
     fun loadConversations() {
         viewModelScope.launch {
-            _conversationsState.value = UIState.Loading
+            if (isConversationsLoadingFirstTime) {
+                _conversationsState.value = UIState.Loading
+            }
             sdk.getConversations({ success ->
+                isConversationsLoadingFirstTime = false
                 _conversationsState.value = UIState.Success(success)
             }, { error ->
+                isConversationsLoadingFirstTime = true
                 _conversationsState.value = UIState.Error(error)
             })
         }

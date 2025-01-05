@@ -25,6 +25,11 @@ data class LikeAction(
 
 class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
 
+    private var isProfileLoadingFirstTime = true
+    private var isFriendsMomentsLoadingFirstTime = true
+    private var isNearbyMomentsLoadingFirstTime = true
+    private var isNearbyPostsLoadingFirstTime = true
+
     private val _profileState = MutableStateFlow<UiState<ProfileModel>>(UiState.Loading)
     val profileState: StateFlow<UiState<ProfileModel>> = _profileState.asStateFlow()
 
@@ -46,13 +51,17 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
 
     fun getProfile() {
         viewModelScope.launch {
-            _profileState.value = UiState.Loading
+            if (isProfileLoadingFirstTime) {
+                _profileState.value = UiState.Loading
+            }
             try {
                 sdk.getMyProfile(
                     onSuccess = { profile ->
+                        isProfileLoadingFirstTime = false
                         _profileState.value = UiState.Success(profile)
                     },
                     onFailure = { error ->
+                        isProfileLoadingFirstTime = true
                         _profileState.value = UiState.Error(error)
                     }
                 )
@@ -69,13 +78,17 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
 
     fun loadFriendsMoments() {
         viewModelScope.launch {
-            _friendsMomentsState.value = UiState.Loading
+            if (isFriendsMomentsLoadingFirstTime) {
+                _friendsMomentsState.value = UiState.Loading
+            }
             try {
                 sdk.getFriendsMoments(
                     onSuccess = { moments ->
+                        isFriendsMomentsLoadingFirstTime = false
                         _friendsMomentsState.value = UiState.Success(moments)
                     },
                     onFailure = { error ->
+                        isFriendsMomentsLoadingFirstTime = true
                         _friendsMomentsState.value = UiState.Error(error)
                     }
                 )
@@ -92,13 +105,17 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
 
     fun loadNearbyMoments() {
         viewModelScope.launch {
-            _nearbyMomentsState.value = UiState.Loading
+            if (isNearbyMomentsLoadingFirstTime) {
+                _nearbyMomentsState.value = UiState.Loading
+            }
             try {
                 sdk.getNearbyMoments(
                     onSuccess = { moments ->
+                        isNearbyMomentsLoadingFirstTime = false
                         _nearbyMomentsState.value = UiState.Success(moments)
                     },
                     onFailure = { error ->
+                        isNearbyMomentsLoadingFirstTime = true
                         _nearbyMomentsState.value = UiState.Error(error)
                     }
                 )
@@ -115,13 +132,17 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
 
     fun loadNearbyPosts() {
         viewModelScope.launch {
-            _nearbyPostsState.value = UiState.Loading
+            if (isNearbyPostsLoadingFirstTime) {
+                _nearbyPostsState.value = UiState.Loading
+            }
             try {
                 sdk.getNearbyPosts(
                     onSuccess = { posts ->
+                        isNearbyPostsLoadingFirstTime = false
                         _nearbyPostsState.value = UiState.Success(posts)
                     },
                     onFailure = { error ->
+                        isNearbyPostsLoadingFirstTime = true
                         _nearbyPostsState.value = UiState.Error(error)
                     }
                 )

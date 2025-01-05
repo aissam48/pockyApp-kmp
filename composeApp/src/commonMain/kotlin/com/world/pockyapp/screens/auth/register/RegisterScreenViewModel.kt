@@ -14,6 +14,7 @@ import com.world.pockyapp.network.models.model.DataModel
 import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.utils.Utils.isValidEmail
 import com.world.pockyapp.utils.Utils.isValidPhoneNumber
+import com.world.pockyapp.utils.Utils.isValidUsername
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -32,6 +33,7 @@ class RegisterScreenViewModel(
 
     var firstName: String = ""
     var lastName: String = ""
+    var username: String = ""
     var phone: String = ""
     var email: String = ""
     var country: String = ""
@@ -57,6 +59,16 @@ class RegisterScreenViewModel(
                 _uiState.value = RegisterUiState.Error(
                     error = ErrorModel(
                         message = "Invalid Last Name",
+                        code = 400
+                    )
+                )
+                return@launch
+            }
+
+            if (!isValidUsername(username)) {
+                _uiState.value = RegisterUiState.Error(
+                    error = ErrorModel(
+                        message = "Username should has just chars, numbers, _",
                         code = 400
                     )
                 )

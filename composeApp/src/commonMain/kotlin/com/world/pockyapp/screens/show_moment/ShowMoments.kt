@@ -24,9 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant
 import com.world.pockyapp.Constant.getUrl
-import com.world.pockyapp.network.models.model.PostModel
+import com.world.pockyapp.network.models.model.MomentModel
 import kotlinx.coroutines.*
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -61,7 +60,7 @@ fun StoryProgressBar(
 // Single story view
 @Composable
 fun StoryView(
-    story: PostModel,
+    story: MomentModel,
     onStoryCompleted: () -> Unit,
     onNextStory: () -> Unit,
     onPreviousStory: () -> Unit,
@@ -71,7 +70,7 @@ fun StoryView(
     var isHolding by remember { mutableStateOf(false) }
 
     // Story progress timer
-    LaunchedEffect(key1 = story.postID, key2 = isHolding) {
+    LaunchedEffect(key1 = story.momentID, key2 = isHolding) {
         if (!isHolding) {
             while (progress < 2f) {
                 delay(50) // Update every 50ms
@@ -107,7 +106,7 @@ fun StoryView(
     ) {
         // Story Image
         AsyncImage(
-            model = getUrl(story.postID),
+            model = getUrl(story.momentID),
             contentDescription = "Story Image",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -126,7 +125,7 @@ fun StoryView(
             ) {
                 // User Avatar
                 AsyncImage(
-                    model = getUrl(story.postID),
+                    model = getUrl(story.momentID),
                     contentDescription = "User Avatar",
                     modifier = Modifier
                         .size(40.dp)
@@ -161,12 +160,12 @@ fun StoryView(
 
 // Stories Container
 @Composable
-fun StoriesContainer(stories: List<PostModel>, navController: NavHostController, back: Boolean) {
+fun StoriesContainer(stories: List<MomentModel>, navController: NavHostController, back: Boolean) {
     var currentStoryIndex by remember { mutableStateOf(0) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Current Story View
-        key(stories[currentStoryIndex].postID) {
+        key(stories[currentStoryIndex].momentID) {
             StoryView(
                 story = stories[currentStoryIndex],
                 onStoryCompleted = {
@@ -199,7 +198,7 @@ fun StoriesContainer(stories: List<PostModel>, navController: NavHostController,
 
 // Example Usage in a Composable
 @Composable
-fun ShowMoments(navController: NavHostController, moments: List<PostModel>, back: Boolean = false) {
+fun ShowMoments(navController: NavHostController, moments: List<MomentModel>, back: Boolean = false) {
     println("momentsSize" + moments.size)
     val sampleStories = moments
 

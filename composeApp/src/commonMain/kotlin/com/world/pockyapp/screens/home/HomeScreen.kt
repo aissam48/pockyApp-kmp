@@ -126,7 +126,8 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                         icon = {
                             Icon(
                                 painter = painterResource(Res.drawable.ic_discover_black),
-                                contentDescription = null
+                                contentDescription = null,
+                                modifier = Modifier.size(30.dp)
                             )
                         }
                     )
@@ -140,7 +141,8 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                         icon = {
                             Icon(
                                 painter = painterResource(Res.drawable.ic_chat_black),
-                                contentDescription = null
+                                contentDescription = null,
+                                modifier = Modifier.size(30.dp)
                             )
                         }
                     )

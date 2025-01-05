@@ -97,6 +97,9 @@ fun RegisterScreen(
     val lastName = remember {
         mutableStateOf("")
     }
+    val username = remember {
+        mutableStateOf("")
+    }
     val phone = remember {
         mutableStateOf("")
     }
@@ -197,6 +200,24 @@ fun RegisterScreen(
                     unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
                 ),
                 label = { Text(text = "LastName", color = MaterialTheme.colorScheme.onPrimary) }
+            )
+
+            Spacer(modifier = Modifier.padding(top = 15.dp))
+
+            OutlinedTextField(
+                singleLine = true,
+                shape = RoundedCornerShape(15.dp),
+                modifier = Modifier.fillMaxWidth(0.85f),
+                value = username.value,
+                onValueChange = { username.value = it },
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                colors = TextFieldDefaults.textFieldColors(
+                    textColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                ),
+                label = { Text(text = "Username", color = MaterialTheme.colorScheme.onPrimary) }
             )
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -349,6 +370,7 @@ fun RegisterScreen(
                                 .clickable {
                                     viewModel.firstName = firstName.value
                                     viewModel.lastName = lastName.value
+                                    viewModel.username = username.value
                                     viewModel.phone = phone.value
                                     viewModel.email = email.value
                                     viewModel.password = password.value

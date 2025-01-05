@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.moment_screen.MomentsScreen
@@ -103,7 +104,7 @@ fun NavigationHost(navController: NavHostController) {
         composable(route = "${NavRoutes.SHOW_MOMENTS.route}/{moments}") { backStackEntry ->
             val modulesJson = backStackEntry.arguments?.getString("moments")?.replace("%", "/")
             val moments = modulesJson?.let {
-                Json.decodeFromString<List<PostModel>>(it)
+                Json.decodeFromString<List<MomentModel>>(it)
             } ?: emptyList()
             ShowMoments(navController, moments)
         }

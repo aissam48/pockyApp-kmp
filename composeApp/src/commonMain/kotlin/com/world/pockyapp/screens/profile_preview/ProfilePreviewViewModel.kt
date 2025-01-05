@@ -6,12 +6,17 @@ import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.profile.ProfileUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
+
+    private var isProfileLoadingFirstTime = true
+    private var isPostsLoadingFirstTime = true
+
     private val _profileState =
         MutableStateFlow<ProfilePreviewUiState>(ProfilePreviewUiState.Loading)
     val profileState: StateFlow<ProfilePreviewUiState> = _profileState.asStateFlow()
@@ -37,11 +42,15 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
     val unFriendState: StateFlow<FriendState> = _unFriendState.asStateFlow()
 
     fun getProfile(id: String) {
-        _profileState.value = ProfilePreviewUiState.Loading
+        if (isProfileLoadingFirstTime){
+            _profileState.value = ProfilePreviewUiState.Loading
+        }
         viewModelScope.launch {
             sdk.getProfile(id, { success ->
+                isProfileLoadingFirstTime = false
                 _profileState.value = ProfilePreviewUiState.Success(success)
             }, { error ->
+                isProfileLoadingFirstTime = true
                 _profileState.value = ProfilePreviewUiState.Error(error)
             })
         }
@@ -70,11 +79,15 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
     }
 
     fun getPosts(id: String) {
-        _postsState.value = PostsState.Loading
+        if (isPostsLoadingFirstTime){
+            _postsState.value = PostsState.Loading
+        }
         viewModelScope.launch {
             sdk.getPosts(id, { success ->
+                isPostsLoadingFirstTime = false
                 _postsState.value = PostsState.Success(success)
             }, { error ->
+                isPostsLoadingFirstTime = true
                 _postsState.value = PostsState.Error(error)
             })
         }

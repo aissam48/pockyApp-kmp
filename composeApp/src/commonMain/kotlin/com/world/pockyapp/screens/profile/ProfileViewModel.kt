@@ -13,6 +13,9 @@ import kotlinx.coroutines.launch
 
 class ProfileViewModel(private val sdk: ApiManager) : ViewModel() {
 
+    private var isProfileLoadingFirstTime = true
+    private var isPostsLoadingFirstTime = true
+
     private val _profileState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
     val profileState: StateFlow<ProfileUiState> = _profileState.asStateFlow()
 
@@ -21,15 +24,21 @@ class ProfileViewModel(private val sdk: ApiManager) : ViewModel() {
 
     fun getProfile() {
         viewModelScope.launch {
+            if (isProfileLoadingFirstTime){
+                _profileState.value = ProfileUiState.Loading
+            }
             try {
                 sdk.getMyProfile({ success ->
+                    isProfileLoadingFirstTime = false
                     _profileState.value = ProfileUiState.Success(success)
 
                 }, { error ->
+                    isProfileLoadingFirstTime = true
                     _profileState.value = ProfileUiState.Error(error)
 
                 })
             } catch (e: Exception) {
+                isProfileLoadingFirstTime = true
                 _profileState.value = ProfileUiState.Error(
                     error = ErrorModel(
                         message = e.message ?: "Unknown error",
@@ -42,16 +51,21 @@ class ProfileViewModel(private val sdk: ApiManager) : ViewModel() {
 
     fun getMyPosts() {
         viewModelScope.launch {
-
+            if (isPostsLoadingFirstTime){
+                _postsState.value = PostsUiState.Loading
+            }
             try {
                 sdk.getMyPosts({ success ->
+                    isPostsLoadingFirstTime = false
                     _postsState.value = PostsUiState.Success(success)
 
                 }, { error ->
+                    isPostsLoadingFirstTime = true
                     _postsState.value = PostsUiState.Error(error)
 
                 })
             } catch (e: Exception) {
+                isPostsLoadingFirstTime = true
                 _postsState.value = PostsUiState.Error(
                     error = ErrorModel(
                         message = e.message ?: "Unknown error",
