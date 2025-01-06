@@ -123,6 +123,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun register(
         firstName: String,
         lastName: String,
+        username: String,
         phone: String,
         email: String,
         password: String,
@@ -135,6 +136,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         val registerRequestModel = RegisterRequestModel(
             firstName = firstName,
             lastName = lastName,
+            username = username,
             phone = phone,
             email = email,
             password = password,
@@ -1202,7 +1204,6 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         } catch (e: Exception) {
 
         }
-
     }
 
     suspend fun shareMoment(
@@ -1246,6 +1247,58 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
         }
 
+    }
+
+    suspend fun block(
+        profileID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.post("$baseUrl/operations/block") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("id" to profileID))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.message)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
+    suspend fun unBlock(
+        profileID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.put("$baseUrl/operations/unblock") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("id" to profileID))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.message)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
     }
 
 }

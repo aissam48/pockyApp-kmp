@@ -135,7 +135,7 @@ class RegisterScreenViewModel(
                 return@launch
             }
 
-            sdk.register(firstName, lastName, phone, email, password, country, city, { success ->
+            sdk.register(firstName, lastName,username, phone, email, password, country, city, { success ->
                 _uiState.value = RegisterUiState.Success("Registration successful")
                 CoroutineScope(Dispatchers.Main).launch {
                     dataStore.edit {

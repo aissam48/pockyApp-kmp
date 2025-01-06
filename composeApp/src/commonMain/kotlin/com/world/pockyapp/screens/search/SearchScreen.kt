@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.Constant
 import com.world.pockyapp.Constant.getUrl
@@ -47,11 +48,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.compose_multiplatform
 import pockyapp.composeapp.generated.resources.ic_back_black
+import pockyapp.composeapp.generated.resources.ic_placeholder
 
 @Composable
 fun SearchScreen(navController: NavHostController, viewModel: SearchViewModel = koinViewModel()) {
@@ -133,11 +137,13 @@ fun SearchScreen(navController: NavHostController, viewModel: SearchViewModel = 
                             modifier = Modifier.height(70.dp).fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Image(
+                            AsyncImage(
+                                model = getUrl(item.photoID),
+                                contentDescription = "",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.size(70.dp).clip(CircleShape),
-                                painter = rememberAsyncImagePainter(getUrl(item.photoID)),
-                                contentDescription = null
+                                placeholder = painterResource(Res.drawable.ic_placeholder),
+                                error = painterResource(Res.drawable.ic_placeholder),
                             )
                             Spacer(modifier = Modifier.size(10.dp))
 

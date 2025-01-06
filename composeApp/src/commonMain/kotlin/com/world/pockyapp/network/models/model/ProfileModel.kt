@@ -7,6 +7,7 @@ data class ProfileModel(
     var id: String = "",
     var firstName: String = "",
     var lastName: String = "",
+    var username: String = "",
     var phone: String = "",
     var email: String = "",
     var country: String = "",
@@ -19,4 +20,5 @@ data class ProfileModel(
     val chatRequest: ChatRequestModel? = null,
     val conversationID: String = "",
     val friend: String = "NO",
+    val block: String = "NO",
 )

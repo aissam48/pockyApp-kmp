@@ -68,7 +68,7 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
             } catch (e: Exception) {
                 _profileState.value = UiState.Error(
                     error = ErrorModel(
-                        message = e.message ?: "Unknown error",
+                        message = "Network error. Please try again later.",
                         code = 500
                     )
                 )
@@ -95,7 +95,7 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
             } catch (e: Exception) {
                 _friendsMomentsState.value = UiState.Error(
                     error = ErrorModel(
-                        message = e.message ?: "Unknown error",
+                        message = "Network error. Please try again later.",
                         code = 500
                     )
                 )
@@ -122,7 +122,7 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
             } catch (e: Exception) {
                 _nearbyMomentsState.value = UiState.Error(
                     error = ErrorModel(
-                        message = e.message ?: "Unknown error",
+                        message = "Network error. Please try again later.",
                         code = 500
                     )
                 )
@@ -149,7 +149,7 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
             } catch (e: Exception) {
                 _nearbyPostsState.value = UiState.Error(
                     error = ErrorModel(
-                        message = e.message ?: "Unknown error",
+                        message = "Network error. Please try again later.",
                         code = 500
                     )
                 )
@@ -185,7 +185,7 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
             } catch (e: Exception) {
                 _likeActionState.value = UiState.Error(
                     error = ErrorModel(
-                        message = e.message ?: "Unknown error",
+                        message = "Network error. Please try again later.",
                         code = 500
                     )
                 )

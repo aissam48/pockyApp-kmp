@@ -261,7 +261,7 @@ fun ChatScreen(
                     label = {
                         androidx.compose.material3.Text(
                             text = "Tap message...",
-                            color = MaterialTheme.colorScheme.onPrimary
+                            color = Color.Gray
                         )
                     }
                 )

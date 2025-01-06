@@ -41,6 +41,12 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
     private val _unFriendState = MutableStateFlow<FriendState>(FriendState.Loading)
     val unFriendState: StateFlow<FriendState> = _unFriendState.asStateFlow()
 
+    private val _blockState = MutableStateFlow<BlockState>(BlockState.Idle)
+    val blockState: StateFlow<BlockState> = _blockState.asStateFlow()
+
+    private val _unBlockState = MutableStateFlow<UnBlockState>(UnBlockState.Idle)
+    val unBlockState: StateFlow<UnBlockState> = _unBlockState.asStateFlow()
+
     fun getProfile(id: String) {
         if (isProfileLoadingFirstTime){
             _profileState.value = ProfilePreviewUiState.Loading
@@ -125,6 +131,33 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
             })
         }
     }
+
+    fun block(id: String) {
+        _blockState.value = BlockState.Loading
+        viewModelScope.launch {
+            sdk.block(id, { success ->
+                _blockState.value = BlockState.Success(success)
+            }, { error ->
+                _blockState.value = BlockState.Error(error)
+            })
+        }
+    }
+
+    fun unBlock(id: String) {
+        _unBlockState.value = UnBlockState.Loading
+        viewModelScope.launch {
+            sdk.unBlock(id, { success ->
+                _unBlockState.value = UnBlockState.Success(success)
+            }, { error ->
+                _unBlockState.value = UnBlockState.Error(error)
+            })
+        }
+    }
+
+    fun report(id: String) {
+
+
+    }
 }
 
 sealed class ProfilePreviewUiState {
@@ -155,4 +188,18 @@ sealed class FriendState {
     data object Loading : FriendState()
     data class Success(val message: String) : FriendState()
     data class Error(val error: ErrorModel) : FriendState()
+}
+
+sealed class BlockState {
+    data object Loading : BlockState()
+    data object Idle : BlockState()
+    data class Success(val message: String) : BlockState()
+    data class Error(val error: ErrorModel) : BlockState()
+}
+
+sealed class UnBlockState {
+    data object Loading : UnBlockState()
+    data object Idle : UnBlockState()
+    data class Success(val message: String) : UnBlockState()
+    data class Error(val error: ErrorModel) : UnBlockState()
 }

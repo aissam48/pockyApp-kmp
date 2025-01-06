@@ -41,7 +41,7 @@ class ProfileViewModel(private val sdk: ApiManager) : ViewModel() {
                 isProfileLoadingFirstTime = true
                 _profileState.value = ProfileUiState.Error(
                     error = ErrorModel(
-                        message = e.message ?: "Unknown error",
+                        message = "Network error. Please try again later.",
                         code = 500
                     )
                 )
@@ -68,7 +68,7 @@ class ProfileViewModel(private val sdk: ApiManager) : ViewModel() {
                 isPostsLoadingFirstTime = true
                 _postsState.value = PostsUiState.Error(
                     error = ErrorModel(
-                        message = e.message ?: "Unknown error",
+                        message = "Network error. Please try again later.",
                         code = 500
                     )
                 )

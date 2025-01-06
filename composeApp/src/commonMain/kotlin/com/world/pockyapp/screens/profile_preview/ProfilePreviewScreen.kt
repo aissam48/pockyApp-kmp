@@ -64,11 +64,13 @@ import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.compose_multiplatform
 import pockyapp.composeapp.generated.resources.ic_back_black
 import pockyapp.composeapp.generated.resources.ic_be_friend
+import pockyapp.composeapp.generated.resources.ic_block_black
 import pockyapp.composeapp.generated.resources.ic_chat_bleu
 import pockyapp.composeapp.generated.resources.ic_chat_request_blue
 import pockyapp.composeapp.generated.resources.ic_location_black
 import pockyapp.composeapp.generated.resources.ic_more_black
 import pockyapp.composeapp.generated.resources.ic_placeholder
+import pockyapp.composeapp.generated.resources.ic_report_black
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -91,6 +93,8 @@ fun ProfilePreviewScreen(
     val beFriendState by viewModel.beFriendState.collectAsState()
     val unFriendState by viewModel.unFriendState.collectAsState()
     val myProfileState by viewModel.myProfileState.collectAsState()
+    val blockState by viewModel.blockState.collectAsState()
+    val unBlockState by viewModel.unBlockState.collectAsState()
     val postsState by viewModel.postsState.collectAsState()
     val sendChatRequestState by viewModel.sendChatRequestState.collectAsState()
     val responseChatRequestState by viewModel.responseChatRequestState.collectAsState()
@@ -117,16 +121,37 @@ fun ProfilePreviewScreen(
         viewModel.getProfile(id = id)
     }
 
-    when (val state = myProfileState) {
-        is MyProfileState.Loading -> {
+    when (val state = blockState) {
+        is BlockState.Loading -> {
 
         }
 
-        is MyProfileState.Success -> {
-            myProfile.value = state.profile
+        is BlockState.Success -> {
+            viewModel.getProfile(id = id)
         }
 
-        is MyProfileState.Error -> {
+        is BlockState.Error -> {
+
+        }
+        is BlockState.Idle -> {
+
+        }
+
+    }
+
+    when (val state = unBlockState) {
+        is UnBlockState.Loading -> {
+
+        }
+
+        is UnBlockState.Success -> {
+            viewModel.getProfile(id = id)
+        }
+
+        is UnBlockState.Error -> {
+
+        }
+        is UnBlockState.Idle -> {
 
         }
     }
@@ -224,304 +249,427 @@ fun ProfilePreviewScreen(
         }
 
     }) { padding ->
-        when (val state = profileState) {
-            is ProfilePreviewUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+
+
+        BottomSheetScaffold(
+            sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            scaffoldState = scaffoldState,
+            sheetPeekHeight = 0.dp,
+            sheetBackgroundColor = Color.LightGray,
+            sheetContent = {
+                Column(
+                    modifier = Modifier.fillMaxWidth().height(160.dp)
                 ) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            is ProfilePreviewUiState.Success -> {
-                profile.value = state.profile
-
-                BottomSheetScaffold(
-                    sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                    scaffoldState = scaffoldState,
-                    sheetPeekHeight = 0.dp,
-                    sheetBackgroundColor = Color.LightGray,
-                    sheetContent = {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().height(100.dp)
-                        ) {
-                            Spacer(modifier = Modifier.size(20.dp))
-                            Row(
-                                modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-                                    .clickable {
-                                        if (profile.value.friend == "NO") {
-                                            viewModel.beFriend(profile.value.id)
-                                        } else {
-                                            if (profile.value.friend == "YES") {
-                                                viewModel.removeFriend(profile.value.id)
-                                            }
-                                        }
-                                        scope.launch {
-                                            scaffoldState.bottomSheetState.collapse()
-                                        }
-                                    },
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_be_friend),
-                                    contentDescription = null
-                                )
-                                Spacer(modifier = Modifier.size(10.dp))
-                                Text(
-                                    fontWeight = FontWeight.Bold,
-                                    text = if (profile.value.friend == "NO")
-                                        "Be friend"
-                                    else
-                                        if (profile.value.friend == "YES")
-                                            "Remove friend" else
-                                            "Request has sent",
-                                    color = Color.Black,
-                                    fontSize = 15.sp
-                                )
-                            }
-
-                        }
-
+                    Spacer(modifier = Modifier.size(20.dp))
+                    Row(
+                        modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                            .clickable {
+                                if (profile.value.friend == "NO") {
+                                    viewModel.beFriend(profile.value.id)
+                                } else {
+                                    if (profile.value.friend == "YES") {
+                                        viewModel.removeFriend(profile.value.id)
+                                    }
+                                }
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.collapse()
+                                }
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_be_friend),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text(
+                            fontWeight = FontWeight.Bold,
+                            text = if (profile.value.friend == "NO")
+                                "Be friend"
+                            else
+                                if (profile.value.friend == "YES")
+                                    "Remove friend" else
+                                    "Request has sent",
+                            color = Color.Black,
+                            fontSize = 15.sp
+                        )
                     }
-                ) {
-                    LazyColumn(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
 
-                        item {
-                            Spacer(modifier = Modifier.size(20.dp))
-                        }
-                        item {
-                            Image(
-                                modifier = Modifier.size(23.dp).clickable {
-                                    navController.popBackStack()
-                                },
-                                painter = painterResource(Res.drawable.ic_back_black),
-                                contentDescription = null
-                            )
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Row(
+                        modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                            .clickable {
 
-                        }
-                        item {
+                                when (profile.value.block) {
+                                    "NO" -> {
+                                        viewModel.block(profile.value.id)
+                                    }
 
-                            Box(modifier = Modifier.fillMaxWidth()) {
+                                    "BLOCKER" -> {
+                                        viewModel.unBlock(profile.value.id)
+                                    }
 
-                                Box(modifier = Modifier.size(150.dp)) {
+                                    else -> {
 
-
-                                    val checkIfSeeAllMoments =
-                                        profile.value.moments.find { !it.viewed }
-                                    Box(
-                                        modifier = Modifier
-                                            .size(150.dp)
-                                            .border(
-                                                width = 5.dp,
-                                                brush = Brush.linearGradient(
-                                                    colors = if (checkIfSeeAllMoments != null) listOf(
-                                                        Color.Red,
-                                                        Color.Yellow,
-                                                        Color.White
-                                                    ) else listOf(
-                                                        Color.Gray,
-                                                        Color.Gray,
-                                                        Color.Gray
-                                                    )
-                                                ),
-                                                shape = CircleShape
-                                            ),
-                                    ) {
-                                        AsyncImage(
-                                            model = getUrl(profile.value.photoID),
-                                            contentDescription = "",
-                                            contentScale = ContentScale.Crop,
-                                            modifier = Modifier.size(150.dp).clip(CircleShape)
-                                                .clickable {
-                                                    if (profile.value.moments.isEmpty()) {
-                                                        return@clickable
-                                                    }
-                                                    val modulesJson =
-                                                        Json.encodeToString(listOf(profile.value))
-                                                            .replace("/", "%")
-                                                    navController.navigate(
-                                                        NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/${myProfile.value.id}"
-                                                    )
-                                                },
-                                            placeholder = painterResource(Res.drawable.ic_placeholder),
-                                            error = painterResource(Res.drawable.ic_placeholder),
-                                        )
                                     }
                                 }
 
-                                Row(modifier = Modifier.align(Alignment.TopEnd)) {
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.collapse()
+                                }
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_block_black),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text(
+                            fontWeight = FontWeight.Bold,
+                            text =
+                            when (profile.value.block) {
+                                "NO" -> {
+                                    "Block"
+                                }
 
-                                    when (true) {
-                                        (profile.value.chatRequest == null) -> {
+                                "BLOCKER" -> {
+                                    "Remove block"
+                                }
+
+                                else -> {
+                                    ""
+                                }
+                            },
+                            color = Color.Black,
+                            fontSize = 15.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Row(
+                        modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                            .clickable {
+                                viewModel.report(profile.value.id)
+
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.collapse()
+                                }
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_report_black),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text(
+                            fontWeight = FontWeight.Bold,
+                            text = "Report",
+                            color = Color.Black,
+                            fontSize = 15.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.size(15.dp))
+                }
+
+            }
+        ) {
+            LazyColumn(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
+
+                item {
+                    Spacer(modifier = Modifier.size(20.dp))
+                    Image(
+                        modifier = Modifier.size(23.dp).clickable {
+                            navController.popBackStack()
+                        },
+                        painter = painterResource(Res.drawable.ic_back_black),
+                        contentDescription = null
+                    )
+                }
+
+                when (val state = profileState) {
+                    is ProfilePreviewUiState.Loading -> {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+
+                    }
+
+                    is ProfilePreviewUiState.Success -> {
+                        profile.value = state.profile
+
+                        when (profile.value.block) {
+                            "NO" -> {
+                                item {
+
+                                    Box(modifier = Modifier.fillMaxWidth()) {
+
+                                        Box(modifier = Modifier.size(150.dp)) {
+
+
+                                            val checkIfSeeAllMoments =
+                                                profile.value.moments.find { !it.viewed }
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(150.dp)
+                                                    .border(
+                                                        width = 5.dp,
+                                                        brush = Brush.linearGradient(
+                                                            colors = if (checkIfSeeAllMoments != null) listOf(
+                                                                Color.Red,
+                                                                Color.Yellow,
+                                                                Color.White
+                                                            ) else listOf(
+                                                                Color.Gray,
+                                                                Color.Gray,
+                                                                Color.Gray
+                                                            )
+                                                        ),
+                                                        shape = CircleShape
+                                                    ),
+                                            ) {
+                                                AsyncImage(
+                                                    model = getUrl(profile.value.photoID),
+                                                    contentDescription = "",
+                                                    contentScale = ContentScale.Crop,
+                                                    modifier = Modifier.size(150.dp)
+                                                        .clip(CircleShape)
+                                                        .clickable {
+                                                            if (profile.value.moments.isEmpty()) {
+                                                                return@clickable
+                                                            }
+                                                            val modulesJson =
+                                                                Json.encodeToString(listOf(profile.value))
+                                                                    .replace("/", "%")
+                                                            navController.navigate(
+                                                                NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/${myProfile.value.id}"
+                                                            )
+                                                        },
+                                                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                                                    error = painterResource(Res.drawable.ic_placeholder),
+                                                )
+                                            }
+                                        }
+
+                                        Row(modifier = Modifier.align(Alignment.TopEnd)) {
+
+                                            when (true) {
+                                                (profile.value.chatRequest == null) -> {
+                                                    Image(
+                                                        painter = painterResource(Res.drawable.ic_chat_request_blue),
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(40.dp)
+                                                            .clickable {
+                                                                scope.launch {
+                                                                    viewModel.sendRequestChat(
+                                                                        profile.value.id
+                                                                    )
+                                                                }
+                                                            }
+                                                    )
+                                                }
+
+                                                (profile.value.chatRequest?.status == "ACCEPTED") -> {
+                                                    Image(
+                                                        painter = painterResource(Res.drawable.ic_chat_bleu),
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(40.dp)
+                                                            .clickable {
+                                                                navController.navigate(NavRoutes.CHAT.route + "/${profile.value.conversationID}" + "/${profile.value.id}" + "/${profile.value.chatRequest?.id}")
+                                                            }
+                                                    )
+                                                }
+
+                                                else -> {}
+                                            }
+
+                                            Spacer(modifier = Modifier.size(15.dp))
                                             Image(
-                                                painter = painterResource(Res.drawable.ic_chat_request_blue),
+                                                painter = painterResource(Res.drawable.ic_more_black),
                                                 contentDescription = null,
-                                                modifier = Modifier.size(40.dp)
+                                                modifier = Modifier.size(30.dp)
                                                     .clickable {
                                                         scope.launch {
-                                                            viewModel.sendRequestChat(profile.value.id)
+                                                            scaffoldState.bottomSheetState.expand()
                                                         }
                                                     }
                                             )
                                         }
-
-                                        (profile.value.chatRequest?.status == "ACCEPTED") -> {
-                                            Image(
-                                                painter = painterResource(Res.drawable.ic_chat_bleu),
-                                                contentDescription = null,
-                                                modifier = Modifier.size(40.dp)
-                                                    .clickable {
-                                                        navController.navigate(NavRoutes.CHAT.route + "/${profile.value.conversationID}" + "/${profile.value.id}" + "/${profile.value.chatRequest?.id}")
-                                                    }
-                                            )
-                                        }
-
-                                        else -> {}
                                     }
 
-                                    Spacer(modifier = Modifier.size(15.dp))
-                                    Image(
-                                        painter = painterResource(Res.drawable.ic_more_black),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(30.dp)
-                                            .clickable {
-                                                scope.launch {
-                                                    scaffoldState.bottomSheetState.expand()
-                                                }
-                                            }
+                                    Spacer(modifier = Modifier.size(20.dp))
+                                    Text(
+                                        text = profile.value.firstName,
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = 18.sp,
+                                        maxLines = 2
                                     )
-                                }
+                                    Text(
+                                        text = profile.value.username,
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = 18.sp,
+                                        maxLines = 2
+                                    )
+                                    Spacer(modifier = Modifier.size(10.dp))
+                                    Row {
+                                        Image(
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.size(20.dp).clip(CircleShape),
+                                            painter = painterResource(Res.drawable.ic_location_black),
+                                            contentDescription = null
+                                        )
+                                        Spacer(modifier = Modifier.size(5.dp))
 
-                            }
-
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.size(20.dp))
-                        }
-
-                        item {
-                            Text(
-                                text = profile.value.firstName,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 18.sp,
-                                maxLines = 2
-                            )
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.size(10.dp))
-                        }
-
-                        item {
-                            Row {
-                                Image(
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.size(20.dp).clip(CircleShape),
-                                    painter = painterResource(Res.drawable.ic_location_black),
-                                    contentDescription = null
-                                )
-                                Spacer(modifier = Modifier.size(5.dp))
-
-                                Text(
-                                    text = "${profile.value.country}, ${profile.value.city}",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp,
-                                    maxLines = 2
-                                )
-                            }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.size(10.dp))
-                        }
-
-                        item {
-                            Text(
-                                text = profile.value.description,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                maxLines = 2
-                            )
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.size(20.dp))
-                        }
-
-                        when (val state = postsState) {
-                            is PostsState.Loading -> {
-
-                            }
-
-                            is PostsState.Success -> {
-                                posts.value.addAll(state.posts)
-                                items(posts.value.chunked(3)) { item ->
-
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-
-                                        item.forEachIndexed { index, postModel ->
-                                            ImagePost(screenSize.value.first, item[index].postID) {
-                                                navController.navigate(NavRoutes.POST.route + "/${item[index].postID}" + "/${myProfile.value.id}")
-                                            }
-                                            if (postModel != item.last()) {
-                                                Spacer(modifier = Modifier.size(3.dp))
-                                            }
-                                        }
-
+                                        Text(
+                                            text = "${profile.value.country}, ${profile.value.city}",
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
+                                            maxLines = 2
+                                        )
                                     }
-                                    Spacer(modifier = Modifier.size(3.dp))
+                                    Spacer(modifier = Modifier.size(10.dp))
+                                    Text(
+                                        text = profile.value.description,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp,
+                                        maxLines = 2
+                                    )
+                                    Spacer(modifier = Modifier.size(20.dp))
 
                                 }
-
                             }
 
-                            is PostsState.Error -> {
+                            "BLOCKED" -> {
+                                item {
+                                    Column {
+                                        Spacer(modifier = Modifier.height(20.dp))
 
+                                        Text(
+                                            text = "PockyApp user",
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 20.sp
+                                        )
+                                    }
+                                }
+                            }
+
+                            "BLOCKER" -> {
+                                item {
+                                    Column {
+                                        Spacer(modifier = Modifier.height(20.dp))
+
+                                        Text(
+                                            text = "${profile.value.firstName} ${profile.value.lastName}",
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 20.sp
+                                        )
+                                        Spacer(modifier = Modifier.height(15.dp))
+                                        Box(modifier = Modifier.height(40.dp).width(100.dp).background(color = Color.Black, shape = RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
+                                            if (unBlockState is UnBlockState.Loading) {
+                                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                            } else {
+                                                Text(
+                                                    text = "Unblock",
+                                                    color = Color.White,
+                                                    modifier = Modifier.clickable {
+                                                        viewModel.unBlock(profile.value.id)
+                                                    })
+                                            }
+
+                                        }
+                                    }
+
+                                }
                             }
                         }
 
+
+                    }
+
+                    is ProfilePreviewUiState.Error -> {
                         item {
-                            Spacer(modifier = Modifier.size(40.dp))
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Error: ${state.error.message}",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    }
+                }
+
+                when (val state = postsState) {
+                    is PostsState.Loading -> {
+
+                    }
+
+                    is PostsState.Success -> {
+                        posts.value.addAll(state.posts)
+                        items(posts.value.chunked(3)) { item ->
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+
+                                item.forEachIndexed { index, postModel ->
+                                    ImagePost(screenSize.value.first, item[index].postID) {
+                                        navController.navigate(NavRoutes.POST.route + "/${item[index].postID}" + "/${myProfile.value.id}")
+                                    }
+                                    if (postModel != item.last()) {
+                                        Spacer(modifier = Modifier.size(3.dp))
+                                    }
+                                }
+
+                            }
+                            Spacer(modifier = Modifier.size(3.dp))
                         }
 
                     }
-                    Layout(
-                        modifier = Modifier.fillMaxWidth().height(0.dp),
-                        measurePolicy = { measurables, constraints ->
 
-                            val width = constraints.maxWidth
-                            val height = constraints.maxHeight
+                    is PostsState.Error -> {
 
-                            screenSize.value = Pair(width, height)
-                            println("Width: $width, height: $height")
-
-                            layout(width, height) {
-
-                            }
-                        }
-                    )
+                    }
                 }
-            }
 
-            is ProfilePreviewUiState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Error: ${state.error.message}",
-                        color = MaterialTheme.colorScheme.error
-                    )
+                item {
+                    Spacer(modifier = Modifier.size(40.dp))
                 }
+
             }
+            Layout(
+                modifier = Modifier.fillMaxWidth().height(0.dp),
+                measurePolicy = { measurables, constraints ->
+
+                    val width = constraints.maxWidth
+                    val height = constraints.maxHeight
+
+                    screenSize.value = Pair(width, height)
+                    println("Width: $width, height: $height")
+
+                    layout(width, height) {
+
+                    }
+                }
+            )
         }
+
+
     }
 
 }
