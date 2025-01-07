@@ -121,6 +121,19 @@ fun ProfilePreviewScreen(
         viewModel.getProfile(id = id)
     }
 
+    when (val state = myProfileState) {
+        is MyProfileState.Loading -> {
+
+        }
+
+        is MyProfileState.Success -> {
+            myProfile.value = state.profile
+        }
+
+        is MyProfileState.Error -> {
+
+        }
+    }
     when (val state = blockState) {
         is BlockState.Loading -> {
 
@@ -128,6 +141,7 @@ fun ProfilePreviewScreen(
 
         is BlockState.Success -> {
             viewModel.getProfile(id = id)
+            viewModel.getPosts(id = id)
         }
 
         is BlockState.Error -> {
@@ -136,7 +150,6 @@ fun ProfilePreviewScreen(
         is BlockState.Idle -> {
 
         }
-
     }
 
     when (val state = unBlockState) {
@@ -146,6 +159,7 @@ fun ProfilePreviewScreen(
 
         is UnBlockState.Success -> {
             viewModel.getProfile(id = id)
+            viewModel.getPosts(id = id)
         }
 
         is UnBlockState.Error -> {
@@ -445,6 +459,7 @@ fun ProfilePreviewScreen(
                                                             if (profile.value.moments.isEmpty()) {
                                                                 return@clickable
                                                             }
+                                                            println(myProfile.value)
                                                             val modulesJson =
                                                                 Json.encodeToString(listOf(profile.value))
                                                                     .replace("/", "%")

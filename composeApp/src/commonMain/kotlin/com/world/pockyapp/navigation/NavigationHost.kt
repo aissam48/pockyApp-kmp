@@ -14,6 +14,7 @@ import com.world.pockyapp.screens.edit_location.EditLocationScreen
 import com.world.pockyapp.screens.edit_profile.EditProfileScreen
 import com.world.pockyapp.screens.home.HomeScreen
 import com.world.pockyapp.screens.auth.login.LoginScreen
+import com.world.pockyapp.screens.blocked.BlockedScreen
 import com.world.pockyapp.screens.change_password.ChangePasswordScreen
 import com.world.pockyapp.screens.chat.ChatScreen
 import com.world.pockyapp.screens.friend_request.FriendRequestsScreen
@@ -86,6 +87,10 @@ fun NavigationHost(navController: NavHostController) {
 
         composable(NavRoutes.MY_PROFILE.route) {
             ProfileScreen(navController)
+        }
+
+        composable(NavRoutes.BLOCKED.route) {
+            BlockedScreen(navController)
         }
 
         composable(route = "${NavRoutes.MOMENTS.route}/{moments}/{index}/{myID}") { backStackEntry ->

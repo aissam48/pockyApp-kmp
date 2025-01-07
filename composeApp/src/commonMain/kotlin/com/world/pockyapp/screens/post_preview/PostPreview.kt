@@ -188,7 +188,6 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
 
                     }
 
-
                 }
             }
         }

@@ -193,6 +193,27 @@ fun SettingsScreen(
                         .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
                         .height(50.dp)
                         .clickable {
+                            navController.navigate(NavRoutes.BLOCKED.route)
+                        }.padding(start = 15.dp)) {
+                    Text(
+                        text = "Blocked",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    )
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.size(15.dp))
+            }
+
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                        .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
+                        .height(50.dp)
+                        .clickable {
                             //viewModel.logout()
                             showDialogLogout = true
                         }.padding(start = 15.dp)) {

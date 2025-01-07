@@ -4,6 +4,7 @@ package com.world.pockyapp.di
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.screens.auth.login.LoginScreenViewModel
 import com.world.pockyapp.screens.auth.register.RegisterScreenViewModel
+import com.world.pockyapp.screens.blocked.BlockedViewModel
 import com.world.pockyapp.screens.change_password.ChangePasswordViewModel
 import com.world.pockyapp.screens.chat.ChatViewModel
 import com.world.pockyapp.screens.edit_location.EditLocationViewModel
@@ -46,5 +47,6 @@ val appModule = module {
     viewModel { ViewPostViewModel(sdk = get()) }
     viewModel { FriendRequestsViewModel(sdk = get()) }
     viewModel { SettingsViewModel(sdk = get(),dataStore = get()) }
+    viewModel { BlockedViewModel(sdk = get()) }
 
 }

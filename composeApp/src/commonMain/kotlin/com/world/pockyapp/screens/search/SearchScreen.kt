@@ -64,10 +64,6 @@ fun SearchScreen(navController: NavHostController, viewModel: SearchViewModel = 
         mutableStateOf("")
     }
 
-    LaunchedEffect(null) {
-        //viewModel.search("")
-    }
-
     val users = viewModel.profilesState.collectAsState()
 
     Scaffold(modifier = Modifier.fillMaxSize()) {
@@ -158,23 +154,20 @@ fun SearchScreen(navController: NavHostController, viewModel: SearchViewModel = 
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Medium,
                                         fontSize = 15.sp,
-                                        maxLines = 2
+                                        maxLines = 1
                                     )
 
                                     Spacer(modifier = Modifier.size(5.dp))
 
                                     Text(
-                                        text = "${item.firstName}${item.lastName}",
+                                        text = item.username,
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Normal,
                                         fontSize = 13.sp,
-                                        maxLines = 2
+                                        maxLines = 1
                                     )
                                 }
-
                             }
-
-
                         }
                         Spacer(modifier = Modifier.size(10.dp))
 
