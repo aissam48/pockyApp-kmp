@@ -142,6 +142,7 @@ fun ProfilePreviewScreen(
         is BlockState.Success -> {
             viewModel.getProfile(id = id)
             viewModel.getPosts(id = id)
+            posts.value = mutableSetOf()
         }
 
         is BlockState.Error -> {
@@ -635,8 +636,7 @@ fun ProfilePreviewScreen(
                     }
 
                     is PostsState.Success -> {
-                        posts.value.addAll(state.posts)
-                        items(posts.value.chunked(3)) { item ->
+                        items(state.posts.chunked(3)) { item ->
 
                             Row(
                                 modifier = Modifier.fillMaxWidth()

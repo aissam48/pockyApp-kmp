@@ -26,6 +26,7 @@ sealed class UnBlockUiState {
 
 class BlockedViewModel(val sdk: ApiManager) : ViewModel() {
 
+    private var isLoadBlocked = false
     private val _blockedState =
         MutableStateFlow<BlockedUiState>(BlockedUiState.Loading)
     val blockedState: StateFlow<BlockedUiState> = _blockedState.asStateFlow()
@@ -35,11 +36,15 @@ class BlockedViewModel(val sdk: ApiManager) : ViewModel() {
     val unBlockState: StateFlow<UnBlockUiState> = _unBlockState.asStateFlow()
 
     fun getBlockedUsers() {
-        _blockedState.value = BlockedUiState.Loading
+        if (!isLoadBlocked){
+            _blockedState.value = BlockedUiState.Loading
+        }
         viewModelScope.launch {
             sdk.getBlockedUsers({ success ->
+                isLoadBlocked = true
                 _blockedState.value = BlockedUiState.Success(success)
             }, { error ->
+                isLoadBlocked = false
                 _blockedState.value =
                     BlockedUiState.Error(error)
             })
