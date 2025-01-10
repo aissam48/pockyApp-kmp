@@ -20,6 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.pointer.PointerEvent
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -35,7 +38,9 @@ import com.world.pockyapp.screens.components.CustomDialogSuccess
 import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
@@ -156,6 +161,7 @@ fun StoryPage(
     val deleteState by viewModel.deleteState.collectAsState()
     val likeState by viewModel.likeState.collectAsState()
     val unlikeState by viewModel.unLikeState.collectAsState()
+    val scope = rememberCoroutineScope() // Use Compose's coroutine scope
 
     if (currentStoryIndex > userStories.moments.size - 1) {
         navController.popBackStack()
@@ -169,22 +175,27 @@ fun StoryPage(
 
     var isHolding by remember { mutableStateOf(false) }
 
-    LaunchedEffect(currentStoryIndex) {
-        progressAnimation.snapTo(0f)
-        progressValue = 0f
-        progressAnimation.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(
-                durationMillis = 5000,
-                easing = LinearEasing
+    LaunchedEffect(currentStoryIndex, isHolding) {
+        // Stop or continue progress based on `isHolding`
+        if (!isHolding) {
+            progressAnimation.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = (10000 * (1f - progressAnimation.value)).toInt(), // Adjust for remaining progress
+                    easing = LinearEasing
+                )
             )
-        )
-        onStoryFinished()
+            onStoryFinished() // Called when animation completes
+        }
     }
 
     LaunchedEffect(progressAnimation.value) {
         if (!isHolding) {
             progressValue = progressAnimation.value
+            if (progressAnimation.value == 1f){
+                onStoryFinished()
+            }
+            println(progressAnimation.value)
         }
 
     }
@@ -235,35 +246,54 @@ fun StoryPage(
             }
         }
 
-        // Touch controls
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(Unit) {
 
+                .pointerInput(Unit) {
                     awaitEachGesture {
-                        // Wait for down event
-                        val down = awaitFirstDown()
+
+                        var clickAble = true
+                        val down = awaitFirstDown() // User touches the screen
                         isHolding = true
                         CoroutineScope(Dispatchers.Main).launch {
-                            progressAnimation.stop()
+                           // progressAnimation.stop() // Pause progress
+
                         }
-                        val offset = down.position
-                        val up = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
-                            waitForUpOrCancellation()
+
+                        // Detect if the user holds for a certain duration
+                        val holdJob = scope.launch {
+                            delay(500) // Threshold for "long press" (e.g., 500ms)
+                            if (isHolding) {
+                                clickAble = false
+                                println("Long press detected!")
+                            }
                         }
+
+                        val up = waitForUpOrCancellation() // Wait for user to lift their finger or cancel
+                        holdJob.cancel() // Stop the hold detection once the finger is lifted or gesture canceled
 
                         if (up != null) {
                             isHolding = false
-                            println("Clicked!")
-                            if (offset.x < size.width / 2) {
-                                onTapLeft()
-                            } else {
-                                onTapRight()
+                            println("Finger removed after hold!") // This happens if the user held for a while
+                            scope.launch {
+
+
+
                             }
+
+                            if (clickAble) {
+                                if (down.position.x < size.width / 2) {
+                                    onTapLeft()
+                                } else {
+                                    onTapRight()
+                                }
+                            }
+
                         }
                     }
                 }
+
         ) {
             Box(
                 modifier = Modifier
