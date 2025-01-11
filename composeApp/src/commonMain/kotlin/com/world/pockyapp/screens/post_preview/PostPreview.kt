@@ -37,7 +37,13 @@ import androidx.navigation.NavHostController
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.preat.peekaboo.image.picker.toImageBitmap
+import com.world.pockyapp.network.models.model.GeoLocationModel
 import com.world.pockyapp.screens.components.CustomDialogSuccess
+import dev.jordond.compass.geocoder.Geocoder
+import dev.jordond.compass.geocoder.placeOrNull
+import dev.jordond.compass.geolocation.Geolocator
+import dev.jordond.compass.geolocation.GeolocatorResult
+import dev.jordond.compass.geolocation.mobile
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -65,6 +71,47 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
             }
         }
     )
+
+    val geolocator: Geolocator = Geolocator.mobile()
+
+    val geoLocationModel by remember { mutableStateOf(GeoLocationModel()) }
+
+    LaunchedEffect(isChecked) {
+        if (!isChecked){
+            return@LaunchedEffect
+        }
+        when (val result: GeolocatorResult = geolocator.current()) {
+            is GeolocatorResult.Success -> {
+                val geocoder = Geocoder()
+                val place = geocoder.placeOrNull(result.data.coordinates)
+                geoLocationModel.latitude = result.data.coordinates.latitude
+                geoLocationModel.longitude = result.data.coordinates.longitude
+                geoLocationModel.street = place?.street.toString()
+                geoLocationModel.country = place?.country.toString()
+                geoLocationModel.postalCode = place?.postalCode.toString()
+            }
+
+            is GeolocatorResult.Error -> when (result) {
+                is GeolocatorResult.NotSupported -> {
+                    isChecked = false
+                }
+                is GeolocatorResult.NotFound -> {
+                    isChecked = false
+                }
+                is GeolocatorResult.PermissionError ->{
+                    isChecked = false
+                }
+                is GeolocatorResult.GeolocationFailed -> {
+                    isChecked = false
+                }
+                else -> {
+                    isChecked = false
+                }
+            }
+        }
+
+
+    }
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -158,7 +205,7 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                     ).height(50.dp).width(130.dp)
                         .padding(5.dp).align(Alignment.CenterEnd).clickable {
                             if (photo.value != null) {
-                                viewModel.setPost(photo.value!!, isChecked)
+                                viewModel.setPost(photo.value!!, isChecked, geoLocationModel)
                             }
                         }
 

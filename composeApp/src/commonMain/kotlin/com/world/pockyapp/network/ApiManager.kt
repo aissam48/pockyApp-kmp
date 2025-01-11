@@ -204,6 +204,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun setPost(
         byteArray: ByteArray,
         isNearby: Boolean,
+        geoLocationModel: GeoLocationModel,
         onSuccess: (String) -> Unit,
         onFailure: (ErrorModel) -> Unit
     ) {
@@ -217,6 +218,11 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                     append(HttpHeaders.ContentDisposition, "filename=file")
                 })
                 append("isNearby", isNearby)
+                append("latitude", geoLocationModel.latitude)
+                append("longitude", geoLocationModel.longitude)
+                append("country", geoLocationModel.country)
+                append("street", geoLocationModel.street)
+                append("postalCode", geoLocationModel.postalCode)
             }) {
             val token = getToken()
             println("token-----> $token")
