@@ -3,6 +3,7 @@ package com.world.pockyapp.screens.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,13 +39,14 @@ import androidx.navigation.NavHostController
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverScreen
-import com.world.pockyapp.screens.profile.ProfileScreen
+import com.world.pockyapp.screens.home.navigations.hot.HotScreen
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_chat_black
 import pockyapp.composeapp.generated.resources.ic_discover_black
+import pockyapp.composeapp.generated.resources.ic_hot_black
 import pockyapp.composeapp.generated.resources.ic_profile_black
 import pockyapp.composeapp.generated.resources.ic_search_black
 
@@ -66,6 +68,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
             duration = SnackbarDuration.Short
         )
     }
+
     Column(
         modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.onPrimary)
     ) {
@@ -86,7 +89,9 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
             Spacer(modifier = Modifier.height(15.dp))
 
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
             ) {
 
                 Image(
@@ -107,7 +112,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                     contentDescription = null,
                 )
             }
-            Spacer(modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.size(10.dp))
 
         }
 
@@ -131,12 +136,26 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                             )
                         }
                     )
-
                     BottomNavigationItem(
                         selected = selected == 1,
                         onClick = {
                             selected = 1
                             viewModel.selectedScreen = 1
+                        },
+                        icon = {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_hot_black),
+                                contentDescription = null,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                    )
+
+                    BottomNavigationItem(
+                        selected = selected == 2,
+                        onClick = {
+                            selected = 2
+                            viewModel.selectedScreen = 2
                         },
                         icon = {
                             Icon(
@@ -158,6 +177,10 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                     }
 
                     1 -> {
+                        HotScreen(navController)
+                    }
+
+                    2 -> {
                         ChatScreen(navController)
                     }
                 }

@@ -19,7 +19,7 @@ import pockyapp.composeapp.generated.resources.ic_close_white
 
 @Composable
 actual fun CameraView(navController: NavHostController) {
-    var captureSession by remember { mutableStateOf<AVCaptureSession?>(null) }
+    /*var captureSession by remember { mutableStateOf<AVCaptureSession?>(null) }
     val photoOutput = remember { AVCapturePhotoOutput() }
 
     DisposableEffect(Unit) {
@@ -28,7 +28,7 @@ actual fun CameraView(navController: NavHostController) {
         onDispose {
             captureSession?.stopRunning()
         }
-    }
+    }*/
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Camera preview here - you'll need a ComposeCamera pod or custom native view
@@ -56,7 +56,7 @@ actual fun CameraView(navController: NavHostController) {
                     .align(Alignment.BottomCenter)
                     .size(80.dp)
                     .clickable {
-                        capturePhoto(photoOutput, navController)
+                        //capturePhoto(photoOutput, navController)
                     }
             )
         }

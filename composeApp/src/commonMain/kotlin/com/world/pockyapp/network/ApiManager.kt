@@ -11,6 +11,7 @@ import com.world.pockyapp.network.models.model.ConversationModel
 import com.world.pockyapp.network.models.model.DataModel
 import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.FriendRequestModel
+import com.world.pockyapp.network.models.model.GeoLocationModel
 import com.world.pockyapp.network.models.model.MessageModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
@@ -1209,6 +1210,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun shareMoment(
         byteArray: ByteArray?,
         isNearby: Boolean,
+        geoLocationModel: GeoLocationModel,
         onSuccess: (String) -> Unit,
         onFailure: (ErrorModel) -> Unit
     ) {
@@ -1223,6 +1225,11 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                             append(HttpHeaders.ContentDisposition, "filename=file")
                         })
                         append("isNearby", isNearby)
+                        append("latitude", geoLocationModel.latitude)
+                        append("longitude", geoLocationModel.longitude)
+                        append("country", geoLocationModel.country)
+                        append("street", geoLocationModel.street)
+                        append("postalCode", geoLocationModel.postalCode)
                     }
 
                 }) {

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.ErrorModel
+import com.world.pockyapp.network.models.model.GeoLocationModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,11 +29,11 @@ class MomentPreviewViewModel(private val sdk: ApiManager) :
     val uiState: StateFlow<MomentPreviewUiState> = _uiState
 
 
-    fun shareMoment(byteArray: ByteArray?, isNearby: Boolean) {
+    fun shareMoment(byteArray: ByteArray?, isNearby: Boolean, geoLocationModel: GeoLocationModel) {
 
         viewModelScope.launch {
             _uiState.value = MomentPreviewUiState.Loading
-            sdk.shareMoment(byteArray,isNearby, { success ->
+            sdk.shareMoment(byteArray,isNearby,geoLocationModel, { success ->
                 _uiState.value = MomentPreviewUiState.Success()
 
             }, { error ->

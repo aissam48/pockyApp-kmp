@@ -175,30 +175,46 @@ fun StoryPage(
 
     var isHolding by remember { mutableStateOf(false) }
 
-    LaunchedEffect(currentStoryIndex, isHolding) {
-        // Stop or continue progress based on `isHolding`
+    LaunchedEffect(currentStoryIndex) {
+        // Reset progress only when the story index changes
+        progressAnimation.snapTo(0f) // Start at 0 for the new story
+        progressValue = 0f // Reset the progress value for the new story
+
         if (!isHolding) {
+            // Animate to the end if not holding
             progressAnimation.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = (10000 * (1f - progressAnimation.value)).toInt(), // Adjust for remaining progress
+                    durationMillis = 10000,
                     easing = LinearEasing
                 )
             )
-            onStoryFinished() // Called when animation completes
+            onStoryFinished() // Trigger when animation completes
+        }
+    }
+
+    LaunchedEffect(isHolding) {
+        if (!isHolding) {
+            // Resume the animation when holding is false
+            progressAnimation.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = (10000 * (1f - progressValue)).toInt(),
+                    easing = LinearEasing
+                )
+            )
+            onStoryFinished() // Trigger when animation completes
         }
     }
 
     LaunchedEffect(progressAnimation.value) {
         if (!isHolding) {
+            // Continuously update progressValue only when not holding
             progressValue = progressAnimation.value
-            if (progressAnimation.value == 1f){
-                onStoryFinished()
-            }
-            println(progressAnimation.value)
+            //println("Progress: ${progressAnimation.value}")
         }
-
     }
+
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -256,10 +272,6 @@ fun StoryPage(
                         var clickAble = true
                         val down = awaitFirstDown() // User touches the screen
                         isHolding = true
-                        CoroutineScope(Dispatchers.Main).launch {
-                           // progressAnimation.stop() // Pause progress
-
-                        }
 
                         // Detect if the user holds for a certain duration
                         val holdJob = scope.launch {
@@ -276,11 +288,6 @@ fun StoryPage(
                         if (up != null) {
                             isHolding = false
                             println("Finger removed after hold!") // This happens if the user held for a while
-                            scope.launch {
-
-
-
-                            }
 
                             if (clickAble) {
                                 if (down.position.x < size.width / 2) {
@@ -289,7 +296,6 @@ fun StoryPage(
                                     onTapRight()
                                 }
                             }
-
                         }
                     }
                 }
@@ -310,7 +316,7 @@ fun StoryPage(
         Row(
             modifier = Modifier
                 .padding(8.dp)
-                .padding(top = 15.dp)
+                .padding(top = 25.dp)
                 .clickable {
                     if (userStories.id == myID) {
                         navController.navigate(NavRoutes.MY_PROFILE.route)

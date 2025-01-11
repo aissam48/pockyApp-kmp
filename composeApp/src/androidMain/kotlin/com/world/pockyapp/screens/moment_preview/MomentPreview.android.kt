@@ -27,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +39,14 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
+import com.world.pockyapp.network.models.model.GeoLocationModel
 import com.world.pockyapp.screens.components.CustomDialogSuccess
+import dev.jordond.compass.geocoder.Geocoder
+import dev.jordond.compass.geocoder.placeOrNull
+import dev.jordond.compass.geolocation.Geolocator
+import dev.jordond.compass.geolocation.GeolocatorResult
+import dev.jordond.compass.geolocation.mobile
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -67,7 +75,47 @@ actual fun MomentPreview(
     val title = remember {
         mutableStateOf("")
     }
+    val scope = rememberCoroutineScope()
+    val geolocator: Geolocator = Geolocator.mobile()
 
+    val geoLocationModel by remember { mutableStateOf(GeoLocationModel()) }
+
+    LaunchedEffect(isChecked) {
+        if (!isChecked){
+            return@LaunchedEffect
+        }
+            when (val result: GeolocatorResult = geolocator.current()) {
+                is GeolocatorResult.Success -> {
+                    val geocoder = Geocoder()
+                    val place = geocoder.placeOrNull(result.data.coordinates)
+                    geoLocationModel.latitude = result.data.coordinates.latitude
+                    geoLocationModel.longitude = result.data.coordinates.longitude
+                    geoLocationModel.street = place?.street.toString()
+                    geoLocationModel.country = place?.country.toString()
+                    geoLocationModel.postalCode = place?.postalCode.toString()
+                }
+
+                is GeolocatorResult.Error -> when (result) {
+                    is GeolocatorResult.NotSupported -> {
+                        isChecked = false
+                    }
+                    is GeolocatorResult.NotFound -> {
+                        isChecked = false
+                    }
+                    is GeolocatorResult.PermissionError ->{
+                        isChecked = false
+                    }
+                    is GeolocatorResult.GeolocationFailed -> {
+                        isChecked = false
+                    }
+                    else -> {
+                        isChecked = false
+                    }
+                }
+            }
+
+
+    }
     if (showDialog) {
         CustomDialogSuccess(
             title = title.value,
@@ -99,7 +147,7 @@ actual fun MomentPreview(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()){
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -121,7 +169,10 @@ actual fun MomentPreview(
                     .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
             ) {
 
-                Row(modifier = Modifier.align(Alignment.CenterStart), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.align(Alignment.CenterStart),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(text = "Share to nearby", color = Color.White, fontSize = 13.sp)
 
                     Spacer(modifier = Modifier.width(10.dp))
@@ -148,7 +199,7 @@ actual fun MomentPreview(
                         .padding(5.dp)
                         .align(Alignment.CenterEnd)
                         .clickable {
-                            viewModel.shareMoment(imageData, isChecked)
+                            viewModel.shareMoment(imageData, isChecked, geoLocationModel)
                         }
 
                 ) {
@@ -185,7 +236,8 @@ actual fun MomentPreview(
         Image(
             painter = painterResource(Res.drawable.ic_close_black),
             contentDescription = null,
-            modifier = Modifier.padding(start = 15.dp, top = 15.dp)
+            modifier = Modifier
+                .padding(start = 15.dp, top = 15.dp)
                 .align(Alignment.TopStart)
                 .size(40.dp)
                 .clickable {
