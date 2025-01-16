@@ -16,6 +16,7 @@ import com.world.pockyapp.network.models.model.MessageModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.network.models.model.ResponseMessageModel
+import com.world.pockyapp.network.models.model.StreetModel
 import com.world.pockyapp.network.models.requests.ChangePasswordRequestModel
 import com.world.pockyapp.network.models.requests.LocationRequestModel
 import com.world.pockyapp.network.models.requests.LoginRequestModel
@@ -223,6 +224,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 append("country", geoLocationModel.country)
                 append("street", geoLocationModel.street)
                 append("postalCode", geoLocationModel.postalCode)
+                append("name", geoLocationModel.name)
             }) {
             val token = getToken()
             println("token-----> $token")
@@ -1236,6 +1238,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                         append("country", geoLocationModel.country)
                         append("street", geoLocationModel.street)
                         append("postalCode", geoLocationModel.postalCode)
+                        append("name", geoLocationModel.name)
                     }
 
                 }) {
@@ -1327,6 +1330,30 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
             if (response.status.isSuccess()) {
                 val responseBody: List<ProfileModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
+    suspend fun getStreets(
+        onSuccess: (List<StreetModel>) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/momentsbylocation") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<StreetModel> = response.body()
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {

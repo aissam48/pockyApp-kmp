@@ -39,6 +39,7 @@ import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.preat.peekaboo.image.picker.toImageBitmap
 import com.world.pockyapp.network.models.model.GeoLocationModel
 import com.world.pockyapp.screens.components.CustomDialogSuccess
+import dev.jordond.compass.Priority
 import dev.jordond.compass.geocoder.Geocoder
 import dev.jordond.compass.geocoder.placeOrNull
 import dev.jordond.compass.geolocation.Geolocator
@@ -77,10 +78,12 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
     val geoLocationModel by remember { mutableStateOf(GeoLocationModel()) }
 
     LaunchedEffect(isChecked) {
+        println("LaunchedEffect")
         if (!isChecked){
             return@LaunchedEffect
         }
-        when (val result: GeolocatorResult = geolocator.current()) {
+
+        when (val result: GeolocatorResult = geolocator.current(priority = Priority.HighAccuracy)) {
             is GeolocatorResult.Success -> {
                 val geocoder = Geocoder()
                 val place = geocoder.placeOrNull(result.data.coordinates)
@@ -89,6 +92,7 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                 geoLocationModel.street = place?.street.toString()
                 geoLocationModel.country = place?.country.toString()
                 geoLocationModel.postalCode = place?.postalCode.toString()
+                geoLocationModel.name = place?.name.toString()
             }
 
             is GeolocatorResult.Error -> when (result) {
@@ -108,8 +112,8 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                     isChecked = false
                 }
             }
-        }
 
+        }
 
     }
 

@@ -13,5 +13,6 @@ data class MomentModel(
     var viewed: Boolean = false,
     var liked: Boolean = false,
     val views: MutableList<String> = mutableListOf(),
+    val geoLocation: GeoLocationModel = GeoLocationModel(),
 ) {
 }

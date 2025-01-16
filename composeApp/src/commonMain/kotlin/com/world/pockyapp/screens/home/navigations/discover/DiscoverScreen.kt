@@ -54,7 +54,7 @@ fun DiscoverScreen(
     val nearbyMomentsState by viewModel.nearbyMomentsState.collectAsState()
     val nearbyPostsState by viewModel.nearbyPostsState.collectAsState()
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         viewModel.getProfile()
         viewModel.loadFriendsMoments()
         viewModel.loadNearbyMoments()
@@ -77,20 +77,25 @@ fun DiscoverScreen(
         // Friends Moments Section
         item {
 
-            Row (verticalAlignment = Alignment.CenterVertically){
+            Row(verticalAlignment = Alignment.CenterVertically) {
 
                 when (profileState) {
                     is UiState.Loading -> {
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
                             CircularProgressIndicator()
                         }
                     }
+
                     is UiState.Error -> {
                         ErrorSection(
                             error = (profileState as UiState.Error).error,
                             onRetry = { viewModel.loadFriendsMoments() }
                         )
                     }
+
                     is UiState.Success -> {
                         val profile = (profileState as UiState.Success<ProfileModel>).data
                         ProfileSection(profile = profile, navController = navController)
@@ -105,18 +110,24 @@ fun DiscoverScreen(
 
                 when (friendsMomentsState) {
                     is UiState.Loading -> {
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
                             CircularProgressIndicator()
                         }
                     }
+
                     is UiState.Error -> {
                         ErrorSection(
                             error = (friendsMomentsState as UiState.Error).error,
                             onRetry = { viewModel.loadFriendsMoments() }
                         )
                     }
+
                     is UiState.Success -> {
-                        val friends = (friendsMomentsState as UiState.Success<List<ProfileModel>>).data
+                        val friends =
+                            (friendsMomentsState as UiState.Success<List<ProfileModel>>).data
                         FriendsMomentsSection(
                             friends = friends,
                             currentProfile = (profileState as? UiState.Success<ProfileModel>)?.data,
@@ -136,14 +147,17 @@ fun DiscoverScreen(
                         CircularProgressIndicator()
                     }
                 }
+
                 is UiState.Error -> {
                     ErrorSection(
                         error = (nearbyMomentsState as UiState.Error).error,
                         onRetry = { viewModel.loadNearbyMoments() }
                     )
                 }
+
                 is UiState.Success -> {
-                    val nearbyMoments = (nearbyMomentsState as UiState.Success<List<ProfileModel>>).data
+                    val nearbyMoments =
+                        (nearbyMomentsState as UiState.Success<List<ProfileModel>>).data
                     if (nearbyMoments.isNotEmpty()) {
                         NearbyMomentsSection(
                             moments = nearbyMoments,
@@ -169,6 +183,7 @@ fun DiscoverScreen(
                     }
                 }
             }
+
             is UiState.Error -> {
                 item {
                     ErrorSection(
@@ -177,6 +192,7 @@ fun DiscoverScreen(
                     )
                 }
             }
+
             is UiState.Success -> {
                 val posts = (nearbyPostsState as UiState.Success<List<PostModel>>).data
                 if (posts.isNotEmpty()) {
@@ -227,11 +243,12 @@ fun ErrorSection(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        when(error.code){
-            in 500..599->{
+        when (error.code) {
+            in 500..599 -> {
 
             }
-            else->{
+
+            else -> {
                 Text(
                     text = error.message,
                     color = MaterialTheme.colorScheme.error,
@@ -367,12 +384,22 @@ fun PostItem(
 
             Spacer(modifier = Modifier.size(8.dp))
 
-            Text(
-                text = "${post.profile.firstName} ${post.profile.lastName}",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+            Column {
+                Text(
+                    text = "${post.profile.firstName} ${post.profile.lastName}",
+                    color = Color.Black,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(modifier = Modifier.size(2.dp))
+                Text(
+                    text = "${post.geoLocation.country} ${post.geoLocation.street}",
+                    color = Color.LightGray,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
         }
 
         // Post Image
@@ -527,29 +554,5 @@ fun NearbyMomentItem(
                 contentDescription = null
             )
         }
-    }
-}
-
-// Optional: Helper composable for common moment border
-@Composable
-private fun MomentBorder(
-    hasUnviewedContent: Boolean,
-    shape: androidx.compose.ui.graphics.Shape,
-    content: @Composable () -> Unit
-) {
-    Box(
-        modifier = Modifier.border(
-            width = 2.dp,
-            brush = Brush.linearGradient(
-                colors = if (hasUnviewedContent) {
-                    listOf(Color.Red, Color.Yellow, Color.White)
-                } else {
-                    listOf(Color.Gray, Color.Gray, Color.Gray)
-                }
-            ),
-            shape = shape
-        )
-    ) {
-        content()
     }
 }

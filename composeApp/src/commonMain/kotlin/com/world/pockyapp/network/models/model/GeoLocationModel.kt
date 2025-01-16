@@ -8,5 +8,6 @@ data class GeoLocationModel(
     var longitude: Double = 0.0,
     var street: String = "",
     var country: String = "",
-    var postalCode: String = ""
+    var postalCode: String = "",
+    var name: String = ""
 )

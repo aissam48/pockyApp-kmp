@@ -1,4 +1,4 @@
-package com.world.pockyapp.screens.moment_screen
+package com.world.pockyapp.screens.moment_by_locationscreen
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -30,7 +30,9 @@ import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.network.models.model.StreetModel
 import com.world.pockyapp.screens.components.CustomDialog
+import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -48,7 +50,7 @@ import pockyapp.composeapp.generated.resources.ic_view
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun StoriesViewer(
-    users: List<ProfileModel>,
+    streets: List<StreetModel>,
     initialUserIndex: Int = 0,
     onStoriesFinished: () -> Unit,
     navController: NavHostController,
@@ -59,18 +61,18 @@ fun StoriesViewer(
     var currentStoryIndex by remember { mutableStateOf(0) }
     val pagerState = rememberPagerState(
         initialPage = initialUserIndex,
-        pageCount = { users.size }
+        pageCount = { streets.size }
     )
 
     val coroutineScope = rememberCoroutineScope()
-    val indexFirstUnvViewed = users[currentUserIndex].moments.indexOfFirst { !it.viewed }
+    val indexFirstUnvViewed = streets[currentUserIndex].moments.indexOfFirst { !it.viewed }
 
     currentStoryIndex = if (indexFirstUnvViewed == -1) 0 else indexFirstUnvViewed
 
     LaunchedEffect(pagerState.currentPage) {
         println("pagerState.currentPage ${pagerState.currentPage}")
         currentUserIndex = pagerState.currentPage
-        val currentMoment = users[currentUserIndex]
+        val currentMoment = streets[currentUserIndex]
         val indexFirstUnvViewedL = currentMoment.moments.indexOfFirst { !it.viewed }
         currentStoryIndex = if (indexFirstUnvViewedL == -1) 0 else indexFirstUnvViewedL
     }
@@ -84,15 +86,15 @@ fun StoriesViewer(
             state = pagerState,
             modifier = Modifier.fillMaxSize()
         ) { userIndex ->
-            val user = users[userIndex]
+            val street = streets[userIndex]
             StoryPage(
-                userStories = user,
+                streetStories = street,
                 currentStoryIndex = if (userIndex == currentUserIndex) {
-                    val momentID = user.moments[currentStoryIndex].momentID
-                    viewModel.viewMoment(momentID, user.id)
+                    val momentID = street.moments[currentStoryIndex].momentID
+                    viewModel.viewMoment(momentID, street.moments[currentStoryIndex].ownerID)
                     currentStoryIndex
                 } else {
-                    val index = user.moments.indexOfFirst { !it.viewed }
+                    val index = street.moments.indexOfFirst { !it.viewed }
                     if (index == -1) {
                         0
                     } else {
@@ -100,10 +102,10 @@ fun StoriesViewer(
                     }
                 },
                 onStoryFinished = {
-                    if (currentStoryIndex < user.moments.size - 1) {
+                    if (currentStoryIndex < street.moments.size - 1) {
                         currentStoryIndex++
                     } else {
-                        if (currentUserIndex < users.size - 1) {
+                        if (currentUserIndex < streets.size - 1) {
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(currentUserIndex + 1)
                             }
@@ -122,9 +124,9 @@ fun StoriesViewer(
                     }
                 },
                 onTapRight = {
-                    if (currentStoryIndex < user.moments.size - 1) {
+                    if (currentStoryIndex < street.moments.size - 1) {
                         currentStoryIndex++
-                    } else if (currentUserIndex < users.size - 1) {
+                    } else if (currentUserIndex < streets.size - 1) {
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(currentUserIndex + 1)
                         }
@@ -140,7 +142,7 @@ fun StoriesViewer(
 
 @Composable
 fun StoryPage(
-    userStories: ProfileModel,
+    streetStories: StreetModel,
     currentStoryIndex: Int,
     onStoryFinished: () -> Unit,
     onTapLeft: () -> Unit,
@@ -154,11 +156,11 @@ fun StoryPage(
     val unlikeState by viewModel.unLikeState.collectAsState()
     val scope = rememberCoroutineScope() // Use Compose's coroutine scope
 
-    if (currentStoryIndex > userStories.moments.size - 1) {
+    if (currentStoryIndex > streetStories.moments.size - 1) {
         navController.popBackStack()
         return
     }
-    val story = userStories.moments[currentStoryIndex]
+    val story = streetStories.moments[currentStoryIndex]
     var progressValue by remember { mutableStateOf(0f) }
     val progressAnimation = remember {
         Animatable(0f)
@@ -239,7 +241,7 @@ fun StoryPage(
                 .padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            userStories.moments.forEachIndexed { index, _ ->
+            streetStories.moments.forEachIndexed { index, _ ->
                 LinearProgressIndicator(
                     progress = if (index < currentStoryIndex) 1f
                     else if (index == currentStoryIndex) progressValue
@@ -309,10 +311,10 @@ fun StoryPage(
                 .padding(8.dp)
                 .padding(top = 25.dp)
                 .clickable {
-                    if (userStories.id == myID) {
+                    if (streetStories.moments.get(currentStoryIndex).profile.id == myID) {
                         navController.navigate(NavRoutes.MY_PROFILE.route)
                     } else {
-                        navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${userStories.id}")
+                        navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${streetStories.moments.get(currentStoryIndex).profile.id}")
                     }
                 },
             verticalAlignment = Alignment.CenterVertically
@@ -328,7 +330,7 @@ fun StoryPage(
             Spacer(modifier = Modifier.width(15.dp))
             Row {
                 AsyncImage(
-                    model = getUrl(userStories.photoID),
+                    model = getUrl(streetStories.moments.get(currentStoryIndex).profile.photoID),
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -339,7 +341,7 @@ fun StoryPage(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "${userStories.firstName} ${userStories.lastName}",
+                    text = "${streetStories.moments.get(currentStoryIndex).profile.firstName} ${streetStories.moments.get(currentStoryIndex).profile.lastName}",
                     color = Color.White,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -430,16 +432,16 @@ fun StoryPage(
 
 // Example usage
 @Composable
-fun MomentsScreen(
+fun MomentsByLocationScreen(
     navController: NavHostController,
-    moments: List<ProfileModel>,
+    moments: List<StreetModel>,
     index: String?,
     myID: String?,
     viewModel: MomentsViewModel = koinViewModel()
 ) {
 
     StoriesViewer(
-        users = moments,
+        streets = moments,
         onStoriesFinished = {
             navController.popBackStack()
         },

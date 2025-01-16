@@ -40,6 +40,8 @@ import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverScreen
 import com.world.pockyapp.screens.home.navigations.hot.HotScreen
+import dev.jordond.compass.autocomplete.Autocomplete
+import dev.jordond.compass.autocomplete.mobile
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -68,7 +70,6 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
             duration = SnackbarDuration.Short
         )
     }
-
     Column(
         modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.onPrimary)
     ) {

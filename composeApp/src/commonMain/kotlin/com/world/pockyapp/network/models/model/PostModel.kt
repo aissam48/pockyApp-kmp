@@ -11,4 +11,5 @@ data class PostModel(
     val profile: ProfileModel = ProfileModel(),
     val likes: MutableList<String> = mutableListOf(),
     var liked: Boolean = false,
+    val geoLocation: GeoLocationModel = GeoLocationModel(),
 )

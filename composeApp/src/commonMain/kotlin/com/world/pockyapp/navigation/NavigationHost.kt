@@ -6,9 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.world.pockyapp.network.models.model.MomentModel
-import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
-import com.world.pockyapp.screens.moment_screen.MomentsScreen
+import com.world.pockyapp.network.models.model.StreetModel
 import com.world.pockyapp.screens.camera.CameraView
 import com.world.pockyapp.screens.edit_location.EditLocationScreen
 import com.world.pockyapp.screens.edit_profile.EditProfileScreen
@@ -18,7 +17,9 @@ import com.world.pockyapp.screens.blocked.BlockedScreen
 import com.world.pockyapp.screens.change_password.ChangePasswordScreen
 import com.world.pockyapp.screens.chat.ChatScreen
 import com.world.pockyapp.screens.friend_request.FriendRequestsScreen
+import com.world.pockyapp.screens.moment_by_locationscreen.MomentsByLocationScreen
 import com.world.pockyapp.screens.moment_preview.MomentPreview
+import com.world.pockyapp.screens.moment_screen.MomentsScreen
 import com.world.pockyapp.screens.post_preview.PostPreview
 import com.world.pockyapp.screens.profile.ProfileScreen
 import com.world.pockyapp.screens.profile_preview.ProfilePreviewScreen
@@ -104,6 +105,19 @@ fun NavigationHost(navController: NavHostController) {
 
 
             MomentsScreen(navController, moments, index, myID)
+        }
+
+        composable(route = "${NavRoutes.MOMENTS_BY_LOCATION.route}/{moments}/{index}/{myID}") { backStackEntry ->
+            val index = backStackEntry.arguments?.getString("index")
+            val myID = backStackEntry.arguments?.getString("myID")
+            println("---------------- $index")
+            val modulesJson = backStackEntry.arguments?.getString("moments")?.replace("%", "/")
+            val moments = modulesJson?.let {
+                Json.decodeFromString<List<StreetModel>>(it)
+            } ?: emptyList()
+
+
+            MomentsByLocationScreen(navController, moments, index, myID)
         }
 
         composable(route = "${NavRoutes.SHOW_MOMENTS.route}/{moments}") { backStackEntry ->
