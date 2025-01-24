@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Colors
+import androidx.compose.material.Divider
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -196,6 +197,8 @@ fun ChatScreen(
                 }
             }
 
+            Divider(modifier = Modifier.fillMaxWidth(), color = Color.LightGray)
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -237,6 +240,7 @@ fun ChatScreen(
             }
 
             // Message input
+            Divider(modifier = Modifier.fillMaxWidth(), color = Color.LightGray)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

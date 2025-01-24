@@ -40,6 +40,7 @@ import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
 import com.world.pockyapp.network.models.model.GeoLocationModel
+import com.world.pockyapp.screens.components.CustomDialogLoading
 import com.world.pockyapp.screens.components.CustomDialogSuccess
 import dev.jordond.compass.Priority
 import dev.jordond.compass.geocoder.Geocoder
@@ -72,6 +73,8 @@ actual fun MomentPreview(
     val uiState by viewModel.uiState.collectAsState()
 
     var showDialog by remember { mutableStateOf(false) }
+    var showDialog2 by remember { mutableStateOf(false) }
+    var showDialog3 by remember { mutableStateOf(false) }
 
     val title = remember {
         mutableStateOf("")
@@ -82,41 +85,53 @@ actual fun MomentPreview(
     val geoLocationModel by remember { mutableStateOf(GeoLocationModel()) }
 
     LaunchedEffect(isChecked) {
-        if (!isChecked){
+        if (!isChecked) {
             return@LaunchedEffect
         }
-            when (val result: GeolocatorResult = geolocator.current(priority = Priority.HighAccuracy)) {
-                is GeolocatorResult.Success -> {
-                    val geocoder = Geocoder()
-                    val place = geocoder.placeOrNull(result.data.coordinates)
-                    geoLocationModel.latitude = result.data.coordinates.latitude
-                    geoLocationModel.longitude = result.data.coordinates.longitude
-                    geoLocationModel.street = place?.street.toString()
-                    geoLocationModel.country = place?.country.toString()
-                    geoLocationModel.postalCode = place?.postalCode.toString()
-                    geoLocationModel.name = place?.name.toString()
+        title.value = "Fetching your location..."
+        showDialog3 = true
+        when (val result: GeolocatorResult = geolocator.current(priority = Priority.HighAccuracy)) {
+            is GeolocatorResult.Success -> {
+                val geocoder = Geocoder()
+                val place = geocoder.placeOrNull(result.data.coordinates)
+                geoLocationModel.latitude = result.data.coordinates.latitude
+                geoLocationModel.longitude = result.data.coordinates.longitude
+                geoLocationModel.street = place?.street.toString()
+                geoLocationModel.country = place?.country.toString()
+                geoLocationModel.postalCode = place?.postalCode.toString()
+                geoLocationModel.name = place?.name.toString()
 
-                    println(geoLocationModel)
-                }
+                println(geoLocationModel)
+                showDialog3 = false
+            }
 
-                is GeolocatorResult.Error -> when (result) {
+            is GeolocatorResult.Error -> {
+                showDialog3 = false
+                when (result) {
                     is GeolocatorResult.NotSupported -> {
                         isChecked = false
+                        title.value = "Enable GPS"
+                        showDialog2 = true
                     }
+
                     is GeolocatorResult.NotFound -> {
                         isChecked = false
                     }
-                    is GeolocatorResult.PermissionError ->{
+
+                    is GeolocatorResult.PermissionError -> {
                         isChecked = false
                     }
+
                     is GeolocatorResult.GeolocationFailed -> {
                         isChecked = false
                     }
+
                     else -> {
                         isChecked = false
                     }
                 }
             }
+        }
 
 
     }
@@ -128,6 +143,21 @@ actual fun MomentPreview(
                 showDialog = false
                 navController.popBackStack()
             }
+        )
+    }
+    if (showDialog2) {
+        CustomDialogSuccess(
+            title = title.value,
+            action = "Close",
+            onCancel = {
+                showDialog2 = false
+                //navController.popBackStack()
+            }
+        )
+    }
+    if (showDialog3) {
+        CustomDialogLoading(
+            title = title.value,
         )
     }
 

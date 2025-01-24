@@ -6,7 +6,9 @@ import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.ChatRequestModel
 import com.world.pockyapp.network.models.model.ConversationModel
 import com.world.pockyapp.network.models.model.ErrorModel
+import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.network.models.model.StreetModel
+import com.world.pockyapp.screens.home.navigations.discover.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +27,31 @@ class HotViewModel(val sdk: ApiManager) : ViewModel() {
     private val _streetState =
         MutableStateFlow<HotState<List<StreetModel>>>(HotState.Loading)
     val streetState: StateFlow<HotState<List<StreetModel>>> = _streetState.asStateFlow()
+
+    private val _profileState = MutableStateFlow<HotState<ProfileModel>>(HotState.Loading)
+    val profileState: StateFlow<HotState<ProfileModel>> = _profileState.asStateFlow()
+
+    fun getProfile() {
+        viewModelScope.launch {
+            try {
+                sdk.getMyProfile(
+                    onSuccess = { profile ->
+                        _profileState.value = HotState.Success(profile)
+                    },
+                    onFailure = { error ->
+                        _profileState.value = HotState.Error(error)
+                    }
+                )
+            } catch (e: Exception) {
+                _profileState.value = HotState.Error(
+                    error = ErrorModel(
+                        message = "Network error. Please try again later.",
+                        code = 500
+                    )
+                )
+            }
+        }
+    }
 
     fun loadStreets() {
         viewModelScope.launch {

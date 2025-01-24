@@ -46,7 +46,7 @@ class MomentsViewModel(private val sdk: ApiManager) :
     fun deleteMoment(momentID: String) {
         viewModelScope.launch {
             sdk.deleteMoment(momentID, { success ->
-                _deleteState.value = success
+                _deleteState.value = "success"
             }, { error ->
                 _deleteState.value = error.message
             })

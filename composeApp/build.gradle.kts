@@ -140,8 +140,8 @@ android {
         applicationId = "com.world.pockyapp"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 8
-        versionName = "1.1"
+        versionCode = 12
+        versionName = "1.1.3"
     }
     packaging {
         resources {

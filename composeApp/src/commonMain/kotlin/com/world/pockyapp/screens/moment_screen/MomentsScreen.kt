@@ -321,7 +321,7 @@ fun StoryPage(
             Image(
                 modifier = Modifier.size(23.dp).clickable {
                     navController.popBackStack()
-                },
+                }.background(color = Color.White, shape = CircleShape),
                 painter = painterResource(Res.drawable.ic_back_black),
                 contentDescription = null
             )
@@ -437,6 +437,12 @@ fun MomentsScreen(
     myID: String?,
     viewModel: MomentsViewModel = koinViewModel()
 ) {
+
+    val deleteMoment by viewModel.deleteState.collectAsState()
+    LaunchedEffect(deleteMoment){
+        if (deleteMoment == "success")
+        navController.popBackStack()
+    }
 
     StoriesViewer(
         users = moments,

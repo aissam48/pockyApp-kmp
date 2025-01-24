@@ -323,7 +323,7 @@ fun StoryPage(
             Image(
                 modifier = Modifier.size(23.dp).clickable {
                     navController.popBackStack()
-                },
+                }.background(color = Color.White, shape = CircleShape),
                 painter = painterResource(Res.drawable.ic_back_black),
                 contentDescription = null
             )

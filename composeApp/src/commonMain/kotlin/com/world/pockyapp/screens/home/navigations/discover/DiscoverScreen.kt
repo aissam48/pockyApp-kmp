@@ -42,6 +42,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_like
+import pockyapp.composeapp.generated.resources.ic_placeholder
 import pockyapp.composeapp.generated.resources.ic_unlike_black
 
 @Composable
@@ -291,6 +292,7 @@ fun ProfileSection(
         AsyncImage(
             model = if (profile.moments.isEmpty()) getUrl(profile.photoID) else getUrl(profile.moments[0].momentID),
             contentScale = ContentScale.Crop,
+            contentDescription = "",
             modifier = Modifier
                 .size(60.dp)
                 .clip(CircleShape)
@@ -304,7 +306,9 @@ fun ProfileSection(
                         )
                     }
                 },
-            contentDescription = null
+            placeholder = painterResource(Res.drawable.ic_placeholder),
+            error = painterResource(Res.drawable.ic_placeholder),
+
         )
     }
 }
@@ -379,7 +383,9 @@ fun PostItem(
                 modifier = Modifier
                     .size(35.dp)
                     .clip(CircleShape),
-                contentDescription = "Profile Photo"
+                contentDescription = "Profile Photo",
+                placeholder = painterResource(Res.drawable.ic_placeholder),
+                error = painterResource(Res.drawable.ic_placeholder),
             )
 
             Spacer(modifier = Modifier.size(8.dp))
@@ -414,7 +420,9 @@ fun PostItem(
                 model = getUrl(post.postID),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                contentDescription = "Post Image"
+                contentDescription = "Post Image",
+                placeholder = painterResource(Res.drawable.ic_placeholder),
+                error = painterResource(Res.drawable.ic_placeholder),
             )
         }
 
@@ -502,7 +510,9 @@ fun MomentItem(
                             )
                         }
                     },
-                contentDescription = null
+                contentDescription = null,
+                placeholder = painterResource(Res.drawable.ic_placeholder),
+                error = painterResource(Res.drawable.ic_placeholder),
             )
         }
     }

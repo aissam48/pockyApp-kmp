@@ -40,10 +40,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
+import com.mmk.kmpnotifier.notification.NotifierManager
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.network.models.model.StreetModel
-import com.world.pockyapp.screens.profile.ImagePost
 import com.world.pockyapp.screens.profile.convertPxToDp
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -51,19 +52,33 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_location_black
+import kotlin.random.Random
 
 @Composable
 fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinViewModel()) {
 
     val streetState by viewModel.streetState.collectAsState()
+    val profileState by viewModel.profileState.collectAsState()
+    val myProfile = remember { mutableStateOf(ProfileModel()) }
+
+    when(val state = profileState){
+        is HotState.Success->{
+            myProfile.value = state.data
+        }
+        else->{
+
+        }
+    }
+
     val screenSize = remember { mutableStateOf(Pair(-1, -1)) }
 
     LaunchedEffect(Unit) {
         viewModel.loadStreets()
+        viewModel.getProfile()
     }
 
     Scaffold(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
+        LazyColumn(modifier = Modifier.padding(start = 10.dp, end = 1.dp)) {
             when (val state = streetState) {
                 is HotState.Loading -> {
                     item {
@@ -83,6 +98,7 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
 
                 is HotState.Success -> {
                     val hotMoments = state.data
+                    hotMoments.sortedByDescending { it.moments.size }
                     if (hotMoments.isNotEmpty()) {
                         item {
                             Text(
@@ -105,7 +121,8 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
                                     HotMomentItem(
                                         street = item[index],
                                         navController = navController,
-                                        screenSize = screenSize
+                                        screenSize = screenSize,
+                                        myProfile = myProfile
                                     )
                                     Spacer(modifier = Modifier.size(7.dp))
 
@@ -146,7 +163,8 @@ fun HotMomentItem(
     street: StreetModel,
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    screenSize: MutableState<Pair<Int, Int>>
+    screenSize: MutableState<Pair<Int, Int>>,
+    myProfile: MutableState<ProfileModel>
 ) {
     val checkIfSeeAllMoments = street.moments.find { !it.viewed }
     Box(
@@ -180,7 +198,7 @@ fun HotMomentItem(
                     .clickable {
                         val modulesJson = Json.encodeToString(listOf(street))
                             .replace("/", "%")
-                        navController.navigate(NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/hdgetksj")
+                        navController.navigate(NavRoutes.MOMENTS_BY_LOCATION.route + "/${modulesJson}" + "/0" + "/${myProfile.value.id}")
                        // navController.navigate(NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/$currentUserId")
                     },
                 contentDescription = null

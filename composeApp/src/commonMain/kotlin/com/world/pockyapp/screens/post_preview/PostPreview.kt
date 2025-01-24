@@ -38,6 +38,7 @@ import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.preat.peekaboo.image.picker.toImageBitmap
 import com.world.pockyapp.network.models.model.GeoLocationModel
+import com.world.pockyapp.screens.components.CustomDialogLoading
 import com.world.pockyapp.screens.components.CustomDialogSuccess
 import dev.jordond.compass.Priority
 import dev.jordond.compass.geocoder.Geocoder
@@ -76,13 +77,20 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
     val geolocator: Geolocator = Geolocator.mobile()
 
     val geoLocationModel by remember { mutableStateOf(GeoLocationModel()) }
+    var showDialog by remember { mutableStateOf(false) }
+    var showDialog2 by remember { mutableStateOf(false) }
+    var showDialog3 by remember { mutableStateOf(false) }
 
+    val title = remember {
+        mutableStateOf("")
+    }
     LaunchedEffect(isChecked) {
         println("LaunchedEffect")
         if (!isChecked){
             return@LaunchedEffect
         }
-
+        title.value = "Fetching your location..."
+        showDialog3 = true
         when (val result: GeolocatorResult = geolocator.current(priority = Priority.HighAccuracy)) {
             is GeolocatorResult.Success -> {
                 val geocoder = Geocoder()
@@ -93,34 +101,38 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                 geoLocationModel.country = place?.country.toString()
                 geoLocationModel.postalCode = place?.postalCode.toString()
                 geoLocationModel.name = place?.name.toString()
+                showDialog3 = false
             }
 
-            is GeolocatorResult.Error -> when (result) {
-                is GeolocatorResult.NotSupported -> {
-                    isChecked = false
-                }
-                is GeolocatorResult.NotFound -> {
-                    isChecked = false
-                }
-                is GeolocatorResult.PermissionError ->{
-                    isChecked = false
-                }
-                is GeolocatorResult.GeolocationFailed -> {
-                    isChecked = false
-                }
-                else -> {
-                    isChecked = false
+            is GeolocatorResult.Error -> {
+                showDialog3 = false
+                when (result) {
+                    is GeolocatorResult.NotSupported -> {
+                        isChecked = false
+                        title.value = "Enable GPS"
+                        showDialog2 = true
+                    }
+
+                    is GeolocatorResult.NotFound -> {
+                        isChecked = false
+                    }
+
+                    is GeolocatorResult.PermissionError -> {
+                        isChecked = false
+                    }
+
+                    is GeolocatorResult.GeolocationFailed -> {
+                        isChecked = false
+                    }
+
+                    else -> {
+                        isChecked = false
+                    }
                 }
             }
 
         }
 
-    }
-
-    var showDialog by remember { mutableStateOf(false) }
-
-    val title = remember {
-        mutableStateOf("")
     }
 
     if (showDialog) {
@@ -131,6 +143,23 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                 showDialog = false
                 navController.popBackStack()
             }
+        )
+    }
+
+    if (showDialog2) {
+        CustomDialogSuccess(
+            title = title.value,
+            action = "Close",
+            onCancel = {
+                showDialog2 = false
+                //navController.popBackStack()
+            }
+        )
+    }
+
+    if (showDialog3) {
+        CustomDialogLoading(
+            title = title.value,
         )
     }
 
