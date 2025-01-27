@@ -148,6 +148,7 @@ fun ProfilePreviewScreen(
         is BlockState.Error -> {
 
         }
+
         is BlockState.Idle -> {
 
         }
@@ -166,6 +167,7 @@ fun ProfilePreviewScreen(
         is UnBlockState.Error -> {
 
         }
+
         is UnBlockState.Idle -> {
 
         }
@@ -365,8 +367,7 @@ fun ProfilePreviewScreen(
                     Row(
                         modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                             .clickable {
-                                viewModel.report(profile.value.id)
-
+                                navController.navigate(NavRoutes.REPORT_PROFILE.route + "/${profile.value.id}")
                                 scope.launch {
                                     scaffoldState.bottomSheetState.collapse()
                                 }
@@ -593,9 +594,19 @@ fun ProfilePreviewScreen(
                                             fontSize = 20.sp
                                         )
                                         Spacer(modifier = Modifier.height(15.dp))
-                                        Box(modifier = Modifier.height(40.dp).width(100.dp).background(color = Color.Black, shape = RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
+                                        Box(
+                                            modifier = Modifier.height(40.dp).width(100.dp)
+                                                .background(
+                                                    color = Color.Black,
+                                                    shape = RoundedCornerShape(8.dp)
+                                                ), contentAlignment = Alignment.Center
+                                        ) {
                                             if (unBlockState is UnBlockState.Loading) {
-                                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(
+                                                        20.dp
+                                                    )
+                                                )
                                             } else {
                                                 Text(
                                                     text = "Unblock",

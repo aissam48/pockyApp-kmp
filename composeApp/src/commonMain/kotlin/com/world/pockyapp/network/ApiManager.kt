@@ -1365,5 +1365,32 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         }
     }
 
+    suspend fun reportProfile(
+        id:String,
+        content:String,
+        onSuccess: (ResponseMessageModel) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.post("$baseUrl/operations/report-profile") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("toID" to id, "content" to content))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
 }
 

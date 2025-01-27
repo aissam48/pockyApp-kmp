@@ -23,4 +23,5 @@ enum class NavRoutes(val route: String) {
     POST("post"),
     FRIEND_REQUESTS("friend_requests"),
     BLOCKED("blocked"),
+    REPORT_PROFILE("report_profile"),
 }

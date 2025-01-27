@@ -23,6 +23,7 @@ import com.world.pockyapp.screens.moment_screen.MomentsScreen
 import com.world.pockyapp.screens.post_preview.PostPreview
 import com.world.pockyapp.screens.profile.ProfileScreen
 import com.world.pockyapp.screens.profile_preview.ProfilePreviewScreen
+import com.world.pockyapp.screens.report_profile.ReportProfileScreen
 import com.world.pockyapp.screens.search.SearchScreen
 import com.world.pockyapp.screens.settings.SettingsScreen
 import com.world.pockyapp.screens.show_moment.ShowMoments
@@ -136,6 +137,11 @@ fun NavigationHost(navController: NavHostController) {
         composable(route = "${NavRoutes.PROFILE_PREVIEW.route}/{id}") { navBackStackEntry ->
             val id = navBackStackEntry.arguments?.getString("id") ?: ""
             ProfilePreviewScreen(navController, id = id)
+        }
+
+        composable(route = "${NavRoutes.REPORT_PROFILE.route}/{id}") { navBackStackEntry ->
+            val id = navBackStackEntry.arguments?.getString("id") ?: ""
+            ReportProfileScreen(navController, id = id)
         }
 
         composable(route = "${NavRoutes.POST.route}/{id}/{myID}") { navBackStackEntry ->

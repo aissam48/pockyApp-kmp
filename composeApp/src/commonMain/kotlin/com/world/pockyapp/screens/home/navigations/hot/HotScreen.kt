@@ -77,7 +77,7 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
         viewModel.getProfile()
     }
 
-    Scaffold(modifier = Modifier.fillMaxSize()) {
+    Scaffold(modifier = Modifier.fillMaxSize().background(color = Color.White)) {
         LazyColumn(modifier = Modifier.padding(start = 10.dp, end = 1.dp)) {
             when (val state = streetState) {
                 is HotState.Loading -> {

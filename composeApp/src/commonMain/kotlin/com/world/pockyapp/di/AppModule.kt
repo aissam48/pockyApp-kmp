@@ -18,6 +18,7 @@ import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.profile.ProfileViewModel
 import com.world.pockyapp.screens.post_preview.PostViewModel
 import com.world.pockyapp.screens.profile_preview.ProfilePreviewViewModel
+import com.world.pockyapp.screens.report_profile.ReportProfileViewModel
 import com.world.pockyapp.screens.search.SearchViewModel
 import com.world.pockyapp.screens.settings.SettingsViewModel
 import com.world.pockyapp.screens.splash_screen.SplashViewModel
@@ -50,5 +51,6 @@ val appModule = module {
     viewModel { SettingsViewModel(sdk = get(),dataStore = get()) }
     viewModel { BlockedViewModel(sdk = get()) }
     viewModel { HotViewModel(sdk = get()) }
+    viewModel { ReportProfileViewModel(sdk = get()) }
 
 }
