@@ -54,18 +54,27 @@ class HotViewModel(val sdk: ApiManager) : ViewModel() {
     }
 
     fun loadStreets() {
-        viewModelScope.launch {
-            if (isStreetLoadingFirstTime) {
-                _streetState.value = HotState.Loading
-            }
+        try {
+            viewModelScope.launch {
+                if (isStreetLoadingFirstTime) {
+                    _streetState.value = HotState.Loading
+                }
 
-            sdk.getStreets({ success ->
-                isStreetLoadingFirstTime = false
-                _streetState.value = HotState.Success(success)
-            }, { error ->
-                isStreetLoadingFirstTime = true
-                _streetState.value = HotState.Error(error)
-            })
+                sdk.getStreets({ success ->
+                    isStreetLoadingFirstTime = false
+                    _streetState.value = HotState.Success(success)
+                }, { error ->
+                    isStreetLoadingFirstTime = true
+                    _streetState.value = HotState.Error(error)
+                })
+            }
+        } catch (e: Exception) {
+            _profileState.value = HotState.Error(
+                error = ErrorModel(
+                    message = "Network error. Please try again later.",
+                    code = 500
+                )
+            )
         }
     }
 

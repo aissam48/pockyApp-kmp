@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
@@ -213,15 +214,15 @@ fun EditProfileScreen(
                     },
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        textColor = Color.Black,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Black,
+                        unfocusedIndicatorColor = Color.Black,
                     ),
                     label = {
                         Text(
                             text = "FirstName",
-                            color = MaterialTheme.colorScheme.onPrimary
+                            color = Color.White
                         )
                     }
                 )
@@ -239,12 +240,12 @@ fun EditProfileScreen(
                     },
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        textColor = Color.Black,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Black,
+                        unfocusedIndicatorColor = Color.Black,
                     ),
-                    label = { Text(text = "LastName", color = MaterialTheme.colorScheme.onPrimary) }
+                    label = { Text(text = "LastName", color = Color.White) }
                 )
 
                 Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -260,12 +261,12 @@ fun EditProfileScreen(
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        textColor = Color.Black,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Black,
+                        unfocusedIndicatorColor = Color.Black,
                     ),
-                    label = { Text(text = "Phone", color = MaterialTheme.colorScheme.onPrimary) }
+                    label = { Text(text = "Phone", color = Color.White) }
                 )
 
                 Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -281,12 +282,12 @@ fun EditProfileScreen(
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        textColor = Color.Black,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Black,
+                        unfocusedIndicatorColor = Color.Black,
                     ),
-                    label = { Text(text = "Email", color = MaterialTheme.colorScheme.onPrimary) }
+                    label = { Text(text = "Email", color = Color.White) }
                 )
 
                 Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -304,15 +305,15 @@ fun EditProfileScreen(
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        textColor = Color.Black,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Black,
+                        unfocusedIndicatorColor = Color.Black,
                     ),
                     label = {
                         Text(
                             text = "Description",
-                            color = MaterialTheme.colorScheme.onPrimary
+                            color = Color.White
                         )
                     },
                 )
@@ -329,7 +330,7 @@ fun EditProfileScreen(
                 ) {
                     when (uiState) {
                         is EditProfileUiState.Loading -> {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                            CircularProgressIndicator(color = Color.Black)
                         }
 
                         else -> {
@@ -350,7 +351,7 @@ fun EditProfileScreen(
                                     text = "Update",
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = Color.Black
                                 )
                             }
                         }

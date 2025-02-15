@@ -185,7 +185,7 @@ fun ProfilePreviewScreen(
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
                     "You requested chat",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = Color.Black,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -206,7 +206,7 @@ fun ProfilePreviewScreen(
                     Spacer(modifier = Modifier.size(10.dp))
                     Text(
                         "Request of chat",
-                        color = MaterialTheme.colorScheme.primary,
+                        color = Color.Black,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -231,7 +231,7 @@ fun ProfilePreviewScreen(
                         ) {
                             Text(
                                 text = "Accept",
-                                color = MaterialTheme.colorScheme.onPrimary,
+                                color = Color.White,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -252,7 +252,7 @@ fun ProfilePreviewScreen(
                         ) {
                             Text(
                                 text = "Reject",
-                                color = MaterialTheme.colorScheme.onPrimary,
+                                color = Color.White,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -548,7 +548,7 @@ fun ProfilePreviewScreen(
 
                                         Text(
                                             text = "${profile.value.country}, ${profile.value.city}",
-                                            color = MaterialTheme.colorScheme.primary,
+                                            color = Color.Black,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 15.sp,
                                             maxLines = 2
@@ -557,7 +557,7 @@ fun ProfilePreviewScreen(
                                     Spacer(modifier = Modifier.size(10.dp))
                                     Text(
                                         text = profile.value.description,
-                                        color = MaterialTheme.colorScheme.primary,
+                                        color = Color.Black,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp,
                                         maxLines = 2

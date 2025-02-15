@@ -225,7 +225,7 @@ actual fun MomentPreview(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .background(
-                            color = MaterialTheme.colorScheme.primary,
+                            color = Color.Black,
                             shape = RoundedCornerShape(15.dp)
                         )
                         .height(50.dp)
@@ -251,7 +251,7 @@ actual fun MomentPreview(
                         }
 
                         else -> {
-                            Text("Share moment", color = MaterialTheme.colorScheme.onPrimary)
+                            Text("Share moment", color = Color.White)
 
                             Spacer(modifier = Modifier.size(15.dp))
 

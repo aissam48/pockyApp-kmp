@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -61,11 +63,12 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
     val profileState by viewModel.profileState.collectAsState()
     val myProfile = remember { mutableStateOf(ProfileModel()) }
 
-    when(val state = profileState){
-        is HotState.Success->{
+    when (val state = profileState) {
+        is HotState.Success -> {
             myProfile.value = state.data
         }
-        else->{
+
+        else -> {
 
         }
     }
@@ -77,8 +80,11 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
         viewModel.getProfile()
     }
 
-    Scaffold(modifier = Modifier.fillMaxSize().background(color = Color.White)) {
-        LazyColumn(modifier = Modifier.padding(start = 10.dp, end = 1.dp)) {
+    Scaffold(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().background(color = Color.White)
+                .padding(start = 10.dp, end = 1.dp)
+        ) {
             when (val state = streetState) {
                 is HotState.Loading -> {
                     item {
@@ -93,22 +99,58 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
                 }
 
                 is HotState.Error -> {
+                    item {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Spacer(modifier = Modifier.height(150.dp))
+                            Text(
+                                text = state.error.message,
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
 
+                            Spacer(modifier = Modifier.height(50.dp))
+
+                            Box(modifier = Modifier.background(
+                                color = Color.Black,
+                                shape = RoundedCornerShape(10.dp)
+                            ).height(50.dp).width(100.dp).clickable {
+                                viewModel.getProfile()
+                                viewModel.loadStreets()
+                            }) {
+                                Text(
+                                    text = "Reload",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    textAlign  = TextAlign.Center,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+
+                        }
+                    }
                 }
 
                 is HotState.Success -> {
                     val hotMoments = state.data
                     hotMoments.sortedByDescending { it.moments.size }
+
+                    item {
+                        Text(
+                            text = "Trending Places >",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Spacer(modifier = Modifier.size(15.dp))
+                    }
+
                     if (hotMoments.isNotEmpty()) {
-                        item {
-                            Text(
-                                text = "Trending Places >",
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
-                            )
-                            Spacer(modifier = Modifier.size(15.dp))
-                        }
+
 
                         items(hotMoments.chunked(2)) { item ->
 
@@ -132,6 +174,20 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
                             Spacer(modifier = Modifier.size(10.dp))
 
                         }
+                    } else {
+                        item {
+                            Spacer(modifier = Modifier.size(100.dp))
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Text(
+                                    text = "There are no moments in trending places",
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                        }
+
                     }
                 }
             }
@@ -199,7 +255,7 @@ fun HotMomentItem(
                         val modulesJson = Json.encodeToString(listOf(street))
                             .replace("/", "%")
                         navController.navigate(NavRoutes.MOMENTS_BY_LOCATION.route + "/${modulesJson}" + "/0" + "/${myProfile.value.id}")
-                       // navController.navigate(NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/$currentUserId")
+                        // navController.navigate(NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/$currentUserId")
                     },
                 contentDescription = null
             )

@@ -129,12 +129,12 @@ fun ChangePasswordScreen(navController: NavHostController, viewModel: ChangePass
                     onValueChange = { currentPassword.value = it },
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        textColor = Color.Black,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Black,
+                        unfocusedIndicatorColor = Color.Black,
                     ),
-                    label = { androidx.compose.material3.Text(text = "Current password", color = MaterialTheme.colorScheme.onPrimary) }
+                    label = { androidx.compose.material3.Text(text = "Current password", color = Color.White) }
                 )
 
                 Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -147,12 +147,12 @@ fun ChangePasswordScreen(navController: NavHostController, viewModel: ChangePass
                     onValueChange = { newPassword.value = it },
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        textColor = Color.Black,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Black,
+                        unfocusedIndicatorColor = Color.Black,
                     ),
-                    label = { androidx.compose.material3.Text(text = "New password", color = MaterialTheme.colorScheme.onPrimary) }
+                    label = { androidx.compose.material3.Text(text = "New password", color = Color.White) }
                 )
 
                 Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -165,12 +165,12 @@ fun ChangePasswordScreen(navController: NavHostController, viewModel: ChangePass
                     onValueChange = { confirmPassword.value = it },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        textColor = Color.Black,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Black,
+                        unfocusedIndicatorColor = Color.Black,
                     ),
-                    label = { androidx.compose.material3.Text(text = "Confirm password", color = MaterialTheme.colorScheme.onPrimary) }
+                    label = { androidx.compose.material3.Text(text = "Confirm password", color = Color.White) }
                 )
 
                 Spacer(modifier = Modifier.size(30.dp))
@@ -185,7 +185,7 @@ fun ChangePasswordScreen(navController: NavHostController, viewModel: ChangePass
                 ) {
                     when (uiState) {
                         is ChangePasswordUiState.Loading -> {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                            CircularProgressIndicator(color = Color.Black)
                         }
 
                         else -> {
@@ -204,7 +204,7 @@ fun ChangePasswordScreen(navController: NavHostController, viewModel: ChangePass
                                     text = "Update",
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = Color.Black
                                 )
                             }
                         }

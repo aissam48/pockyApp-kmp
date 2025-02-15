@@ -227,7 +227,7 @@ fun EditLocationScreen(
                 ) {
                     when (uiState) {
                         is EditLocationUiState.Loading -> {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                            CircularProgressIndicator(color = Color.Black)
                         }
 
                         else -> {
@@ -245,7 +245,7 @@ fun EditLocationScreen(
                                     text = "Update",
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = Color.Black
                                 )
                             }
                         }

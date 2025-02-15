@@ -153,7 +153,7 @@ fun FriendRequestsScreen(
                                     ) {
                                         Text(
                                             text = "Accept",
-                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            color = Color.White,
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.SemiBold
                                         )
@@ -169,7 +169,7 @@ fun FriendRequestsScreen(
                                     ) {
                                         Text(
                                             text = "Reject",
-                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            color = Color.White,
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.SemiBold
                                         )

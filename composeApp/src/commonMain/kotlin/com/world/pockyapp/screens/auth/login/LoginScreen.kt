@@ -29,6 +29,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
@@ -93,9 +95,9 @@ fun LoginScreen(
             Spacer(modifier = Modifier.padding(top = 100.dp))
 
             Text(
-                text = "PockyApp",
+                text = "NearVibe",
                 fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.primary,
+                color = Color.Black,
                 fontSize = 50.sp,
             )
 
@@ -109,12 +111,12 @@ fun LoginScreen(
                 onValueChange = { email.value = it },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black,
                 ),
-                label = { Text(text = "Email", color = MaterialTheme.colorScheme.onPrimary) }
+                label = { Text(text = "Email", color = Color.White) }
             )
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -128,12 +130,12 @@ fun LoginScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = PasswordVisualTransformation(),
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    textColor = Black,
+                    cursorColor = Color.Black,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black,
                 ),
-                label = { Text(text = "Password", color = MaterialTheme.colorScheme.onPrimary) }
+                label = { Text(text = "Password", color = Color.White) }
             )
 
             Spacer(modifier = Modifier.padding(top = 30.dp))
@@ -148,7 +150,7 @@ fun LoginScreen(
 
             ) {
                 if (uiState == LoginUiState.Loading) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    CircularProgressIndicator(color = Color.Black)
                 } else {
 
                     Box(
@@ -164,7 +166,7 @@ fun LoginScreen(
                         Text(
                             text = "Login",
                             fontSize = 20.sp,
-                            color = MaterialTheme.colorScheme.primary
+                            color = Color.Black
                         )
                     }
 
@@ -177,7 +179,7 @@ fun LoginScreen(
             Text(
                 text = "You don't have an account? Create one",
                 fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.primary,
+                color = Color.Black,
                 modifier = Modifier.clickable {
                     navController.navigate(NavRoutes.REGISTER.route)
                 }

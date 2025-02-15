@@ -233,7 +233,7 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.background(
-                        color = MaterialTheme.colorScheme.primary,
+                        color = Color.Black,
                         shape = RoundedCornerShape(15.dp)
                     ).height(50.dp).width(130.dp)
                         .padding(5.dp).align(Alignment.CenterEnd).clickable {
@@ -255,7 +255,7 @@ fun PostPreview(navController: NavHostController, viewModel: PostViewModel = koi
                         }
 
                         else -> {
-                            Text("Share post", color = MaterialTheme.colorScheme.onPrimary)
+                            Text("Share post", color = Color.White)
 
                             Spacer(modifier = Modifier.size(15.dp))
 

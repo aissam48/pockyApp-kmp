@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -90,7 +91,7 @@ fun ChatScreen(
                     if (chatRequests.isNotEmpty()) {
                         Text(
                             text = "Chat's requests",
-                            color = MaterialTheme.colorScheme.primary,
+                            color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
@@ -115,7 +116,7 @@ fun ChatScreen(
 
                                         Text(
                                             text = "${item.sendProfile.firstName} ${item.sendProfile.lastName}",
-                                            color = MaterialTheme.colorScheme.primary,
+                                            color = Color.Black,
                                             fontWeight = FontWeight.Normal,
                                             fontSize = 13.sp,
                                             maxLines = 2,
@@ -138,7 +139,7 @@ fun ChatScreen(
         item {
             Text(
                 text = "Chats",
-                color = MaterialTheme.colorScheme.primary,
+                color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp
             )
@@ -196,7 +197,7 @@ fun ChatScreen(
                                 Column {
                                     Text(
                                         text = "${item.profile.firstName} ${item.profile.lastName}",
-                                        color = MaterialTheme.colorScheme.primary,
+                                        color = Color.Black,
                                         fontWeight = FontWeight.Medium,
                                         fontSize = 15.sp,
                                         maxLines = 2
@@ -206,7 +207,7 @@ fun ChatScreen(
 
                                     Text(
                                         text = item.lastMessage?.content ?: "",
-                                        color = MaterialTheme.colorScheme.primary,
+                                        color = Color.Black,
                                         fontWeight = FontWeight.Normal,
                                         fontSize = 13.sp,
                                         maxLines = 2
@@ -215,7 +216,7 @@ fun ChatScreen(
 
                                 Text(
                                     text = formatCreatedAt(item.lastMessage?.createdAt),
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color = Color.Black,
                                     fontWeight = FontWeight.ExtraLight,
                                     fontSize = 12.sp,
                                     maxLines = 2

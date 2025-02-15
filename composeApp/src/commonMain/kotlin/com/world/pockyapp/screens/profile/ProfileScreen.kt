@@ -288,7 +288,7 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                         item {
                             Text(
                                 text = state.profile.firstName,
-                                color = MaterialTheme.colorScheme.primary,
+                                color = Color.Black,
                                 fontWeight = FontWeight.Normal,
                                 fontSize = 18.sp,
                                 maxLines = 2
@@ -311,7 +311,7 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
 
                                 Text(
                                     text = "${state.profile.country}, ${state.profile.city}",
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color = Color.Black,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp,
                                     maxLines = 2
@@ -326,7 +326,7 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                         item {
                             Text(
                                 text = state.profile.description,
-                                color = MaterialTheme.colorScheme.primary,
+                                color = Color.Black,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp,
                                 maxLines = 2

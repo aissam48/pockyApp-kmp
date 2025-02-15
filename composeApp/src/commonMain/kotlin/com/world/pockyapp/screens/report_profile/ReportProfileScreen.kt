@@ -188,10 +188,10 @@ fun ReportProfileScreen(
                         },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         colors = TextFieldDefaults.textFieldColors(
-                            textColor = MaterialTheme.colorScheme.primary,
-                            cursorColor = MaterialTheme.colorScheme.primary,
-                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                            unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                            textColor = Color.Black,
+                            cursorColor = Color.Black,
+                            focusedIndicatorColor = Color.Black,
+                            unfocusedIndicatorColor = Color.Black,
                         ),
                         label = {
                             Text(
@@ -213,7 +213,7 @@ fun ReportProfileScreen(
                     ) {
                         when (reportProfileState) {
                             is ReportProfileState.Loading -> {
-                                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                                CircularProgressIndicator(color = Color.Black)
                             }
 
                             else -> {
@@ -229,7 +229,7 @@ fun ReportProfileScreen(
                                         text = "Send",
                                         fontSize = 20.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = Color.Black
                                     )
                                 }
                             }

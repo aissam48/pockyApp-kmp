@@ -68,7 +68,7 @@ fun DiscoverScreen(
         item {
             Text(
                 text = "Friends",
-                color = MaterialTheme.colorScheme.primary,
+                color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp
             )
@@ -200,7 +200,7 @@ fun DiscoverScreen(
                     item {
                         Text(
                             text = "Nearby posts >",
-                            color = MaterialTheme.colorScheme.primary,
+                            color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
@@ -257,7 +257,7 @@ fun ErrorSection(
                 )
                 Text(
                     text = "Retry",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = Color.Black,
                     modifier = Modifier
                         .clickable(onClick = onRetry)
                         .padding(8.dp)
@@ -341,7 +341,7 @@ fun NearbyMomentsSection(
 
     Text(
         text = "Nearby moments >",
-        color = MaterialTheme.colorScheme.primary,
+        color = Color.Black,
         fontWeight = FontWeight.Bold,
         fontSize = 18.sp
     )

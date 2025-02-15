@@ -71,7 +71,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
         )
     }
     Column(
-        modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.onPrimary)
+        modifier = Modifier.fillMaxSize().background(color = Color.White)
     ) {
 
         Column(
@@ -80,7 +80,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
         ) {
 
             Text(
-                "PockyApp",
+                "NearVibe",
                 fontSize = 25.sp,
                 fontStyle = FontStyle.Italic,
                 fontFamily = FontFamily.Monospace,

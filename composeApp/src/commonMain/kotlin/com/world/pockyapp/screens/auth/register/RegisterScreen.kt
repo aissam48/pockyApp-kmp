@@ -176,12 +176,12 @@ fun RegisterScreen(
                 onValueChange = { firstName.value = it },
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black,
                 ),
-                label = { Text(text = "FirstName", color = MaterialTheme.colorScheme.onPrimary) }
+                label = { Text(text = "FirstName", color = Color.White) }
             )
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -194,12 +194,12 @@ fun RegisterScreen(
                 onValueChange = { lastName.value = it },
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black,
                 ),
-                label = { Text(text = "LastName", color = MaterialTheme.colorScheme.onPrimary) }
+                label = { Text(text = "LastName", color = Color.White) }
             )
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -212,12 +212,12 @@ fun RegisterScreen(
                 onValueChange = { username.value = it },
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black,
                 ),
-                label = { Text(text = "Username", color = MaterialTheme.colorScheme.onPrimary) }
+                label = { Text(text = "Username", color = Color.White) }
             )
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -230,12 +230,12 @@ fun RegisterScreen(
                 onValueChange = { phone.value = it },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black,
                 ),
-                label = { Text(text = "Phone", color = MaterialTheme.colorScheme.onPrimary) }
+                label = { Text(text = "Phone", color = Color.White) }
             )
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -248,12 +248,12 @@ fun RegisterScreen(
                 onValueChange = { email.value = it },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black,
                 ),
-                label = { Text(text = "Email", color = MaterialTheme.colorScheme.onPrimary) }
+                label = { Text(text = "Email", color = Color.White) }
             )
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -316,12 +316,12 @@ fun RegisterScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = PasswordVisualTransformation(),
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black,
                 ),
-                label = { Text(text = "Password", color = MaterialTheme.colorScheme.onPrimary) }
+                label = { Text(text = "Password", color = Color.White) }
             )
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
@@ -335,15 +335,15 @@ fun RegisterScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = PasswordVisualTransformation(),
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black,
                 ),
                 label = {
                     Text(
                         text = "Confirm Password",
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = Color.White
                     )
                 }
             )
@@ -360,7 +360,7 @@ fun RegisterScreen(
             ) {
                 when (uiState) {
                     is RegisterScreenViewModel.RegisterUiState.Loading -> {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        CircularProgressIndicator(color = Color.Black)
                     }
 
                     else -> {
@@ -382,7 +382,7 @@ fun RegisterScreen(
                             Text(
                                 text = "Register",
                                 fontSize = 20.sp,
-                                color = MaterialTheme.colorScheme.primary
+                                color = Color.Black
                             )
                         }
                     }

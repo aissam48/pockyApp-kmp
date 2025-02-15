@@ -152,7 +152,7 @@ fun BlockedScreen(
                                     ) {
                                         Text(
                                             text = "Unblock",
-                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            color = Color.White,
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.SemiBold
                                         )

@@ -107,15 +107,15 @@ fun SearchScreen(navController: NavHostController, viewModel: SearchViewModel = 
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black,
                 ),
                 label = {
                     androidx.compose.material3.Text(
                         text = "Search...",
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = Color.White
                     )
                 }
             )
@@ -151,7 +151,7 @@ fun SearchScreen(navController: NavHostController, viewModel: SearchViewModel = 
                                 Column {
                                     Text(
                                         text = "${item.firstName} ${item.lastName}",
-                                        color = MaterialTheme.colorScheme.primary,
+                                        color = Color.Black,
                                         fontWeight = FontWeight.Medium,
                                         fontSize = 15.sp,
                                         maxLines = 1
@@ -161,7 +161,7 @@ fun SearchScreen(navController: NavHostController, viewModel: SearchViewModel = 
 
                                     Text(
                                         text = item.username,
-                                        color = MaterialTheme.colorScheme.primary,
+                                        color = Color.Black,
                                         fontWeight = FontWeight.Normal,
                                         fontSize = 13.sp,
                                         maxLines = 1

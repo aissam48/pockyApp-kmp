@@ -257,10 +257,10 @@ fun ChatScreen(
                     onValueChange = { message.value = it },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        textColor = Color.Black,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Black,
+                        unfocusedIndicatorColor = Color.Black,
                     ),
                     label = {
                         androidx.compose.material3.Text(
