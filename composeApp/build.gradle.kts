@@ -49,6 +49,7 @@ kotlin {
             // CameraX View class
             implementation(libs.androidx.camera.view)
             //implementation("io.ktor:ktor-client-okhttp:3.0.1")
+
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -81,8 +82,6 @@ kotlin {
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.kotlinx.coroutines.swing)
 
-            //implementation("io.coil-kt.coil3:coil-compose:3.0.0-alpha06")
-            //implementation("io.coil-kt.coil3:coil-network-ktor:3.0.0-alpha06")
 
             implementation("io.coil-kt.coil3:coil-compose:3.0.4")
             implementation("io.coil-kt.coil3:coil-network-ktor2:3.0.4")
@@ -109,7 +108,6 @@ kotlin {
             implementation(libs.compass.geocoder.mobile)
 
 
-
             // Geolocation
             implementation(libs.compass.geolocation)
 
@@ -124,10 +122,11 @@ kotlin {
 
             // Optional - Autocomplete support for only iOS and Android using native Geocoder
             implementation(libs.compass.autocomplete.mobile)
-            
+
 
             // Optional - Location permissions for mobile
             implementation(libs.compass.permissions.mobile)
+
         }
     }
 }
@@ -162,5 +161,7 @@ android {
 dependencies {
     implementation(libs.androidx.activity.ktx)
     debugImplementation(compose.uiTooling)
+
+
 }
 
