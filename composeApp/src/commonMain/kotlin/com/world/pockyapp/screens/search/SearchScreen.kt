@@ -16,10 +16,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -96,29 +99,30 @@ fun SearchScreen(navController: NavHostController, viewModel: SearchViewModel = 
                 shape = RoundedCornerShape(15.dp),
                 modifier = Modifier.fillMaxWidth(),
                 value = search.value,
-                onValueChange = {
-                    search.value = it
-                    CoroutineScope(Dispatchers.Main).launch {
-                        delay(500)
-                        if (it.isEmpty())
-                            return@launch
-                        viewModel.search(it)
-                    }
-                },
+                onValueChange = {search.value = it
+                                viewModel.search(it)},
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                colors = TextFieldDefaults.textFieldColors(
+                colors = TextFieldDefaults.outlinedTextFieldColors(
                     textColor = Color.Black,
                     cursorColor = Color.Black,
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Black,
+                    focusedBorderColor = Color.Black,
+                    unfocusedBorderColor = Color.Black,
                 ),
                 label = {
-                    androidx.compose.material3.Text(
+                    Text(
                         text = "Search...",
-                        color = Color.White
+                        color = Color.Gray
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search Icon",
+                        tint = Color.Black
                     )
                 }
             )
+
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
 

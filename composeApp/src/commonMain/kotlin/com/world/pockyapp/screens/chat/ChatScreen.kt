@@ -16,6 +16,11 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -143,12 +148,12 @@ fun ChatScreen(
     Scaffold(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .padding(start = 10.dp, end = 10.dp, top = 20.dp)
+                .padding(top = 20.dp)
                 .fillMaxSize()
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 10.dp)
+                modifier = Modifier.padding(bottom = 10.dp, start = 10.dp, end = 10.dp)
             ) {
                 Image(
                     modifier = Modifier
@@ -197,100 +202,187 @@ fun ChatScreen(
                 }
             }
 
-            Divider(modifier = Modifier.fillMaxWidth(), color = Color.LightGray)
+            Divider(modifier = Modifier.fillMaxWidth(), color = Color.White)
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .weight(1f).background(color = Color(0xFFf7f7f7)),
                 state = listState,
-                reverseLayout = true
+                reverseLayout = true,
             ) {
                 items(messages) { item: MessageModel ->
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxWidth().padding(start = 10.dp, end = 10.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    color = if (item.senderID == profileID) Color(0XFFA3B288)
-                                    else Color(0XFF8EB288),
-                                    shape = RoundedCornerShape(10.dp)
+
+                        if (item.senderID == profileID) {
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.align(
+                                    Alignment.Start
                                 )
-                                .padding(10.dp).align(
-                                    if (item.senderID != profileID) Alignment.End
-                                    else Alignment.Start
-                                ).widthIn(min = 80.dp, max = 300.dp)
-                        ) {
-                            Text(item.content, color = Color.Black, fontSize = 15.sp)
-                        }
-                        Text(
-                            formatCreatedAt(item.createdAt),
-                            color = Color.LightGray,
-                            fontSize = 12.sp,
-                            modifier = Modifier.align(
-                                if (item.senderID != profileID) Alignment.End
-                                else Alignment.Start
+                            ) {
+                                AsyncImage(
+                                    model = getUrl(profile?.photoID),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(25.dp)
+                                        .clip(CircleShape),
+                                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                                    error = painterResource(Res.drawable.ic_placeholder),
+                                )
+                                Spacer(modifier = Modifier.size(5.dp))
+                                Text(
+                                    text = "${profile?.firstName} ${profile?.lastName}",
+                                    color = Color(0xFFDFC46B),
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.clickable {
+                                        navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${profile?.id}")
+                                    }
+                                )
+                            }
+                            Spacer(modifier = Modifier.size(5.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = Color(0XFFFFFFFF),
+                                        shape = RoundedCornerShape(
+                                            topStart = 15.dp,
+                                            topEnd = 15.dp,
+                                            bottomEnd = 15.dp
+                                        )
+                                    )
+                                    .padding(10.dp).align(
+                                        Alignment.Start
+                                    ).widthIn(min = 80.dp, max = 300.dp)
+                            ) {
+                                Text(item.content, color = Color.Black, fontSize = 15.sp)
+                            }
+                            Text(
+                                formatCreatedAt(item.createdAt),
+                                color = Color.LightGray,
+                                fontSize = 12.sp,
+                                modifier = Modifier.align(
+                                    Alignment.Start
+                                )
                             )
-                        )
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.align(
+                                    Alignment.End
+                                )
+                            ) {
+                                Text(
+                                    text = "Me",
+                                    color = Color(0xFFDFC46B),
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.clickable {
+                                        navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${profile?.id}")
+                                    }
+                                )
+                                Spacer(modifier = Modifier.size(5.dp))
+
+                                AsyncImage(
+                                    model = getUrl(me?.photoID),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(25.dp)
+                                        .clip(CircleShape),
+                                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                                    error = painterResource(Res.drawable.ic_placeholder),
+                                )
+                            }
+                            Spacer(modifier = Modifier.size(5.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = Color(0XFF000000),
+                                        shape = RoundedCornerShape(
+                                            topStart = 15.dp,
+                                            topEnd = 15.dp,
+                                            bottomStart = 15.dp
+                                        )
+                                    )
+                                    .padding(10.dp).align(
+                                        Alignment.End
+                                    ).widthIn(min = 80.dp, max = 300.dp)
+                            ) {
+                                Text(item.content, color = Color.White, fontSize = 15.sp)
+                            }
+                            Text(
+                                formatCreatedAt(item.createdAt),
+                                color = Color.LightGray,
+                                fontSize = 12.sp,
+                                modifier = Modifier.align(
+                                    Alignment.End
+                                )
+                            )
+                        }
+
                         Spacer(modifier = Modifier.size(15.dp))
                     }
                 }
             }
 
             // Message input
-            Divider(modifier = Modifier.fillMaxWidth(), color = Color.LightGray)
+            Divider(modifier = Modifier.fillMaxWidth().height(2.dp), color = Color.White)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(80.dp)
-                    .padding(10.dp),
+                    .height(80.dp).background(color = Color(0xFFf7f7f7)),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 OutlinedTextField(
-                    singleLine = true,
-                    shape = RoundedCornerShape(15.dp),
-                    modifier = Modifier.fillMaxWidth(0.80f),
                     value = message.value,
                     onValueChange = { message.value = it },
+                    singleLine = true,
+                    shape = RoundedCornerShape(25.dp),
+                    modifier = Modifier.fillMaxWidth(0.85f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                    colors = TextFieldDefaults.textFieldColors(
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
                         textColor = Color.Black,
                         cursorColor = Color.Black,
-                        focusedIndicatorColor = Color.Black,
-                        unfocusedIndicatorColor = Color.Black,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
                     ),
-                    label = {
-                        androidx.compose.material3.Text(
-                            text = "Tap message...",
-                            color = Color.Gray
-                        )
+                    placeholder = {
+                        Text("Tap message...", color = Color.Gray)
+                    },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                if (message.value.isNotBlank()) {
+                                    val data = MessageModel(
+                                        content = message.value,
+                                        conversationID = conversationID,
+                                        senderID = me?.id ?: ""
+                                    )
+                                    viewModel.sendMessage(data)
+                                    message.value = ""
+                                    coroutineScope.launch {
+                                        listState.animateScrollToItem(0)
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Default.Send,
+                                contentDescription = "Send Message",
+                                tint = Color.Black
+                            )
+                        }
                     }
                 )
 
-                Image(
-                    modifier = Modifier
-                        .size(35.dp)
-                        .clickable {
-                            if (message.value.isNotBlank()) {
-                                val data = MessageModel(
-                                    content = message.value,
-                                    conversationID = conversationID,
-                                    senderID = me?.id ?: ""
-                                )
-                                //messages.add(0, data)
-                                viewModel.sendMessage(data)
-                                message.value = ""
-                                coroutineScope.launch {
-                                    listState.animateScrollToItem(0)
-                                }
-                            }
-                        },
-                    painter = painterResource(Res.drawable.ic_send_bleu),
-                    contentDescription = null
-                )
             }
         }
     }

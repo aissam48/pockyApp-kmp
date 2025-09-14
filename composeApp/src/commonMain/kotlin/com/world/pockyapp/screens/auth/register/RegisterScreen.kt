@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
@@ -27,6 +29,9 @@ import androidx.compose.material.Surface
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,6 +46,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +59,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -65,6 +72,11 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_back_black
+import pockyapp.composeapp.generated.resources.icon_country
+import pockyapp.composeapp.generated.resources.icon_username
+import pockyapp.composeapp.generated.resources.icon_visibility
+import pockyapp.composeapp.generated.resources.icon_visibilityoff
+import pockyapp.composeapp.generated.resources.icons_name
 
 @Composable
 fun RegisterScreen(
@@ -79,10 +91,10 @@ fun RegisterScreen(
     }
 
     val country = remember {
-        mutableStateOf("Country")
+        mutableStateOf("")
     }
     val city = remember {
-        mutableStateOf("City")
+        mutableStateOf("")
     }
     val shownCountry = remember {
         mutableStateOf(false)
@@ -116,6 +128,10 @@ fun RegisterScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+
+
     LaunchedEffect(uiState) {
         when (uiState) {
             RegisterScreenViewModel.RegisterUiState.Loading -> {
@@ -147,9 +163,11 @@ fun RegisterScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(start = 10.dp, top = 10.dp, end = 10.dp)
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.align(Alignment.Start)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.align(Alignment.Start)
+            ) {
                 Image(
                     modifier = Modifier.size(23.dp).clickable {
                         navController.popBackStack()
@@ -158,119 +176,198 @@ fun RegisterScreen(
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.size(15.dp))
-                androidx.compose.material.Text(
-                    text = "Register",
-                    color = Color.Black,
-                    fontSize = 25.sp,
-                    fontWeight = FontWeight.Bold
-                )
+
             }
+            Spacer(modifier = Modifier.padding(top = 20.dp))
+
+            androidx.compose.material.Text(
+                text = "Create your account",
+                color = Color.Black,
+                fontSize = 25.sp,
+                fontFamily = FontFamily.Default,
+            )
+
+            Spacer(modifier = Modifier.padding(top = 15.dp))
+
+            androidx.compose.material.Text(
+                text = "Create an account discover a world of near vibes to be in and share yours",
+                color = Color(0xFFDFC46B),
+                fontSize = 15.sp,
+                fontFamily = FontFamily.SansSerif
+            )
 
             Spacer(modifier = Modifier.padding(top = 50.dp))
 
             OutlinedTextField(
-                singleLine = true,
-                shape = RoundedCornerShape(15.dp),
-                modifier = Modifier.fillMaxWidth(0.85f),
                 value = firstName.value,
                 onValueChange = { firstName.value = it },
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = Color.Black,
-                    cursorColor = Color.Black,
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Black,
-                ),
-                label = { Text(text = "FirstName", color = Color.White) }
-            )
-
-            Spacer(modifier = Modifier.padding(top = 15.dp))
-
-            OutlinedTextField(
                 singleLine = true,
                 shape = RoundedCornerShape(15.dp),
-                modifier = Modifier.fillMaxWidth(0.85f),
+                modifier = Modifier.fillMaxWidth(0.85f).align(Alignment.CenterHorizontally),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words // better for names
+                ),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedBorderColor = Color.Black,
+                    unfocusedBorderColor = Color.Black
+                ),
+                label = { Text(text = "First Name", color = Color.Gray) },
+
+                // Left icon (optional)
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        painter = painterResource(Res.drawable.icons_name),
+                        contentDescription = "First Name Icon"
+                    )
+                }
+            )
+
+            OutlinedTextField(
                 value = lastName.value,
                 onValueChange = { lastName.value = it },
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = Color.Black,
-                    cursorColor = Color.Black,
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Black,
-                ),
-                label = { Text(text = "LastName", color = Color.White) }
-            )
-
-            Spacer(modifier = Modifier.padding(top = 15.dp))
-
-            OutlinedTextField(
                 singleLine = true,
                 shape = RoundedCornerShape(15.dp),
-                modifier = Modifier.fillMaxWidth(0.85f),
+                modifier = Modifier.fillMaxWidth(0.85f).align(Alignment.CenterHorizontally),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words // better for names
+                ),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedBorderColor = Color.Black,
+                    unfocusedBorderColor = Color.Black
+                ),
+                label = { Text(text = "Last Name", color = Color.Gray) },
+
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        painter = painterResource(Res.drawable.icons_name),
+                        contentDescription = "Last Name Icon"
+                    )
+                }
+            )
+
+            OutlinedTextField(
                 value = username.value,
                 onValueChange = { username.value = it },
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                colors = TextFieldDefaults.textFieldColors(
+                singleLine = true,
+                shape = RoundedCornerShape(15.dp),
+                modifier = Modifier.fillMaxWidth(0.85f).align(Alignment.CenterHorizontally),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words // better for names
+                ),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
                     textColor = Color.Black,
                     cursorColor = Color.Black,
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Black,
+                    focusedBorderColor = Color.Black,
+                    unfocusedBorderColor = Color.Black
                 ),
-                label = { Text(text = "Username", color = Color.White) }
+                label = { Text(text = "Username", color = Color.Gray) },
+
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        painter = painterResource(Res.drawable.icon_username),
+                        contentDescription = "Username Icon"
+                    )
+                }
             )
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
 
             OutlinedTextField(
-                singleLine = true,
-                shape = RoundedCornerShape(15.dp),
-                modifier = Modifier.fillMaxWidth(0.85f),
                 value = phone.value,
                 onValueChange = { phone.value = it },
+                singleLine = true,
+                shape = RoundedCornerShape(15.dp),
+                modifier = Modifier.fillMaxWidth(0.85f).align(Alignment.CenterHorizontally),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                colors = TextFieldDefaults.textFieldColors(
+                colors = TextFieldDefaults.outlinedTextFieldColors(
                     textColor = Color.Black,
                     cursorColor = Color.Black,
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Black,
+                    focusedBorderColor = Color.Black,
+                    unfocusedBorderColor = Color.Black
                 ),
-                label = { Text(text = "Phone", color = Color.White) }
+                label = { Text(text = "Phone", color = Color.Gray) },
+
+                leadingIcon = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(start = 5.dp)
+                    ) {
+                        Text(
+                            text = "+212",
+                            color = Color.Black,
+                            modifier = Modifier.padding(end = 4.dp).clickable { }
+                        )
+                        Spacer(modifier = Modifier.width(5.dp).height(0.dp))
+                        Divider(
+                            modifier = Modifier.height(30.dp).width(2.dp),
+                            color = Color(0xFFDFC46B)
+                        )
+                    }
+                }
             )
+
+            OutlinedTextField(
+                value = email.value,
+                onValueChange = { email.value = it },
+                singleLine = true,
+                shape = RoundedCornerShape(15.dp),
+                modifier = Modifier.fillMaxWidth(0.85f).align(Alignment.CenterHorizontally),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedBorderColor = Color.Black,
+                    unfocusedBorderColor = Color.Black
+                ),
+                label = { Text(text = "Email", color = Color.Gray) },
+
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = Icons.Default.Email,
+                        contentDescription = "Email Icon"
+                    )
+                }
+            )
+
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
 
             OutlinedTextField(
+                value = country.value,
+                onValueChange = { country.value = it },
                 singleLine = true,
+                readOnly = true,
                 shape = RoundedCornerShape(15.dp),
-                modifier = Modifier.fillMaxWidth(0.85f),
-                value = email.value,
-                onValueChange = { email.value = it },
+                modifier = Modifier.fillMaxWidth(0.85f).align(Alignment.CenterHorizontally),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                colors = TextFieldDefaults.textFieldColors(
+                colors = TextFieldDefaults.outlinedTextFieldColors(
                     textColor = Color.Black,
                     cursorColor = Color.Black,
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Black,
+                    focusedBorderColor = Color.Black,
+                    unfocusedBorderColor = Color.Black
                 ),
-                label = { Text(text = "Email", color = Color.White) }
+                label = {
+                    Text(text = "Country", color = Color.Gray)
+                },
+
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(20.dp).clickable {
+                            shownCountry.value = true
+                        },
+                        painter = painterResource(Res.drawable.icon_country),
+                        contentDescription = "country Icon"
+                    )
+                }
             )
-
-            Spacer(modifier = Modifier.padding(top = 15.dp))
-
-            Box(
-                modifier = Modifier.height(55.dp).fillMaxWidth(0.85f)
-                    .background(color = LightGray, shape = RoundedCornerShape(15.dp)).clickable {
-                        shownCountry.value = true
-                    }.padding(start = 15.dp)
-            ) {
-                Text(
-                    modifier = Modifier.align(Alignment.CenterStart),
-                    text = country.value,
-                    color = if (country.value == "Country") Color.White else Color.Black
-                )
-            }
-
 
             CustomCountryPickerDialog(countries, shownCountry.value, {
                 shownCountry.value = false
@@ -281,22 +378,34 @@ fun RegisterScreen(
                 viewModel.country = cou.country
             })
 
-            Spacer(modifier = Modifier.padding(top = 15.dp))
+            OutlinedTextField(
+                value = city.value,
+                onValueChange = { city.value = it },
+                singleLine = true,
+                readOnly = true,
+                shape = RoundedCornerShape(15.dp),
+                modifier = Modifier.fillMaxWidth(0.85f).align(Alignment.CenterHorizontally),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedBorderColor = Color.Black,
+                    unfocusedBorderColor = Color.Black
+                ),
+                label = {
+                    Text(text = "City", color = Color.Gray)
+                },
 
-            Box(
-                modifier = Modifier.height(55.dp).fillMaxWidth(0.85f)
-                    .background(color = LightGray, shape = RoundedCornerShape(15.dp)).clickable {
-                        shownCity.value = true
-                    }.padding(start = 15.dp)
-            ) {
-                Text(
-                    modifier = Modifier.align(Alignment.CenterStart),
-                    text = city.value,
-                    color = if (city.value == "City") Color.White else Color.Black
-                )
-            }
-
-
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(20.dp).clickable {
+                            shownCity.value = true
+                        },
+                        painter = painterResource(Res.drawable.icon_country),
+                        contentDescription = "city Icon"
+                    )
+                }
+            )
             CustomCityPickerDialog(countryModel.value?.cities ?: emptyList(), shownCity.value, {
                 shownCity.value = false
             }, { cit ->
@@ -308,43 +417,85 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.padding(top = 15.dp))
 
             OutlinedTextField(
-                singleLine = true,
-                shape = RoundedCornerShape(15.dp),
-                modifier = Modifier.fillMaxWidth(0.85f),
                 value = password.value,
                 onValueChange = { password.value = it },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                visualTransformation = PasswordVisualTransformation(),
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = Color.Black,
-                    cursorColor = Color.Black,
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Black,
-                ),
-                label = { Text(text = "Password", color = Color.White) }
-            )
-
-            Spacer(modifier = Modifier.padding(top = 15.dp))
-
-            OutlinedTextField(
                 singleLine = true,
                 shape = RoundedCornerShape(15.dp),
-                modifier = Modifier.fillMaxWidth(0.85f),
-                value = confirmPassword.value,
-                onValueChange = { confirmPassword.value = it },
+                modifier = Modifier.fillMaxWidth(0.85f).align(Alignment.CenterHorizontally),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                visualTransformation = PasswordVisualTransformation(),
-                colors = TextFieldDefaults.textFieldColors(
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
                     textColor = Color.Black,
                     cursorColor = Color.Black,
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Black,
+                    focusedBorderColor = Color.Black,
+                    unfocusedBorderColor = Color.Black
                 ),
                 label = {
-                    Text(
-                        text = "Confirm Password",
-                        color = Color.White
+                    Text(text = "Password", color = Color.Gray)
+                },
+
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = Icons.Default.Lock, // you can use painterResource if you have custom icon
+                        contentDescription = "Password Icon",
+                        tint = Color.Gray
                     )
+                },
+
+                trailingIcon = {
+                    val image =
+                        if (passwordVisible) painterResource(Res.drawable.icon_visibility) else painterResource(
+                            Res.drawable.icon_visibilityoff
+                        )
+                    IconButton(
+                        modifier = Modifier.size(20.dp),
+                        onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(painter = image, contentDescription = "Toggle password visibility")
+                    }
+                }
+            )
+
+            OutlinedTextField(
+                value = confirmPassword.value,
+                onValueChange = { confirmPassword.value = it },
+                singleLine = true,
+                shape = RoundedCornerShape(15.dp),
+                modifier = Modifier.fillMaxWidth(0.85f).align(Alignment.CenterHorizontally),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedBorderColor = Color.Black,
+                    unfocusedBorderColor = Color.Black
+                ),
+                label = {
+                    Text(text = "Confirm password", color = Color.Gray)
+                },
+
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = Icons.Default.Lock, // you can use painterResource if you have custom icon
+                        contentDescription = "confirm password Icon",
+                        tint = Color.Gray
+                    )
+                },
+
+                trailingIcon = {
+                    val image =
+                        if (confirmPasswordVisible) painterResource(Res.drawable.icon_visibility) else painterResource(
+                            Res.drawable.icon_visibilityoff
+                        )
+                    IconButton(
+                        modifier = Modifier.size(20.dp),
+                        onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                        Icon(
+                            painter = image,
+                            contentDescription = "Toggle confirm password visibility"
+                        )
+                    }
                 }
             )
 
@@ -353,8 +504,8 @@ fun RegisterScreen(
             Box(
                 modifier = Modifier
                     .height(50.dp)
-                    .fillMaxWidth(0.85f)
-                    .background(color = Gray, shape = RoundedCornerShape(16.dp)),
+                    .fillMaxWidth(0.85f).align(Alignment.CenterHorizontally)
+                    .background(color = Color(0xFFDFC46B), shape = RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
 
             ) {

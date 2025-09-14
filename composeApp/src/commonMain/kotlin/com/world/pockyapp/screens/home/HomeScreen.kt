@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
@@ -20,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -76,98 +78,112 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
 
         Column(
             modifier = Modifier.fillMaxWidth()
-                .padding(top = 15.dp, start = 10.dp, end = 10.dp)
+                .padding(top = 20.dp, start = 10.dp, end = 10.dp)
         ) {
 
-            Text(
-                "NearVibe",
-                fontSize = 25.sp,
-                fontStyle = FontStyle.Italic,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-            )
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
-
-                Image(
-                    painter = painterResource(Res.drawable.ic_profile_black),
-                    modifier = Modifier.size(33.dp).clickable {
-                        navController.navigate(NavRoutes.MY_PROFILE.route)
-                    },
-                    contentDescription = null,
+            Row() {
+                Text(
+                    "NearVibe",
+                    fontSize = 25.sp,
+                    fontStyle = FontStyle.Italic,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFDFC46B)
                 )
 
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.weight(1f))
 
-                Image(
-                    painter = painterResource(Res.drawable.ic_search_black),
-                    modifier = Modifier.size(28.dp).clickable {
-                        navController.navigate(NavRoutes.SEARCH.route)
-                    },
-                    contentDescription = null,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+
+                    Image(
+                        painter = painterResource(Res.drawable.ic_profile_black),
+                        modifier = Modifier.size(33.dp).clickable {
+                            navController.navigate(NavRoutes.MY_PROFILE.route)
+                        },
+                        contentDescription = null,
+                    )
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Image(
+                        painter = painterResource(Res.drawable.ic_search_black),
+                        modifier = Modifier.size(28.dp).clickable {
+                            navController.navigate(NavRoutes.SEARCH.route)
+                        },
+                        contentDescription = null,
+                    )
+                }
             }
+
             Spacer(modifier = Modifier.size(10.dp))
 
         }
 
         Scaffold(
             bottomBar = {
-                NavigationBar(
-                    containerColor = Color(0XFFFAF9F6),
-                    contentColor = Color.Yellow
+                Surface(
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomEnd = 24.dp, bottomStart = 24.dp),
+                    shadowElevation = 8.dp,
+                    tonalElevation = 8.dp,
+                    modifier = Modifier.padding(20.dp)
                 ) {
-                    BottomNavigationItem(
-                        selected = selected == 0,
-                        onClick = {
-                            selected = 0
-                            viewModel.selectedScreen = 0
-                        },
-                        icon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_discover_black),
-                                contentDescription = null,
-                                modifier = Modifier.size(30.dp)
-                            )
-                        }
+                    NavigationBar(
+                        modifier = Modifier.height(60.dp),
+                        containerColor = Color(0xFFDFC46B),
+                        contentColor = Color.Yellow
                     )
-                    BottomNavigationItem(
-                        selected = selected == 1,
-                        onClick = {
-                            selected = 1
-                            viewModel.selectedScreen = 1
-                        },
-                        icon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_hot_black),
-                                contentDescription = null,
-                                modifier = Modifier.size(30.dp)
-                            )
-                        }
-                    )
+                    {
+                        BottomNavigationItem(
+                            selected = selected == 0,
+                            onClick = {
+                                selected = 0
+                                viewModel.selectedScreen = 0
+                            },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_discover_black),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
+                        )
+                        BottomNavigationItem(
+                            selected = selected == 1,
+                            onClick = {
+                                selected = 1
+                                viewModel.selectedScreen = 1
+                            },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_hot_black),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
+                        )
 
-                    BottomNavigationItem(
-                        selected = selected == 2,
-                        onClick = {
-                            selected = 2
-                            viewModel.selectedScreen = 2
-                        },
-                        icon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_chat_black),
-                                contentDescription = null,
-                                modifier = Modifier.size(30.dp)
-                            )
-                        }
-                    )
+                        BottomNavigationItem(
+                            selected = selected == 2,
+                            onClick = {
+                                selected = 2
+                                viewModel.selectedScreen = 2
+                            },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_chat_black),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
+                        )
 
+                    }
                 }
+
             }
         ) {
 

@@ -212,7 +212,6 @@ fun LoginScreen(
                     Text(text = "Password", color = Color.Gray)
                 },
 
-                // Left icon
                 leadingIcon = {
                     Icon(
                         modifier = Modifier.size(20.dp),
