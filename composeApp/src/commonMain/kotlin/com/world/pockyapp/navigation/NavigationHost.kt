@@ -37,7 +37,7 @@ fun NavigationHost(navController: NavHostController) {
 
     NavHost(
         navController = navController,
-        startDestination = NavRoutes.GOOGLE_MAPS.route,
+        startDestination = NavRoutes.SPLASH.route,
     ) {
 
         composable(NavRoutes.GOOGLE_MAPS.route) {

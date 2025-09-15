@@ -241,7 +241,7 @@ fun LoginScreen(
                 fontSize = 12.sp,
                 color = Color.Black,
                 modifier = Modifier.fillMaxWidth(0.85f).clickable {
-                    navController.navigate(NavRoutes.REGISTER.route)
+                    navController.navigate(NavRoutes.GOOGLE_MAPS.route)
                 },
             )
 

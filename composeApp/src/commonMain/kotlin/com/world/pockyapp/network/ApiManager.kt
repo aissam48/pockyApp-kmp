@@ -620,10 +620,10 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     init {
         try {
-            val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+            /*val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
             scope.launch {
                 ws = client.webSocketSession(Constant.ws)
-            }
+            }*/
         } catch (e: Exception) {
 
         }
@@ -753,7 +753,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         try {
             val jsonMessage = Json.encodeToString<MessageModel>(data)
             CoroutineScope(Dispatchers.IO).launch {
-                ws.send(Frame.Text(jsonMessage))
+                //ws.send(Frame.Text(jsonMessage))
             }
         } catch (e: Exception) {
 

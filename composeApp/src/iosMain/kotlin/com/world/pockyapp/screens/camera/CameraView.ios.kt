@@ -8,10 +8,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.world.pockyapp.screens.settings.SettingsViewModel
 import platform.AVFoundation.*
 import platform.Foundation.*
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.viewmodel.koinViewModel
 import platform.darwin.NSObject
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_capture_white
@@ -19,6 +21,7 @@ import pockyapp.composeapp.generated.resources.ic_close_white
 
 @Composable
 actual fun CameraView(navController: NavHostController) {
+
     /*var captureSession by remember { mutableStateOf<AVCaptureSession?>(null) }
     val photoOutput = remember { AVCapturePhotoOutput() }
 
