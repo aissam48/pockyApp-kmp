@@ -28,8 +28,11 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.heatmaps.Gradient
 import com.google.maps.android.heatmaps.HeatmapTileProvider
 import com.google.maps.android.heatmaps.WeightedLatLng
+import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.screens.home.navigations.discover.UiState
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -49,29 +52,6 @@ actual fun GoogleMapsScreen(navController: NavHostController) {
         viewModel.loadGlobalMoments()
     }
 
-    // Handle error state
-    LaunchedEffect(globalMomentsState) {
-        if (globalMomentsState is UiState.Error) {
-            showError = true
-            snackbarHostState.showSnackbar(
-                message = "Failed to load moment data. Showing sample data instead.",
-                actionLabel = "Retry"
-            )
-        }
-    }
-
-    // Show loading indicator
-    if (globalMomentsState is UiState.Loading) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-        return
-    }
 
     val moments = remember(globalMomentsState) {
         when (val state = globalMomentsState) {
@@ -81,6 +61,16 @@ actual fun GoogleMapsScreen(navController: NavHostController) {
             else -> emptyList()
         }
     }
+
+    val profiles = remember(globalMomentsState) {
+        when (val state = globalMomentsState) {
+            is UiState.Success -> {
+                state.data
+            }
+            else -> emptyList()
+        }
+    }.filter { it.moments.isNotEmpty() }
+
     // Prepare heatmap data
     val heatmapData = remember(globalMomentsState) {
         when (val state = globalMomentsState) {
@@ -102,9 +92,9 @@ actual fun GoogleMapsScreen(navController: NavHostController) {
                         }
                     }
 
-                //realData
+                realData
 
-                getSampleData()
+                //getSampleData()
 
             }
 
@@ -150,7 +140,14 @@ actual fun GoogleMapsScreen(navController: NavHostController) {
         ),
         onMapClick = { clickedLatLng ->
             println("ClickedOnMap: $clickedLatLng")
-            handleMapClick(clickedLatLng, moments)
+            val momentsAround = handleMapClick(clickedLatLng, moments)
+
+            println(profiles)
+
+            val modulesJson = Json.encodeToString(profiles).replace("/", "%")
+            navController.navigate(
+                NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/d140fd44-4879-486f-b6a6-445a15f7d0f0"
+            )
         }
     ) {
         TileOverlay(
@@ -163,7 +160,7 @@ actual fun GoogleMapsScreen(navController: NavHostController) {
 }
 
 private fun handleMapClick(clickedLatLng: LatLng, heatmapData: List<MomentModel>): List<MomentModel> {
-    val radiusInMeters = 10000.0 // 10 km
+    val radiusInMeters = 20000.0
     val momentsInCircle = heatmapData.filter { point ->
         val distance = haversineDistance(
             clickedLatLng.latitude,
@@ -171,6 +168,8 @@ private fun handleMapClick(clickedLatLng: LatLng, heatmapData: List<MomentModel>
             point.geoLocation.latitude,
             point.geoLocation.longitude
         )
+        println("distance -> $distance")
+        println("radiusInMeters -> $radiusInMeters")
         distance <= radiusInMeters
     }
     println("ClickedOnMap: $clickedLatLng, found ${momentsInCircle.size} moments nearby")
