@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -38,12 +37,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.world.pockyapp.screens.google_maps.GoogleMapsScreen
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverScreen
 import com.world.pockyapp.screens.home.navigations.hot.HotScreen
-import dev.jordond.compass.autocomplete.Autocomplete
-import dev.jordond.compass.autocomplete.mobile
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -53,6 +51,7 @@ import pockyapp.composeapp.generated.resources.ic_discover_black
 import pockyapp.composeapp.generated.resources.ic_hot_black
 import pockyapp.composeapp.generated.resources.ic_profile_black
 import pockyapp.composeapp.generated.resources.ic_search_black
+import pockyapp.composeapp.generated.resources.icon_world
 
 
 @Composable
@@ -174,6 +173,21 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                             },
                             icon = {
                                 Icon(
+                                    painter = painterResource(Res.drawable.icon_world),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
+                        )
+
+                        BottomNavigationItem(
+                            selected = selected == 3,
+                            onClick = {
+                                selected = 3
+                                viewModel.selectedScreen = 3
+                            },
+                            icon = {
+                                Icon(
                                     painter = painterResource(Res.drawable.ic_chat_black),
                                     contentDescription = null,
                                     modifier = Modifier.size(30.dp)
@@ -198,6 +212,10 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                     }
 
                     2 -> {
+                        GoogleMapsScreen(navController)
+                    }
+
+                    3 -> {
                         ChatScreen(navController)
                     }
                 }

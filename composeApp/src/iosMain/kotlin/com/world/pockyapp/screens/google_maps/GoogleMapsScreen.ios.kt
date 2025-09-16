@@ -1,4 +1,4 @@
-package com.world.pockyapp
+package com.world.pockyapp.screens.google_maps
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -9,11 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.UIKitInteropInteractionMode
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitView
+import androidx.navigation.NavHostController
 import cocoapods.GoogleMaps.GMSCameraPosition
 import cocoapods.GoogleMaps.GMSCameraUpdate
 import cocoapods.GoogleMaps.GMSMapView
 import cocoapods.GoogleMaps.GMSMarker
-import kotlinx.cinterop.CValue
 import platform.CoreLocation.CLLocationCoordinate2D
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.cValue
@@ -22,20 +22,18 @@ import platform.UIKit.UIGraphicsBeginImageContextWithOptions
 import platform.UIKit.UIGraphicsEndImageContext
 import platform.UIKit.UIGraphicsGetImageFromCurrentImageContext
 import platform.UIKit.UIBezierPath
-import platform.Foundation.NSData
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLSession
 import platform.Foundation.NSURLRequest
 import platform.Foundation.dataTaskWithRequest
 import platform.CoreGraphics.CGSizeMake
 import platform.CoreGraphics.CGRectMake
-import platform.CoreGraphics.CGPointMake
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 @OptIn(ExperimentalForeignApi::class, ExperimentalComposeUiApi::class)
 @Composable
-actual fun GoogleMapsScreen() {
+actual fun GoogleMapsScreen(navController: NavHostController) {
 
     val mapView = remember {
         GMSMapView()

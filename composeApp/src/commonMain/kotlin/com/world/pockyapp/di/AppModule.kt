@@ -10,6 +10,7 @@ import com.world.pockyapp.screens.chat.ChatViewModel
 import com.world.pockyapp.screens.edit_location.EditLocationViewModel
 import com.world.pockyapp.screens.edit_profile.EditProfileViewModel
 import com.world.pockyapp.screens.friend_request.FriendRequestsViewModel
+import com.world.pockyapp.screens.google_maps.GoogleMapsViewModel
 import com.world.pockyapp.screens.home.HomeViewModel
 import com.world.pockyapp.screens.home.navigations.conversations.ConversationsViewModel
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverViewModel
@@ -52,5 +53,6 @@ val appModule = module {
     viewModel { BlockedViewModel(sdk = get()) }
     viewModel { HotViewModel(sdk = get()) }
     viewModel { ReportProfileViewModel(sdk = get()) }
+    viewModel { GoogleMapsViewModel(sdk = get()) }
 
 }
