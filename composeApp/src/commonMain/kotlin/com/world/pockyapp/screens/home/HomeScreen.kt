@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.world.pockyapp.screens.google_maps.GoogleMapsScreen
+import com.world.pockyapp.screens.google_maps.MapComponentScreen
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverScreen
@@ -212,7 +212,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                     }
 
                     2 -> {
-                        GoogleMapsScreen(navController)
+                        MapComponentScreen(navController)
                     }
 
                     3 -> {

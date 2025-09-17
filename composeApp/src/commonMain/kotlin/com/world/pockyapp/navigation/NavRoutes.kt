@@ -2,7 +2,7 @@ package com.world.pockyapp.navigation
 
 enum class NavRoutes(val route: String) {
     GOOGLE_MAPS("google_maps"),
-
+    MAP_COMPONENT("map_component"),
     SPLASH("splash"),
     LOGIN("login"),
     REGISTER("register"),

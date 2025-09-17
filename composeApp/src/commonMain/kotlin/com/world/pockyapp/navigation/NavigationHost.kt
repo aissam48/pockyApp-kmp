@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.world.pockyapp.screens.google_maps.MapComponentScreen
 import com.world.pockyapp.screens.google_maps.GoogleMapsScreen
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.ProfileModel
@@ -39,6 +40,10 @@ fun NavigationHost(navController: NavHostController) {
         navController = navController,
         startDestination = NavRoutes.SPLASH.route,
     ) {
+
+        composable(NavRoutes.MAP_COMPONENT.route) {
+            MapComponentScreen(navController)
+        }
 
         composable(NavRoutes.GOOGLE_MAPS.route) {
             GoogleMapsScreen(navController)

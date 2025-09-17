@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.ErrorModel
+import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.home.navigations.discover.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,9 +16,9 @@ class GoogleMapsViewModel(val sdk: ApiManager): ViewModel() {
 
     private var isGlobalMomentsLoadingFirstTime = true
 
-    private val _globalMomentsState = MutableStateFlow<UiState<List<ProfileModel>>>(UiState.Loading)
+    private val _globalMomentsState = MutableStateFlow<UiState<List<MomentModel>>>(UiState.Loading)
 
-    val globalMomentsState: StateFlow<UiState<List<ProfileModel>>> =
+    val globalMomentsState: StateFlow<UiState<List<MomentModel>>> =
         _globalMomentsState.asStateFlow()
 
     fun loadGlobalMoments() {

@@ -13,6 +13,7 @@ import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.FriendRequestModel
 import com.world.pockyapp.network.models.model.GeoLocationModel
 import com.world.pockyapp.network.models.model.MessageModel
+import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.network.models.model.ResponseMessageModel
@@ -469,7 +470,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
 
     suspend fun getGlobalMoments(
-        onSuccess: (List<ProfileModel>) -> Unit,
+        onSuccess: (List<MomentModel>) -> Unit,
         onFailure: (ErrorModel) -> Unit
     ) {
         try {
@@ -482,7 +483,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             }
 
             if (response.status.isSuccess()) {
-                val responseBody: List<ProfileModel> =
+                val responseBody: List<MomentModel> =
                     response.body()
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)

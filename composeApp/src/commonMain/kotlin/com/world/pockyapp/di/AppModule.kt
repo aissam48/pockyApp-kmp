@@ -25,7 +25,9 @@ import com.world.pockyapp.screens.settings.SettingsViewModel
 import com.world.pockyapp.screens.splash_screen.SplashViewModel
 import com.world.pockyapp.screens.view_post.ViewPostViewModel
 import org.koin.compose.viewmodel.dsl.viewModel
+import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import org.koin.mp.KoinPlatform
 
 
 val appModule = module {
@@ -55,4 +57,10 @@ val appModule = module {
     viewModel { ReportProfileViewModel(sdk = get()) }
     viewModel { GoogleMapsViewModel(sdk = get()) }
 
+}
+
+object ViewModelProvider {
+    fun getGoogleMapsViewModel(): GoogleMapsViewModel {
+        return KoinPlatform.getKoin().get()
+    }
 }
