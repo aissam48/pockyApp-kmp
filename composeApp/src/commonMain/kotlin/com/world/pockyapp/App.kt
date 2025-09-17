@@ -1,6 +1,11 @@
 package com.world.pockyapp
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.mmk.kmpnotifier.notification.NotifierManager
 import com.mmk.kmpnotifier.notification.PayloadData
@@ -13,7 +18,13 @@ import org.koin.compose.KoinContext
 @Preview
 fun App() {
     AppTheme {
-        KoinContext {
+        Scaffold {
+            Column(Modifier.fillMaxSize()) {
+                MapComponent()
+            }
+        }
+        /*KoinContext {
+
             val navController = rememberNavController()
             NavigationHost(navController)
 
@@ -39,7 +50,5 @@ fun App() {
                     
                 })
             }
-
-        }
-    }
-}
+        }*/
+    }}
