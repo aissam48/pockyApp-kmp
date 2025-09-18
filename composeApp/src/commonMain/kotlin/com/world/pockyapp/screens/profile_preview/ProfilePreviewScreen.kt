@@ -282,48 +282,6 @@ fun ProfilePreviewScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Friend Action
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                if (profile.value.friend == "NO") {
-                                    viewModel.beFriend(profile.value.id)
-                                } else if (profile.value.friend == "YES") {
-                                    viewModel.removeFriend(profile.value.id)
-                                }
-                                scope.launch { scaffoldState.bottomSheetState.collapse() }
-                            },
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA)),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_be_friend),
-                                contentDescription = null,
-                                tint = Color(0xFF2196F3)
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text(
-                                fontWeight = FontWeight.SemiBold,
-                                text = when (profile.value.friend) {
-                                    "NO" -> "Add Friend"
-                                    "YES" -> "Remove Friend"
-                                    else -> "Request Sent"
-                                },
-                                color = Color.Black,
-                                fontSize = 16.sp
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
                     // Block Action
                     Card(
                         modifier = Modifier
@@ -335,16 +293,16 @@ fun ProfilePreviewScreen(
                                 }
                                 scope.launch { scaffoldState.bottomSheetState.collapse() }
                             },
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA)),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFDFC46B)),
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
+                                modifier = Modifier.size(20.dp),
                                 painter = painterResource(Res.drawable.ic_block_black),
                                 contentDescription = null,
                                 tint = Color(0xFFFF5722)
@@ -353,12 +311,12 @@ fun ProfilePreviewScreen(
                             Text(
                                 fontWeight = FontWeight.SemiBold,
                                 text = when (profile.value.block) {
-                                    "NO" -> "Block User"
-                                    "BLOCKER" -> "Unblock User"
+                                    "NO" -> "Block"
+                                    "BLOCKER" -> "Unblock"
                                     else -> ""
                                 },
                                 color = Color.Black,
-                                fontSize = 16.sp
+                                fontSize = 14.sp
                             )
                         }
                     }
@@ -373,16 +331,16 @@ fun ProfilePreviewScreen(
                                 navController.navigate(NavRoutes.REPORT_PROFILE.route + "/${profile.value.id}")
                                 scope.launch { scaffoldState.bottomSheetState.collapse() }
                             },
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA)),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFDFC46B)),
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
+                                modifier = Modifier.size(20.dp),
                                 painter = painterResource(Res.drawable.ic_report_black),
                                 contentDescription = null,
                                 tint = Color(0xFFE91E63)
@@ -390,9 +348,9 @@ fun ProfilePreviewScreen(
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
                                 fontWeight = FontWeight.SemiBold,
-                                text = "Report User",
+                                text = "Report",
                                 color = Color.Black,
-                                fontSize = 16.sp
+                                fontSize = 14.sp
                             )
                         }
                     }
@@ -407,31 +365,35 @@ fun ProfilePreviewScreen(
                     .background(Color(0xFFF5F5F5))
                     .padding(horizontal = 16.dp)
             ) {
-
-                // Header with back button
                 item {
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(44.dp)
-                                .background(Color.White, CircleShape)
-                                .clickable { navController.popBackStack() }
-                                .shadow(2.dp, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Image(
-                                modifier = Modifier.size(24.dp),
-                                painter = painterResource(Res.drawable.ic_back_black),
-                                contentDescription = null
-                            )
-                        }
+                        Image(
+                            modifier = Modifier.size(23.dp).clickable {
+                                navController.popBackStack()
+                            },
+                            painter = painterResource(Res.drawable.ic_back_black),
+                            contentDescription = null
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Image(
+                            painter = painterResource(Res.drawable.ic_more_black),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp).clickable {
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.expand()
+                                }
+                            }
+                        )
+
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
                 when (val state = profileState) {
@@ -457,7 +419,6 @@ fun ProfilePreviewScreen(
                         when (profile.value.block) {
                             "NO" -> {
                                 item {
-                                    // Profile Header Card
                                     Card(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -467,7 +428,7 @@ fun ProfilePreviewScreen(
                                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                                     ) {
                                         Column(
-                                            modifier = Modifier.padding(24.dp),
+                                            modifier = Modifier.padding(20.dp),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         )
                                         {
@@ -502,7 +463,8 @@ fun ProfilePreviewScreen(
                                                             shape = CircleShape
                                                         )
                                                         .padding(4.dp),
-                                                ) {
+                                                )
+                                                {
                                                     AsyncImage(
                                                         model = getUrl(profile.value.photoID),
                                                         contentDescription = "",
@@ -525,103 +487,6 @@ fun ProfilePreviewScreen(
                                                     )
                                                 }
 
-                                                // Action Buttons
-                                                Column {
-                                                    when (true) {
-                                                        (profile.value.chatRequest == null) -> {
-                                                            Box(
-                                                                modifier = Modifier
-                                                                    .size(48.dp)
-                                                                    .background(
-                                                                        brush = Brush.linearGradient(
-                                                                            colors = listOf(
-                                                                                Color(
-                                                                                    0xFF667eea
-                                                                                ), Color(0xFF764ba2)
-                                                                            )
-                                                                        ),
-                                                                        shape = CircleShape
-                                                                    )
-                                                                    .clickable {
-                                                                        scope.launch {
-                                                                            viewModel.sendRequestChat(
-                                                                                profile.value.id
-                                                                            )
-                                                                        }
-                                                                    }
-                                                                    .shadow(4.dp, CircleShape),
-                                                                contentAlignment = Alignment.Center
-                                                            ) {
-                                                                Image(
-                                                                    painter = painterResource(Res.drawable.ic_chat_request_blue),
-                                                                    contentDescription = null,
-                                                                    modifier = Modifier.size(24.dp)
-                                                                )
-                                                            }
-                                                        }
-
-                                                        (profile.value.chatRequest?.status == "ACCEPTED") -> {
-                                                            Box(
-                                                                modifier = Modifier
-                                                                    .size(48.dp)
-                                                                    .background(
-                                                                        brush = Brush.linearGradient(
-                                                                            colors = listOf(
-                                                                                Color(
-                                                                                    0xFF4CAF50
-                                                                                ), Color(0xFF8BC34A)
-                                                                            )
-                                                                        ),
-                                                                        shape = CircleShape
-                                                                    )
-                                                                    .clickable {
-                                                                        navController.navigate(
-                                                                            NavRoutes.CHAT.route + "/${profile.value.conversationID}" + "/${profile.value.id}" + "/${profile.value.chatRequest?.id}"
-                                                                        )
-                                                                    }
-                                                                    .shadow(4.dp, CircleShape),
-                                                                contentAlignment = Alignment.Center
-                                                            ) {
-                                                                Image(
-                                                                    painter = painterResource(Res.drawable.ic_chat_bleu),
-                                                                    contentDescription = null,
-                                                                    modifier = Modifier.size(24.dp)
-                                                                )
-                                                            }
-                                                        }
-
-                                                        else -> {}
-                                                    }
-
-                                                    Spacer(modifier = Modifier.height(12.dp))
-
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .size(48.dp)
-                                                            .background(
-                                                                Color.White,
-                                                                shape = CircleShape
-                                                            )
-                                                            .border(
-                                                                2.dp,
-                                                                Color.Gray.copy(alpha = 0.2f),
-                                                                CircleShape
-                                                            )
-                                                            .clickable {
-                                                                scope.launch {
-                                                                    scaffoldState.bottomSheetState.expand()
-                                                                }
-                                                            }
-                                                            .shadow(2.dp, CircleShape),
-                                                        contentAlignment = Alignment.Center
-                                                    ) {
-                                                        Image(
-                                                            painter = painterResource(Res.drawable.ic_more_black),
-                                                            contentDescription = null,
-                                                            modifier = Modifier.size(20.dp)
-                                                        )
-                                                    }
-                                                }
                                             }
 
                                             Spacer(modifier = Modifier.height(20.dp))
@@ -693,6 +558,76 @@ fun ProfilePreviewScreen(
                                                 .padding(20.dp),
                                             horizontalArrangement = Arrangement.SpaceEvenly
                                         ) {
+
+
+                                            // Followers (you'll need to add this to your profile model)
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(
+                                                    text = profile.value.followers.toString(),
+                                                    color = Color.Black,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 18.sp
+                                                )
+                                                Text(
+                                                    text = "Followers",
+                                                    color = Color.Gray,
+                                                    fontSize = 13.sp
+                                                )
+                                            }
+
+                                            // Following
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(
+                                                    text = profile.value.followings.toString(),
+                                                    color = Color.Black,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 18.sp
+                                                )
+                                                Text(
+                                                    text = "Following",
+                                                    color = Color.Gray,
+                                                    fontSize = 13.sp
+                                                )
+                                            }
+
+                                            // Following
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(
+                                                    text = profile.value.friends.toString(),
+                                                    color = Color.Black,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 18.sp
+                                                )
+                                                Text(
+                                                    text = "Friends",
+                                                    color = Color.Gray,
+                                                    fontSize = 13.sp
+                                                )
+                                            }
+
+                                            // Stories/Moments
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(
+                                                    text = "${profile.value.momentsNumber}",
+                                                    color = Color.Black,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 18.sp
+                                                )
+                                                Text(
+                                                    text = "Moments",
+                                                    color = Color.Gray,
+                                                    fontSize = 13.sp
+                                                )
+                                            }
+
                                             // Posts
                                             Column(
                                                 horizontalAlignment = Alignment.CenterHorizontally
@@ -712,57 +647,6 @@ fun ProfilePreviewScreen(
                                                     fontSize = 13.sp
                                                 )
                                             }
-
-                                            // Followers (you'll need to add this to your profile model)
-                                            Column(
-                                                horizontalAlignment = Alignment.CenterHorizontally
-                                            ) {
-                                                Text(
-                                                    text = "O",
-                                                    color = Color.Black,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 18.sp
-                                                )
-                                                Text(
-                                                    text = "Followers",
-                                                    color = Color.Gray,
-                                                    fontSize = 13.sp
-                                                )
-                                            }
-
-                                            // Following
-                                            Column(
-                                                horizontalAlignment = Alignment.CenterHorizontally
-                                            ) {
-                                                Text(
-                                                    text = "0",
-                                                    color = Color.Black,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 18.sp
-                                                )
-                                                Text(
-                                                    text = "Following",
-                                                    color = Color.Gray,
-                                                    fontSize = 13.sp
-                                                )
-                                            }
-
-                                            // Stories/Moments
-                                            Column(
-                                                horizontalAlignment = Alignment.CenterHorizontally
-                                            ) {
-                                                Text(
-                                                    text = "${profile.value.moments.size}",
-                                                    color = Color.Black,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 18.sp
-                                                )
-                                                Text(
-                                                    text = "Stories",
-                                                    color = Color.Gray,
-                                                    fontSize = 13.sp
-                                                )
-                                            }
                                         }
                                     }
 
@@ -775,10 +659,14 @@ fun ProfilePreviewScreen(
                                     Card(
                                         modifier = Modifier.fillMaxWidth(),
                                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = Color(
+                                                0xFFF5F5F5
+                                            )
+                                        ),
                                     ) {
                                         Row {
-                                            Box (
+                                            Box(
                                                 modifier = Modifier.weight(1f).height(40.dp)
                                                     .clickable {
                                                         if (profile.value.friend == "NO") {
@@ -786,10 +674,20 @@ fun ProfilePreviewScreen(
                                                         } else if (profile.value.friend == "YES") {
                                                             viewModel.removeFriend(profile.value.id)
                                                         }
-                                                    }.background(Color(0xFF000000), shape = RoundedCornerShape(10.dp)),
-                                                ) {
+                                                    }.background(
+                                                        Color(
+                                                            when (profile.value.friend) {
+                                                                "NO" -> 0xFF000000
+                                                                "YES" -> 0xFFDFC46B
+                                                                else -> 0xFF808080
+                                                            }
+                                                        ),
+                                                        shape = RoundedCornerShape(10.dp)
+                                                    ),
+                                            ) {
 
                                                 Text(
+                                                    textAlign = TextAlign.Center,
                                                     modifier = Modifier.align(Alignment.Center),
                                                     text = when (profile.value.friend) {
                                                         "NO" -> "Add Friend"
@@ -797,14 +695,14 @@ fun ProfilePreviewScreen(
                                                         else -> "Friending requested"
                                                     },
                                                     color = Color.White,
-                                                    fontSize = 14.sp
+                                                    fontSize = 12.sp
                                                 )
 
                                             }
 
                                             Spacer(modifier = Modifier.width(10.dp))
 
-                                            Box (
+                                            Box(
                                                 modifier = Modifier.weight(1f).height(40.dp)
                                                     .clickable {
                                                         when (true) {
@@ -824,7 +722,16 @@ fun ProfilePreviewScreen(
 
                                                             else -> {}
                                                         }
-                                                    }.background(Color(0xFF000000), shape = RoundedCornerShape(10.dp))
+                                                    }.background(
+                                                        Color(
+                                                            when (true) {
+                                                                (profile.value.chatRequest == null || profile.value.chatRequest?.status == "REJECTED") -> 0xFF000000
+                                                                (profile.value.chatRequest?.status == "ACCEPTED") -> 0xFFDFC46B
+                                                                else -> 0xFF808080
+                                                            }
+                                                        ),
+                                                        shape = RoundedCornerShape(10.dp)
+                                                    )
                                             ) {
 
                                                 Text(
@@ -837,35 +744,41 @@ fun ProfilePreviewScreen(
                                                         else -> "Request Messaging"
                                                     },
                                                     color = Color.White,
-                                                    fontSize = 14.sp
+                                                    fontSize = 12.sp
                                                 )
 
                                             }
 
                                             Spacer(modifier = Modifier.width(10.dp))
 
-                                            Card (
+                                            Box(
                                                 modifier = Modifier.weight(1f).height(40.dp)
                                                     .clickable {
-                                                        if (profile.value.friend == "NO") {
-                                                            viewModel.beFriend(profile.value.id)
-                                                        } else if (profile.value.friend == "YES") {
-                                                            viewModel.removeFriend(profile.value.id)
+                                                        if (profile.value.following) {
+                                                            viewModel.unFollow(profile.value.id)
+                                                        } else {
+                                                            viewModel.follow(profile.value.id)
                                                         }
-                                                    },
-                                                shape = RoundedCornerShape(10.dp),
-                                                colors = CardDefaults.cardColors(containerColor = Color(0xFFDFC46B)),
-                                            ) {
+                                                    }.background(
+                                                        color = Color(
+                                                            when (profile.value.following) {
+                                                                true -> 0xFFDFC46B
+                                                                false -> 0xFF000000
+                                                            }
+                                                        ),
+                                                        shape = RoundedCornerShape(10.dp)
+                                                    ),
+
+                                                ) {
 
                                                 Text(
-                                                    fontWeight = FontWeight.SemiBold,
-                                                    text = when (profile.value.friend) {
-                                                        "NO" -> "Add Friend"
-                                                        "YES" -> "Remove Friend"
-                                                        else -> "Request Sent"
+                                                    modifier = Modifier.align(Alignment.Center),
+                                                    text = when (profile.value.following) {
+                                                        true -> "Following"
+                                                        false -> "Follow"
                                                     },
-                                                    color = Color.Black,
-                                                    fontSize = 16.sp
+                                                    color = Color.White,
+                                                    fontSize = 12.sp
                                                 )
 
                                             }
@@ -1003,7 +916,6 @@ fun ProfilePreviewScreen(
                     }
                 }
 
-                // Posts Grid Section
                 when (val state = postsState) {
                     is PostsState.Loading -> {
                         item {
@@ -1180,13 +1092,11 @@ fun ProfilePreviewScreen(
                     }
                 }
 
-                // Bottom spacing
                 item {
                     Spacer(modifier = Modifier.height(40.dp))
                 }
             }
 
-            // Layout measurement for screen size
             Layout(
                 modifier = Modifier.fillMaxWidth().height(0.dp),
                 measurePolicy = { measurables, constraints ->
@@ -1199,3 +1109,4 @@ fun ProfilePreviewScreen(
         }
     }
 }
+

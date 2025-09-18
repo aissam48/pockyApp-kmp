@@ -158,6 +158,16 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
 
 
     }
+
+    fun follow(id: String) {
+
+
+    }
+
+    fun unFollow(id: String) {
+
+
+    }
 }
 
 sealed class ProfilePreviewUiState {
