@@ -5,19 +5,19 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
@@ -29,7 +29,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
-import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.screens.components.CustomDialog
 import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.delay
@@ -37,42 +37,35 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.ic_back_black
-import pockyapp.composeapp.generated.resources.ic_delete
-import pockyapp.composeapp.generated.resources.ic_like
-import pockyapp.composeapp.generated.resources.ic_placeholder
-import pockyapp.composeapp.generated.resources.ic_unlike_black
-import pockyapp.composeapp.generated.resources.ic_view
+import pockyapp.composeapp.generated.resources.*
 
+// Story duration constants
+private const val STORY_DURATION_MS = 5000L
+private const val LONG_PRESS_THRESHOLD_MS = 200L
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun StoriesViewer(
-    users: List<ProfileModel>,
+private fun StoriesViewer(
+    moments: List<List<MomentModel>>,
     initialUserIndex: Int = 0,
     onStoriesFinished: () -> Unit,
     navController: NavHostController,
     myID: String,
     viewModel: MomentsViewModel
 ) {
-    var currentUserIndex by remember { mutableStateOf(initialUserIndex) }
-    var currentStoryIndex by remember { mutableStateOf(0) }
     val pagerState = rememberPagerState(
         initialPage = initialUserIndex,
-        pageCount = { users.size }
+        pageCount = { moments.size }
     )
 
+    var currentUserIndex by remember { mutableStateOf(initialUserIndex) }
+    var isPagerSettled by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-    val indexFirstUnvViewed = users[currentUserIndex].moments.indexOfFirst { !it.viewed }
 
-    currentStoryIndex = if (indexFirstUnvViewed == -1) 0 else indexFirstUnvViewed
-
-    LaunchedEffect(pagerState.currentPage) {
-        println("pagerState.currentPage ${pagerState.currentPage}")
+    // Track when pager is settled and which page is active
+    LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
         currentUserIndex = pagerState.currentPage
-        val currentMoment = users[currentUserIndex]
-        val indexFirstUnvViewedL = currentMoment.moments.indexOfFirst { !it.viewed }
-        currentStoryIndex = if (indexFirstUnvViewedL == -1) 0 else indexFirstUnvViewedL
+        isPagerSettled = !pagerState.isScrollInProgress
     }
 
     Box(
@@ -82,69 +75,162 @@ fun StoriesViewer(
     ) {
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            userScrollEnabled = true
         ) { userIndex ->
-            val user = users[userIndex]
-            StoryPage(
-                userStories = user,
-                currentStoryIndex = if (userIndex == currentUserIndex) {
-                    val momentID = user.moments[currentStoryIndex].momentID
-                    viewModel.viewMoment(momentID, user.id)
-                    currentStoryIndex
-                } else {
-                    val index = user.moments.indexOfFirst { !it.viewed }
-                    if (index == -1) {
-                        0
-                    } else {
-                        index
-                    }
-                },
-                onStoryFinished = {
-                    if (currentStoryIndex < user.moments.size - 1) {
-                        currentStoryIndex++
-                    } else {
-                        if (currentUserIndex < users.size - 1) {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(currentUserIndex + 1)
-                            }
-                        } else {
-                            onStoriesFinished()
+            val momentsOfUser = moments[userIndex]
+
+            StoryUserPage(
+                userStories = momentsOfUser,
+                isActive = userIndex == currentUserIndex && isPagerSettled,
+                isPagerSettled = isPagerSettled,
+                onNavigateToNextUser = {
+                    if (currentUserIndex < moments.size - 1) {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(currentUserIndex + 1)
                         }
+                    } else {
+                        onStoriesFinished()
                     }
                 },
-                onTapLeft = {
-                    if (currentStoryIndex > 0) {
-                        currentStoryIndex--
-                    } else if (currentUserIndex > 0) {
+                onNavigateToPreviousUser = {
+                    if (currentUserIndex > 0) {
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(currentUserIndex - 1)
                         }
                     }
                 },
-                onTapRight = {
-                    if (currentStoryIndex < user.moments.size - 1) {
-                        currentStoryIndex++
-                    } else if (currentUserIndex < users.size - 1) {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(currentUserIndex + 1)
-                        }
-                    }
-                },
+                onExit = onStoriesFinished,
                 navController = navController,
                 myID = myID,
-                viewModel = viewModel
+                viewModel = viewModel,
+                pageOffset = pagerState.currentPageOffsetFraction
+            )
+        }
+
+        // Close button (Instagram-like X button)
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+                .size(32.dp)
+                .background(
+                    Color.Black.copy(alpha = 0.3f),
+                    CircleShape
+                )
+                .clickable { onStoriesFinished() },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "×",
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
             )
         }
     }
 }
 
 @Composable
-fun StoryPage(
-    userStories: ProfileModel,
-    currentStoryIndex: Int,
-    onStoryFinished: () -> Unit,
+private fun StoryUserPage(
+    userStories: List<MomentModel>,
+    isActive: Boolean,
+    isPagerSettled: Boolean,
+    onNavigateToNextUser: () -> Unit,
+    onNavigateToPreviousUser: () -> Unit,
+    onExit: () -> Unit,
+    navController: NavHostController,
+    myID: String,
+    viewModel: MomentsViewModel,
+    pageOffset: Float = 0f
+) {
+    // Find first unviewed story or start from beginning
+    val initialStoryIndex = remember(userStories) {
+        userStories.indexOfFirst { !it.viewed }.takeIf { it != -1 } ?: 0
+    }
+
+    var currentStoryIndex by remember(userStories) { mutableStateOf(initialStoryIndex) }
+
+    // Only show story content when this page is active and fully visible
+    if (isActive && isPagerSettled && currentStoryIndex < userStories.size) {
+        val currentStory = userStories[currentStoryIndex]
+
+        // Mark story as viewed only when page is settled
+        LaunchedEffect(currentStoryIndex, isPagerSettled) {
+            if (isPagerSettled) {
+                viewModel.viewMoment(currentStory.momentID, currentStory.ownerID)
+            }
+        }
+
+        StoryPage(
+            story = currentStory,
+            storyIndex = currentStoryIndex,
+            totalStories = userStories.size,
+            shouldStartTimer = isPagerSettled,
+            onStoryComplete = {
+                if (currentStoryIndex < userStories.size - 1) {
+                    currentStoryIndex++
+                } else {
+                    onNavigateToNextUser()
+                }
+            },
+            onTapLeft = {
+                if (currentStoryIndex > 0) {
+                    currentStoryIndex--
+                } else {
+                    onNavigateToPreviousUser()
+                }
+            },
+            onTapRight = {
+                if (currentStoryIndex < userStories.size - 1) {
+                    currentStoryIndex++
+                } else {
+                    onNavigateToNextUser()
+                }
+            },
+            onProfileTap = {
+                if (currentStory.ownerID == myID) {
+                    navController.navigate(NavRoutes.MY_PROFILE.route)
+                } else {
+                    navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${currentStory.ownerID}")
+                }
+            },
+            onExit = onExit,
+            navController = navController,
+            myID = myID,
+            viewModel = viewModel
+        )
+    } else {
+        // Show placeholder when page is not active
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            if (userStories.isNotEmpty() && currentStoryIndex < userStories.size) {
+                AsyncImage(
+                    model = getUrl(userStories[currentStoryIndex].momentID),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                    error = painterResource(Res.drawable.ic_placeholder)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StoryPage(
+    story: MomentModel,
+    storyIndex: Int,
+    totalStories: Int,
+    shouldStartTimer: Boolean,
+    onStoryComplete: () -> Unit,
     onTapLeft: () -> Unit,
     onTapRight: () -> Unit,
+    onProfileTap: () -> Unit,
+    onExit: () -> Unit,
     navController: NavHostController,
     myID: String,
     viewModel: MomentsViewModel
@@ -152,306 +238,414 @@ fun StoryPage(
     val deleteState by viewModel.deleteState.collectAsState()
     val likeState by viewModel.likeState.collectAsState()
     val unlikeState by viewModel.unLikeState.collectAsState()
-    val scope = rememberCoroutineScope() // Use Compose's coroutine scope
 
-    if (currentStoryIndex > userStories.moments.size - 1) {
-        navController.popBackStack()
-        return
-    }
-    val story = userStories.moments[currentStoryIndex]
-    var progressValue by remember { mutableStateOf(0f) }
-    val progressAnimation = remember {
-        Animatable(0f)
-    }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var isPressed by remember { mutableStateOf(false) }
 
-    var isHolding by remember { mutableStateOf(false) }
+    // Progress animation
+    val progress = remember { Animatable(0f) }
 
-    LaunchedEffect(currentStoryIndex) {
-        // Reset progress only when the story index changes
-        progressAnimation.snapTo(0f) // Start at 0 for the new story
-        progressValue = 0f // Reset the progress value for the new story
+    val coroutineScope = rememberCoroutineScope()
 
-        if (!isHolding) {
-            // Animate to the end if not holding
-            progressAnimation.animateTo(
+    // Handle story progression - only start when shouldStartTimer is true
+    LaunchedEffect(storyIndex, isPressed, shouldStartTimer) {
+        progress.snapTo(0f) // Always reset progress for new story
+
+        if (shouldStartTimer && !isPressed) {
+            progress.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = 10000,
+                    durationMillis = STORY_DURATION_MS.toInt(),
                     easing = LinearEasing
                 )
             )
-            onStoryFinished() // Trigger when animation completes
+            onStoryComplete()
+        } else if (!shouldStartTimer) {
+            // Stop animation if pager is scrolling
+            progress.stop()
         }
     }
 
-    LaunchedEffect(isHolding) {
-        if (!isHolding) {
-            // Resume the animation when holding is false
-            progressAnimation.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(
-                    durationMillis = (10000 * (1f - progressValue)).toInt(),
-                    easing = LinearEasing
+    // Resume animation when user stops pressing and timer should be active
+    LaunchedEffect(isPressed, shouldStartTimer) {
+        if (!isPressed && shouldStartTimer) {
+            val remainingTime = (STORY_DURATION_MS * (1f - progress.value)).toLong()
+            if (remainingTime > 0) {
+                progress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(
+                        durationMillis = remainingTime.toInt(),
+                        easing = LinearEasing
+                    )
                 )
-            )
-            onStoryFinished() // Trigger when animation completes
+                onStoryComplete()
+            }
+        } else {
+            progress.stop()
         }
     }
 
-    LaunchedEffect(progressAnimation.value) {
-        if (!isHolding) {
-            // Continuously update progressValue only when not holding
-            progressValue = progressAnimation.value
-            //println("Progress: ${progressAnimation.value}")
-        }
-    }
-
-
-    var showDialog by remember { mutableStateOf(false) }
-
-    if (showDialog) {
+    // Handle delete dialog
+    if (showDeleteDialog) {
         CustomDialog(
-            title = "Are you sure you want to delete this moment?",
+            title = "Delete this moment?",
             action1 = "Cancel",
             action2 = "Delete",
-            onCancel = { showDialog = false },
+            onCancel = { showDeleteDialog = false },
             onDelete = {
-                showDialog = false
+                showDeleteDialog = false
                 viewModel.deleteMoment(story.momentID)
             }
         )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Story Image
+        // Story background image
         AsyncImage(
             model = getUrl(story.momentID),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Crop,
+            placeholder = painterResource(Res.drawable.ic_placeholder),
+            error = painterResource(Res.drawable.ic_placeholder)
+        )
+
+        // Dark gradient overlays for better readability
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Black.copy(alpha = 0.7f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .align(Alignment.BottomCenter)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.7f)
+                        )
+                    )
+                )
         )
 
         // Progress indicators
-        Row(
+        StoryProgressIndicators(
+            currentIndex = storyIndex,
+            totalStories = totalStories,
+            progress = progress.value,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
-                .padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            userStories.moments.forEachIndexed { index, _ ->
-                LinearProgressIndicator(
-                    progress = if (index < currentStoryIndex) 1f
-                    else if (index == currentStoryIndex) progressValue
-                    else 0f,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(2.dp),
-                    color = Color.White.copy(alpha = 0.4f),
-                    trackColor = Color.White.copy(alpha = 0.3f)
-                )
-            }
-        }
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        )
 
+        // Touch areas for navigation and pause
         Row(
             modifier = Modifier
                 .fillMaxSize()
-
                 .pointerInput(Unit) {
-                    awaitEachGesture {
+                    var wasLongPress = false
 
-                        var clickAble = true
-                        val down = awaitFirstDown() // User touches the screen
-                        isHolding = true
+                    detectTapGestures(
+                        onPress = {
+                            if (shouldStartTimer) {
+                                isPressed = true
+                                wasLongPress = false
 
-                        // Detect if the user holds for a certain duration
-                        val holdJob = scope.launch {
-                            delay(500) // Threshold for "long press" (e.g., 500ms)
-                            if (isHolding) {
-                                clickAble = false
-                                println("Long press detected!")
+                                val longPressJob = coroutineScope.launch {
+                                    delay(LONG_PRESS_THRESHOLD_MS)
+                                    wasLongPress = true
+                                }
+
+                                tryAwaitRelease()
+                                longPressJob.cancel()
+                                isPressed = false
                             }
-                        }
-
-                        val up = waitForUpOrCancellation() // Wait for user to lift their finger or cancel
-                        holdJob.cancel() // Stop the hold detection once the finger is lifted or gesture canceled
-
-                        if (up != null) {
-                            isHolding = false
-                            println("Finger removed after hold!") // This happens if the user held for a while
-
-                            if (clickAble) {
-                                if (down.position.x < size.width / 2) {
+                        },
+                        onTap = { offset ->
+                            if (shouldStartTimer && !wasLongPress) {
+                                // Only register as tap if it wasn't a long press
+                                if (offset.x < size.width * 0.3f) {
                                     onTapLeft()
-                                } else {
+                                } else if (offset.x > size.width * 0.7f) {
                                     onTapRight()
                                 }
                             }
                         }
-                    }
+                    )
                 }
-
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            )
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            )
+            // Left tap area (30% of screen)
+            Box(modifier = Modifier.weight(0.3f).fillMaxHeight())
+            // Middle area (40% of screen) - no action
+            Box(modifier = Modifier.weight(0.4f).fillMaxHeight())
+            // Right tap area (30% of screen)
+            Box(modifier = Modifier.weight(0.3f).fillMaxHeight())
         }
-        // User info
-        Row(
+
+        // Story header with user info
+        StoryHeader(
+            story = story,
+            onProfileTap = onProfileTap,
+            onBackTap = onExit,
+            modifier = Modifier.padding(16.dp)
+        )
+
+        // Story actions (like, delete, views)
+        StoryActions(
+            story = story,
+            myID = myID,
+            onLikeToggle = { isLiked ->
+                if (isLiked) {
+                    viewModel.like(story.momentID)
+                } else {
+                    viewModel.unLike(story.momentID)
+                }
+            },
+            onDeleteClick = { showDeleteDialog = true },
             modifier = Modifier
-                .padding(8.dp)
-                .padding(top = 25.dp)
-                .clickable {
-                    if (userStories.id == myID) {
-                        navController.navigate(NavRoutes.MY_PROFILE.route)
-                    } else {
-                        navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${userStories.id}")
-                    }
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        )
+    }
+}
+
+@Composable
+private fun StoryProgressIndicators(
+    currentIndex: Int,
+    totalStories: Int,
+    progress: Float,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        repeat(totalStories) { index ->
+            LinearProgressIndicator(
+                progress = when {
+                    index < currentIndex -> 1f
+                    index == currentIndex -> progress
+                    else -> 0f
                 },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Image(
-                modifier = Modifier.size(23.dp).clickable {
-                    navController.popBackStack()
-                }.background(color = Color.White, shape = CircleShape),
-                painter = painterResource(Res.drawable.ic_back_black),
-                contentDescription = null
+                modifier = Modifier
+                    .weight(1f)
+                    .height(2.dp)
+                    .clip(RoundedCornerShape(1.dp)),
+                color = Color.White,
+                trackColor = Color.White.copy(alpha = 0.3f)
             )
-            Spacer(modifier = Modifier.width(15.dp))
-            Row {
-                AsyncImage(
-                    model = getUrl(userStories.photoID),
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape),
-                    placeholder = painterResource(Res.drawable.ic_placeholder),
-                    error = painterResource(Res.drawable.ic_placeholder),
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "${userStories.firstName} ${userStories.lastName}",
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = formatCreatedAt(story.createdAt),
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-
-        }
-
-        Column(
-            modifier = Modifier.align(Alignment.BottomEnd).padding(end = 10.dp, bottom = 30.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            Image(
-                colorFilter = ColorFilter.tint(color = Color.White),
-                painter = if (story.liked)
-                    painterResource(Res.drawable.ic_like)
-                else painterResource(
-                    Res.drawable.ic_unlike_black
-                ),
-                modifier = Modifier.size(40.dp).clickable {
-                    if (story.likes.contains(myID)) {
-                        story.likes.remove(myID)
-                        viewModel.unLike(story.momentID)
-                        story.liked = false
-                    } else {
-                        story.likes.add(myID)
-                        viewModel.like(story.momentID)
-                        story.liked = true
-                    }
-                },
-                contentDescription = null
-            )
-
-            Spacer(modifier = Modifier.size(5.dp))
-
-            androidx.compose.material.Text(
-                text = story.likes.size.toString(),
-                color = Color.Gray,
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp
-            )
-
-            Spacer(modifier = Modifier.size(20.dp))
-
-            if (myID == story.ownerID) {
-                Image(
-                    painter = painterResource(Res.drawable.ic_delete),
-                    modifier = Modifier.size(35.dp).clickable {
-                        //viewModel.deleteMoment(story.postID)
-                        showDialog = true
-                    },
-                    contentDescription = null
-                )
-            }
-
-            Spacer(modifier = Modifier.size(20.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${story.views.size}",
-                    color = Color.Yellow,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.size(5.dp))
-                Image(
-                    painter = painterResource(Res.drawable.ic_view),
-                    contentDescription = null,
-                    modifier = Modifier.size(25.dp)
-                )
-
-            }
-            Spacer(modifier = Modifier.size(50.dp))
         }
     }
 }
 
-// Example usage
+@Composable
+private fun StoryHeader(
+    story: MomentModel,
+    onProfileTap: () -> Unit,
+    onBackTap: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Back button
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .background(Color.White, CircleShape)
+                .clickable { onBackTap() },
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.ic_back_black),
+                contentDescription = "Back",
+                modifier = Modifier.size(16.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // User profile info
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .clickable { onProfileTap() }
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = getUrl(story.profile.photoID),
+                contentDescription = "Profile",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape),
+                placeholder = painterResource(Res.drawable.ic_placeholder),
+                error = painterResource(Res.drawable.ic_placeholder)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column {
+                Text(
+                    text = "${story.profile.firstName} ${story.profile.lastName}",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Text(
+                    text = formatCreatedAt(story.createdAt),
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 12.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StoryActions(
+    story: MomentModel,
+    myID: String,
+    onLikeToggle: (Boolean) -> Unit,
+    onDeleteClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Like button
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(
+                        Color.Black.copy(alpha = 0.3f),
+                        CircleShape
+                    )
+                    .clickable {
+                        val isCurrentlyLiked = story.likes.contains(myID)
+                        if (isCurrentlyLiked) {
+                            story.likes.remove(myID)
+                            story.liked = false
+                            onLikeToggle(false)
+                        } else {
+                            story.likes.add(myID)
+                            story.liked = true
+                            onLikeToggle(true)
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = if (story.liked) {
+                        painterResource(Res.drawable.ic_like)
+                    } else {
+                        painterResource(Res.drawable.ic_unlike_black)
+                    },
+                    contentDescription = "Like",
+                    modifier = Modifier.size(24.dp),
+                    colorFilter = ColorFilter.tint(
+                        if (story.liked) Color.Red else Color.White
+                    )
+                )
+            }
+
+            if (story.likes.isNotEmpty()) {
+                Text(
+                    text = story.likes.size.toString(),
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        // Views counter
+        if (story.views.isNotEmpty()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.ic_view),
+                    contentDescription = "Views",
+                    modifier = Modifier.size(20.dp),
+                    colorFilter = ColorFilter.tint(Color.White.copy(alpha = 0.8f))
+                )
+                Text(
+                    text = story.views.size.toString(),
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        // Delete button (only for own stories)
+        if (myID == story.ownerID) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(
+                        Color.Black.copy(alpha = 0.3f),
+                        CircleShape
+                    )
+                    .clickable { onDeleteClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.ic_delete),
+                    contentDescription = "Delete",
+                    modifier = Modifier.size(24.dp),
+                    colorFilter = ColorFilter.tint(Color.White)
+                )
+            }
+        }
+    }
+}
+
+// Main screen composable
 @Composable
 fun MomentsScreen(
     navController: NavHostController,
-    moments: List<ProfileModel>,
-    index: String?,
-    myID: String?,
     viewModel: MomentsViewModel = koinViewModel()
 ) {
+    val deleteState by viewModel.deleteState.collectAsState()
 
-    val deleteMoment by viewModel.deleteState.collectAsState()
-    LaunchedEffect(deleteMoment){
-        if (deleteMoment == "success")
-        navController.popBackStack()
+    // Handle delete completion
+    LaunchedEffect(deleteState) {
+        if (deleteState == "success") {
+            navController.popBackStack()
+        }
     }
 
     StoriesViewer(
-        users = moments,
+        moments = viewModel.moments,
+        initialUserIndex = viewModel.selectedIndex ?: 0,
         onStoriesFinished = {
             navController.popBackStack()
         },
-        initialUserIndex = index?.toIntOrNull() ?: 0,
         navController = navController,
-        myID = myID ?: "",
+        myID = viewModel.myID ?: "",
         viewModel = viewModel
     )
 }

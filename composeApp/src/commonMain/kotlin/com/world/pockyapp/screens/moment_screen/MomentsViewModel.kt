@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
+import com.world.pockyapp.network.models.model.MomentModel
+import com.world.pockyapp.network.models.model.ProfileModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -72,5 +74,10 @@ class MomentsViewModel(private val sdk: ApiManager) :
             })
         }
     }
+
+
+    var moments: List<List<MomentModel>> = emptyList()
+    var selectedIndex: Int? = null
+    var myID: String? = null
 }
 

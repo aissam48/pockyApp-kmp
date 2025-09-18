@@ -30,10 +30,13 @@ import com.google.maps.android.heatmaps.HeatmapTileProvider
 import com.google.maps.android.heatmaps.WeightedLatLng
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.MomentModel
+import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.home.navigations.discover.UiState
+import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
+import kotlin.collections.emptyList
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.pow
@@ -44,6 +47,7 @@ import kotlin.math.sqrt
 actual fun MapComponentScreen(navController: NavHostController) {
     val viewModel: GoogleMapsViewModel = koinViewModel()
     val globalMomentsState by viewModel.globalMomentsState.collectAsState()
+    val momentsViewModel: MomentsViewModel = koinViewModel() // Koin inject
 
     //val heatmapData = remember { mutableStateOf(emptyList<WeightedLatLng>()) }
     //val moments = remember { mutableStateOf(emptyList<MomentModel>()) }
@@ -138,13 +142,17 @@ actual fun MapComponentScreen(navController: NavHostController) {
                     val momentsAround = handleMapClick(clickedLatLng, (globalMomentsState as UiState.Success<List<MomentModel>>).data, cameraPositionState.position.zoom)
 
                     println(momentsAround)
+                    momentsViewModel.moments = listOf<List<MomentModel>>(listOf(momentsAround.last(), momentsAround.last(),  momentsAround.last()),listOf(momentsAround.last(), momentsAround.last()),momentsAround)
+                    momentsViewModel.selectedIndex = 0
+                    momentsViewModel.myID = "d140fd44-4879-486f-b6a6-445a15f7d0f0"
+                    val modulesJson = Json.encodeToString(listOf<ProfileModel>()).replace("/", "%")
+                    navController.navigate(
+                        NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/d140fd44-4879-486f-b6a6-445a15f7d0f0"
+                    )
                 }
                 //
 
-                /*val modulesJson = Json.encodeToString(profiles).replace("/", "%")
-                navController.navigate(
-                    NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/d140fd44-4879-486f-b6a6-445a15f7d0f0"
-                )*/
+
             }
         ) {
             if (heatmapProvider != null) {

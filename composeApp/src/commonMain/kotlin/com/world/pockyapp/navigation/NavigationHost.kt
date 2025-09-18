@@ -22,6 +22,7 @@ import com.world.pockyapp.screens.friend_request.FriendRequestsScreen
 import com.world.pockyapp.screens.moment_by_locationscreen.MomentsByLocationScreen
 import com.world.pockyapp.screens.moment_preview.MomentPreview
 import com.world.pockyapp.screens.moment_screen.MomentsScreen
+import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.post_preview.PostPreview
 import com.world.pockyapp.screens.profile.ProfileScreen
 import com.world.pockyapp.screens.profile_preview.ProfilePreviewScreen
@@ -31,7 +32,10 @@ import com.world.pockyapp.screens.settings.SettingsScreen
 import com.world.pockyapp.screens.show_moment.ShowMoments
 import com.world.pockyapp.screens.splash_screen.SplashScreen
 import com.world.pockyapp.screens.view_post.ViewPostScreen
+import kotlinx.coroutines.NonCancellable.get
 import kotlinx.serialization.json.Json
+import org.koin.compose.viewmodel.koinViewModel
+import kotlin.coroutines.EmptyCoroutineContext.get
 
 @Composable
 fun NavigationHost(navController: NavHostController) {
@@ -106,6 +110,7 @@ fun NavigationHost(navController: NavHostController) {
         }
 
         composable(route = "${NavRoutes.MOMENTS.route}/{moments}/{index}/{myID}") { backStackEntry ->
+
             val index = backStackEntry.arguments?.getString("index")
             val myID = backStackEntry.arguments?.getString("myID")
             println("---------------- $index")
@@ -115,7 +120,7 @@ fun NavigationHost(navController: NavHostController) {
             } ?: emptyList()
 
 
-            MomentsScreen(navController, moments, index, myID)
+            MomentsScreen(navController)
         }
 
         composable(route = "${NavRoutes.MOMENTS_BY_LOCATION.route}/{moments}/{index}/{myID}") { backStackEntry ->
