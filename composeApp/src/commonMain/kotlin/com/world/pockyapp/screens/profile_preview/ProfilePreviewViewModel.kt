@@ -47,6 +47,14 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
     private val _unBlockState = MutableStateFlow<UnBlockState>(UnBlockState.Idle)
     val unBlockState: StateFlow<UnBlockState> = _unBlockState.asStateFlow()
 
+    private val _unFollowState = MutableStateFlow<UnFollowState>(UnFollowState.Idle)
+    val unFollowState: StateFlow<UnFollowState> = _unFollowState.asStateFlow()
+
+    private val _followState = MutableStateFlow<FollowState>(FollowState.Idle)
+    val followState: StateFlow<FollowState> = _followState.asStateFlow()
+
+
+
     fun getProfile(id: String) {
         if (isProfileLoadingFirstTime){
             _profileState.value = ProfilePreviewUiState.Loading
@@ -160,13 +168,25 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
     }
 
     fun follow(id: String) {
-
-
+        _followState.value = FollowState.Loading
+        viewModelScope.launch {
+            sdk.followProfile(id, { success ->
+                _followState.value = FollowState.Success(success.message)
+            }, { error ->
+                _followState.value = FollowState.Error(error)
+            })
+        }
     }
 
     fun unFollow(id: String) {
-
-
+        _unFollowState.value = UnFollowState.Loading
+        viewModelScope.launch {
+            sdk.unFollowProfile(id, { success ->
+                _unFollowState.value = UnFollowState.Success(success.message)
+            }, { error ->
+                _unFollowState.value = UnFollowState.Error(error)
+            })
+        }
     }
 }
 
@@ -213,4 +233,16 @@ sealed class UnBlockState {
     data object Idle : UnBlockState()
     data class Success(val message: String) : UnBlockState()
     data class Error(val error: ErrorModel) : UnBlockState()
+}
+sealed class FollowState {
+    data object Loading : FollowState()
+    data object Idle : FollowState()
+    data class Success(val message: String) : FollowState()
+    data class Error(val error: ErrorModel) : FollowState()
+}
+sealed class UnFollowState {
+    data object Loading : UnFollowState()
+    data object Idle : UnFollowState()
+    data class Success(val message: String) : UnFollowState()
+    data class Error(val error: ErrorModel) : UnFollowState()
 }

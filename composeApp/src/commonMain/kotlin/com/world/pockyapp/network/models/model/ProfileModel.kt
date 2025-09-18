@@ -17,6 +17,7 @@ data class ProfileModel(
     val isPhoneNumberVerified: Boolean = false,
     val isEmailVerified: Boolean = false,
     val moments: List<MomentModel> = emptyList(),
+    val album: List<MomentModel> = emptyList(),
     val chatRequest: ChatRequestModel? = null,
     val conversationID: String = "",
     var friend: String = "NO",
@@ -25,6 +26,7 @@ data class ProfileModel(
     val following: Boolean = false,
     val followers: Int = 0,
     val followings: Int = 0,
-    val friends: Int = 0,
-    val momentsNumber: Int = 0,
+    val friendsCount: Int = 0,
+    val postsCount: Int = 0,
+    val momentsCount: Int = 0,
 )

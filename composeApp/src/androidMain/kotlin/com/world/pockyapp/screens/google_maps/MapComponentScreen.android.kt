@@ -145,9 +145,8 @@ actual fun MapComponentScreen(navController: NavHostController) {
                     momentsViewModel.moments = listOf<List<MomentModel>>(listOf(momentsAround.last(), momentsAround.last(),  momentsAround.last()),listOf(momentsAround.last(), momentsAround.last()),momentsAround)
                     momentsViewModel.selectedIndex = 0
                     momentsViewModel.myID = "d140fd44-4879-486f-b6a6-445a15f7d0f0"
-                    val modulesJson = Json.encodeToString(listOf<ProfileModel>()).replace("/", "%")
                     navController.navigate(
-                        NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/d140fd44-4879-486f-b6a6-445a15f7d0f0"
+                        NavRoutes.MOMENTS.route
                     )
                 }
                 //

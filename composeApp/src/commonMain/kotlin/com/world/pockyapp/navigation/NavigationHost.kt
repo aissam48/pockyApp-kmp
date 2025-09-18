@@ -109,17 +109,7 @@ fun NavigationHost(navController: NavHostController) {
             BlockedScreen(navController)
         }
 
-        composable(route = "${NavRoutes.MOMENTS.route}/{moments}/{index}/{myID}") { backStackEntry ->
-
-            val index = backStackEntry.arguments?.getString("index")
-            val myID = backStackEntry.arguments?.getString("myID")
-            println("---------------- $index")
-            val modulesJson = backStackEntry.arguments?.getString("moments")?.replace("%", "/")
-            val moments = modulesJson?.let {
-                Json.decodeFromString<List<ProfileModel>>(it)
-            } ?: emptyList()
-
-
+        composable(route = "${NavRoutes.MOMENTS.route}") { backStackEntry ->
             MomentsScreen(navController)
         }
 

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -52,12 +53,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.profile.ImagePost
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -100,6 +104,9 @@ fun ProfilePreviewScreen(
     val sendChatRequestState by viewModel.sendChatRequestState.collectAsState()
     val responseChatRequestState by viewModel.responseChatRequestState.collectAsState()
 
+    val followState by viewModel.followState.collectAsState()
+    val unFollowState by viewModel.unFollowState.collectAsState()
+
     val myProfile = remember { mutableStateOf(ProfileModel()) }
     val profile = remember { mutableStateOf(ProfileModel()) }
     val posts = remember { mutableStateOf(mutableSetOf<PostModel>()) }
@@ -110,7 +117,14 @@ fun ProfilePreviewScreen(
         viewModel.getPosts(id = id)
     }
 
-    LaunchedEffect(responseChatRequestState, beFriendState, unFriendState, sendChatRequestState) {
+    LaunchedEffect(
+        responseChatRequestState,
+        beFriendState,
+        unFriendState,
+        sendChatRequestState,
+        followState,
+        unFollowState
+    ) {
         viewModel.getProfile(id = id)
     }
 
@@ -147,7 +161,8 @@ fun ProfilePreviewScreen(
     }
 
     Scaffold(
-        backgroundColor = Color(0xFFF5F5F5),
+        // backgroundColor = Color(0xFFF5F5F5),
+        backgroundColor = Color(0xFFFFFFFF),
         topBar = {
 
 
@@ -507,7 +522,7 @@ fun ProfilePreviewScreen(
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -740,7 +755,7 @@ fun ProfilePreviewScreen(
                                                 horizontalAlignment = Alignment.CenterHorizontally
                                             ) {
                                                 Text(
-                                                    text = profile.value.friends.toString(),
+                                                    text = profile.value.friendsCount.toString(),
                                                     color = Color.Black,
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 18.sp
@@ -757,7 +772,7 @@ fun ProfilePreviewScreen(
                                                 horizontalAlignment = Alignment.CenterHorizontally
                                             ) {
                                                 Text(
-                                                    text = "${profile.value.momentsNumber}",
+                                                    text = "${profile.value.momentsCount}",
                                                     color = Color.Black,
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 18.sp
@@ -895,14 +910,14 @@ fun ProfilePreviewScreen(
                                             Box(
                                                 modifier = Modifier.weight(1f).height(40.dp)
                                                     .clickable {
-                                                        if (profile.value.following) {
+                                                        if (profile.value.follower) {
                                                             viewModel.unFollow(profile.value.id)
                                                         } else {
                                                             viewModel.follow(profile.value.id)
                                                         }
                                                     }.background(
                                                         color = Color(
-                                                            when (profile.value.following) {
+                                                            when (profile.value.follower) {
                                                                 true -> 0xFFDFC46B
                                                                 false -> 0xFF000000
                                                             }
@@ -914,7 +929,7 @@ fun ProfilePreviewScreen(
 
                                                 Text(
                                                     modifier = Modifier.align(Alignment.Center),
-                                                    text = when (profile.value.following) {
+                                                    text = when (profile.value.follower) {
                                                         true -> "Following"
                                                         false -> "Follow"
                                                     },
@@ -928,6 +943,31 @@ fun ProfilePreviewScreen(
 
 
                                     }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.height(10.dp))
+
+                                    Text(
+                                        text = "Album",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 20.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+
+                                    LazyRow(modifier = Modifier.fillMaxWidth()) {
+
+                                        items(profile.value.album.sortedByDescending { it.createdAt }) { moment ->
+                                            CardMoment(
+                                                myID = myProfile.value.id,
+                                                moment = moment,
+                                                navController = navController
+                                            )
+                                            Spacer(modifier = Modifier.width(10.dp))
+                                        }
+                                    }
+
                                 }
 
                             }
@@ -1245,3 +1285,43 @@ fun ProfilePreviewScreen(
     }
 }
 
+@Composable
+fun CardMoment(
+    myID: String,
+    moment: MomentModel,
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    val viewModel: MomentsViewModel = koinViewModel()
+    Box(
+        modifier = modifier
+            .height(150.dp)
+            .width(90.dp),
+    ) {
+        androidx.compose.material.Card(
+            shape = RoundedCornerShape(10.dp),
+            backgroundColor = Color.LightGray,
+            modifier = Modifier
+                .height(150.dp)
+                .width(90.dp)
+        ) {
+            AsyncImage(
+                model = getUrl(moment.momentID),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable {
+
+                        viewModel.moments = listOf(listOf(moment))
+                        viewModel.selectedIndex = 0
+                        viewModel.myID = myID
+
+                        navController.navigate(
+                            NavRoutes.MOMENTS.route
+                        )
+                    },
+                contentDescription = null
+            )
+        }
+    }
+}

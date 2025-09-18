@@ -1423,5 +1423,57 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         }
     }
 
+    suspend fun followProfile(
+        id:String,
+        onSuccess: (ResponseMessageModel) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.post("$baseUrl/operations/follow") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("userID" to id))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
+    suspend fun unFollowProfile(
+        id:String,
+        onSuccess: (ResponseMessageModel) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.post("$baseUrl/operations/unFollow") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("userID" to id))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
 }
 

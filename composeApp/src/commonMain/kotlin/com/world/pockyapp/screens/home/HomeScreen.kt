@@ -83,7 +83,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
 
             Row() {
                 Image(
-                    modifier = Modifier.size(35.dp),
+                    modifier = Modifier.size(30.dp),
                     painter = painterResource(Res.drawable.nearvibe_logo),
                     contentDescription = "logo"
                 )
@@ -93,8 +93,9 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                 Text(
                     text = "NearVibe",
                     fontFamily = FontFamily.Default,
+                    fontWeight = FontWeight.Bold,
                     color = Color(0xFFDFC46B),
-                    fontSize = 35.sp,
+                    fontSize = 30.sp,
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
