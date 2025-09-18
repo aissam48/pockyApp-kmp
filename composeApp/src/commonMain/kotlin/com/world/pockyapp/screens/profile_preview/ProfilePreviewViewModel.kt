@@ -35,10 +35,10 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
     private val _myProfileState = MutableStateFlow<MyProfileState>(MyProfileState.Loading)
     val myProfileState: StateFlow<MyProfileState> = _myProfileState.asStateFlow()
 
-    private val _beFriendState = MutableStateFlow<FriendState>(FriendState.Loading)
+    private val _beFriendState = MutableStateFlow<FriendState>(FriendState.Idil)
     val beFriendState: StateFlow<FriendState> = _beFriendState.asStateFlow()
 
-    private val _unFriendState = MutableStateFlow<FriendState>(FriendState.Loading)
+    private val _unFriendState = MutableStateFlow<FriendState>(FriendState.Idil)
     val unFriendState: StateFlow<FriendState> = _unFriendState.asStateFlow()
 
     private val _blockState = MutableStateFlow<BlockState>(BlockState.Idle)
@@ -195,6 +195,7 @@ sealed class MyProfileState {
 }
 
 sealed class FriendState {
+    data object Idil : FriendState()
     data object Loading : FriendState()
     data class Success(val message: String) : FriendState()
     data class Error(val error: ErrorModel) : FriendState()

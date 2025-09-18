@@ -19,7 +19,7 @@ data class ProfileModel(
     val moments: List<MomentModel> = emptyList(),
     val chatRequest: ChatRequestModel? = null,
     val conversationID: String = "",
-    val friend: String = "NO",
+    var friend: String = "NO",
     val block: String = "NO",
     val follower: Boolean = false,
     val following: Boolean = false,

@@ -248,7 +248,8 @@ private fun StoryPage(
     val coroutineScope = rememberCoroutineScope()
 
     // Handle story progression - only start when shouldStartTimer is true
-    LaunchedEffect(storyIndex, isPressed, shouldStartTimer) {
+    LaunchedEffect(storyIndex, shouldStartTimer) {
+        println("Always reset progress for new story")
         progress.snapTo(0f) // Always reset progress for new story
 
         if (shouldStartTimer && !isPressed) {
@@ -287,14 +288,22 @@ private fun StoryPage(
 
     // Handle delete dialog
     if (showDeleteDialog) {
+        coroutineScope.launch {
+            progress.stop()
+        }
+
         CustomDialog(
             title = "Delete this moment?",
             action1 = "Cancel",
             action2 = "Delete",
-            onCancel = { showDeleteDialog = false },
+            onCancel = {
+                showDeleteDialog = false
+                //onStoryComplete()
+            },
             onDelete = {
                 showDeleteDialog = false
                 viewModel.deleteMoment(story.momentID)
+                onStoryComplete()
             }
         )
     }
@@ -359,6 +368,7 @@ private fun StoryPage(
 
                     detectTapGestures(
                         onPress = {
+
                             if (shouldStartTimer) {
                                 isPressed = true
                                 wasLongPress = false
@@ -367,10 +377,10 @@ private fun StoryPage(
                                     delay(LONG_PRESS_THRESHOLD_MS)
                                     wasLongPress = true
                                 }
-
                                 tryAwaitRelease()
                                 longPressJob.cancel()
                                 isPressed = false
+
                             }
                         },
                         onTap = { offset ->

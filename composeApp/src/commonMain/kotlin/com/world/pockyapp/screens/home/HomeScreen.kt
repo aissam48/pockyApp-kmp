@@ -52,6 +52,7 @@ import pockyapp.composeapp.generated.resources.ic_hot_black
 import pockyapp.composeapp.generated.resources.ic_profile_black
 import pockyapp.composeapp.generated.resources.ic_search_black
 import pockyapp.composeapp.generated.resources.icon_world
+import pockyapp.composeapp.generated.resources.nearvibe_logo
 
 
 @Composable
@@ -81,13 +82,19 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
         ) {
 
             Row() {
+                Image(
+                    modifier = Modifier.size(35.dp),
+                    painter = painterResource(Res.drawable.nearvibe_logo),
+                    contentDescription = "logo"
+                )
+
+                Spacer(modifier = Modifier.width(15.dp))
+
                 Text(
-                    "NearVibe",
-                    fontSize = 25.sp,
-                    fontStyle = FontStyle.Italic,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFDFC46B)
+                    text = "NearVibe",
+                    fontFamily = FontFamily.Default,
+                    color = Color(0xFFDFC46B),
+                    fontSize = 35.sp,
                 )
 
                 Spacer(modifier = Modifier.weight(1f))

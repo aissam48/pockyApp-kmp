@@ -149,113 +149,8 @@ fun ProfilePreviewScreen(
     Scaffold(
         backgroundColor = Color(0xFFF5F5F5),
         topBar = {
-            // Modern Chat Request Header
-            if (profile.value.chatRequest != null && profile.value.chatRequest?.status == "NOT_YET") {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color(0xFFDFC46B),
-                                    Color(0xFFDFC46B),
-                                    Color(0xFFFFFFFF),
-                                )
-                            )
-                        )
-                        .padding(16.dp)
-                ) {
-                    if (myProfile.value.id == profile.value.chatRequest?.senderID) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                "Chat Request Sent",
-                                color = Color.White,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                "Waiting for response...",
-                                color = Color.White.copy(alpha = 0.8f),
-                                fontSize = 14.sp
-                            )
-                        }
-                    } else if (myProfile.value.id.isNotEmpty() && myProfile.value.id != profile.value.chatRequest?.senderID) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                "Incoming Chat Request",
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                // Accept Button
-                                Box(
-                                    modifier = Modifier
-                                        .background(
-                                            color = Color(0xFF4CAF50),
-                                            shape = RoundedCornerShape(25.dp)
-                                        )
-                                        .height(45.dp)
-                                        .width(120.dp)
-                                        .clickable {
-                                            viewModel.responseRequestChat(
-                                                profile.value.chatRequest?.id ?: "",
-                                                true,
-                                                profile.value.chatRequest?.senderID ?: ""
-                                            )
-                                        }
-                                        .shadow(4.dp, RoundedCornerShape(25.dp)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "Accept",
-                                        color = Color.White,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
 
-                                // Reject Button
-                                Box(
-                                    modifier = Modifier
-                                        .background(
-                                            color = Color(0xFFF44336),
-                                            shape = RoundedCornerShape(25.dp)
-                                        )
-                                        .height(45.dp)
-                                        .width(120.dp)
-                                        .clickable {
-                                            viewModel.responseRequestChat(
-                                                profile.value.chatRequest?.id ?: "",
-                                                false,
-                                                profile.value.chatRequest?.senderID ?: ""
-                                            )
-                                        }
-                                        .shadow(4.dp, RoundedCornerShape(25.dp)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "Decline",
-                                        color = Color.White,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+
         }
     ) { padding ->
 
@@ -358,13 +253,259 @@ fun ProfilePreviewScreen(
                     Spacer(modifier = Modifier.height(20.dp))
                 }
             }
-        ) {
+        )
+        {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color(0xFFF5F5F5))
                     .padding(horizontal = 16.dp)
             ) {
+                //profile.value.friend = "PENDING_RECEIVED"
+                item {
+                    Column {
+                        /*                       // Modern Chat Request Header
+                                               if (profile.value.chatRequest != null && profile.value.chatRequest?.status == "NOT_YET") {
+                                                   Box(
+                                                       modifier = Modifier
+                                                           .fillMaxWidth()
+                                                           .background(
+                                                               brush = Brush.horizontalGradient(
+                                                                   colors = listOf(
+                                                                       Color(0xFFDFC46B),
+                                                                       Color(0xFFDFC46B),
+                                                                       Color(0xFFFFFFFF),
+                                                                   )
+                                                               )
+                                                           )
+                                                           .padding(16.dp)
+                                                   ) {
+                                                       if (myProfile.value.id == profile.value.chatRequest?.senderID) {
+                                                           Column(
+                                                               modifier = Modifier.fillMaxWidth(),
+                                                               horizontalAlignment = Alignment.CenterHorizontally
+                                                           ) {
+                                                               Text(
+                                                                   "Chat Request Sent",
+                                                                   color = Color.White,
+                                                                   fontSize = 18.sp,
+                                                                   fontWeight = FontWeight.Bold
+                                                               )
+                                                               Text(
+                                                                   "Waiting for response...",
+                                                                   color = Color.White.copy(alpha = 0.8f),
+                                                                   fontSize = 14.sp
+                                                               )
+                                                           }
+                                                       } else if (myProfile.value.id.isNotEmpty() && myProfile.value.id != profile.value.chatRequest?.senderID) {
+                                                           Column(
+                                                               modifier = Modifier.fillMaxWidth(),
+                                                               horizontalAlignment = Alignment.CenterHorizontally
+                                                           ) {
+                                                               Text(
+                                                                   "Incoming Chat Request",
+                                                                   color = Color.White,
+                                                                   fontSize = 16.sp,
+                                                                   fontWeight = FontWeight.Bold
+                                                               )
+                                                               Spacer(modifier = Modifier.height(12.dp))
+                                                               Row(
+                                                                   modifier = Modifier.fillMaxWidth(),
+                                                                   horizontalArrangement = Arrangement.SpaceEvenly
+                                                               ) {
+                                                                   // Accept Button
+                                                                   Box(
+                                                                       modifier = Modifier
+                                                                           .background(
+                                                                               color = Color(0xFF4CAF50),
+                                                                               shape = RoundedCornerShape(25.dp)
+                                                                           )
+                                                                           .height(45.dp)
+                                                                           .width(120.dp)
+                                                                           .clickable {
+                                                                               viewModel.responseRequestChat(
+                                                                                   profile.value.chatRequest?.id ?: "",
+                                                                                   true,
+                                                                                   profile.value.chatRequest?.senderID ?: ""
+                                                                               )
+                                                                           }
+                                                                           .shadow(4.dp, RoundedCornerShape(25.dp)),
+                                                                       contentAlignment = Alignment.Center
+                                                                   ) {
+                                                                       Text(
+                                                                           text = "Accept",
+                                                                           color = Color.White,
+                                                                           fontSize = 14.sp,
+                                                                           fontWeight = FontWeight.Bold
+                                                                       )
+                                                                   }
+
+                                                                   // Reject Button
+                                                                   Box(
+                                                                       modifier = Modifier
+                                                                           .background(
+                                                                               color = Color(0xFFF44336),
+                                                                               shape = RoundedCornerShape(25.dp)
+                                                                           )
+                                                                           .height(45.dp)
+                                                                           .width(120.dp)
+                                                                           .clickable {
+                                                                               viewModel.responseRequestChat(
+                                                                                   profile.value.chatRequest?.id ?: "",
+                                                                                   false,
+                                                                                   profile.value.chatRequest?.senderID ?: ""
+                                                                               )
+                                                                           }
+                                                                           .shadow(4.dp, RoundedCornerShape(25.dp)),
+                                                                       contentAlignment = Alignment.Center
+                                                                   ) {
+                                                                       Text(
+                                                                           text = "Decline",
+                                                                           color = Color.White,
+                                                                           fontSize = 14.sp,
+                                                                           fontWeight = FontWeight.Bold
+                                                                       )
+                                                                   }
+                                                               }
+                                                           }
+                                                       }
+                                                   }
+                                               }
+                       */
+                        if (profile.value.friend == "PENDING_RECEIVED") {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(
+
+                                                Color(0xFFDFC46B),
+                                                Color(0xFFDFC46B),
+                                                Color(0xFFFFFFFF),
+                                            )
+                                        )
+                                    )
+                                    .padding(16.dp)
+                            )
+                            {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        "👥 Friend Request",
+                                        color = Color.Black,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceEvenly
+                                    ) {
+                                        // Accept Friend Button
+                                        Box(
+                                            modifier = Modifier
+                                                .background(
+                                                    color = Color(0xFF4CAF50),
+                                                    shape = RoundedCornerShape(20.dp)
+                                                )
+                                                .height(36.dp)
+                                                .width(100.dp)
+                                                .clickable {
+                                                    //viewModel.acceptFriendRequest(profile.value.id)
+                                                }
+                                                .shadow(3.dp, RoundedCornerShape(20.dp)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (beFriendState is FriendState.Loading) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(16.dp),
+                                                    color = Color.White,
+                                                    strokeWidth = 2.dp
+                                                )
+                                            } else {
+                                                Text(
+                                                    text = "Accept",
+                                                    color = Color.White,
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+
+                                        // Reject Friend Button
+                                        Box(
+                                            modifier = Modifier
+                                                .background(
+                                                    color = Color(0xFFF44336),
+                                                    shape = RoundedCornerShape(20.dp)
+                                                )
+                                                .height(36.dp)
+                                                .width(100.dp)
+                                                .clickable {
+                                                    //viewModel.rejectFriendRequest(profile.value.id)
+                                                }
+                                                .shadow(3.dp, RoundedCornerShape(20.dp)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (unFriendState is FriendState.Loading) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(16.dp),
+                                                    color = Color.White,
+                                                    strokeWidth = 2.dp
+                                                )
+                                            } else {
+                                                Text(
+                                                    text = "Decline",
+                                                    color = Color.White,
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } /*else if (profile.value.friend == "NOT_YET") {
+                            // Friend Request Sent TopBar
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(
+                                                Color(0xFFFFF176),
+                                                Color(0xFFFFF176),
+                                                Color(0xFFFFFFFF),
+                                            )
+                                        )
+                                    )
+                                    .padding(16.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        "👥 Friend Request Sent",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        "Waiting for response...",
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            }
+                        }*/
+
+                    }
+                }
+
                 item {
                     Spacer(modifier = Modifier.height(10.dp))
                     Row(
@@ -827,7 +968,6 @@ fun ProfilePreviewScreen(
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(16.dp),
                                         colors = CardDefaults.cardColors(containerColor = Color.White),
-                                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                                     ) {
                                         Column(
                                             modifier = Modifier.padding(32.dp),
@@ -848,12 +988,7 @@ fun ProfilePreviewScreen(
                                                     .height(48.dp)
                                                     .width(140.dp)
                                                     .background(
-                                                        brush = Brush.horizontalGradient(
-                                                            colors = listOf(
-                                                                Color(0xFF667eea),
-                                                                Color(0xFF764ba2)
-                                                            )
-                                                        ),
+                                                        color = Color(0xFFDFC46B),
                                                         shape = RoundedCornerShape(24.dp)
                                                     )
                                                     .clickable {
