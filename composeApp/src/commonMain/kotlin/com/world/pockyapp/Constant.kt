@@ -11,7 +11,8 @@ object Constant {
     var SHARED_LINK = DEV_ENV
     private var SHARED_LINK_HOST = DEV_ENV_HOST
 
-    val ws = "ws://$SHARED_LINK_HOST/ws"
+    //val ws = "ws://$SHARED_LINK_HOST"
+    val ws = "http://192.168.100.182:443"
 
     fun getUrl(id:String?):String = "$SHARED_LINK/stream/media/$id"
 }

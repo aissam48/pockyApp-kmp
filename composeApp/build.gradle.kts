@@ -163,7 +163,7 @@ kotlin {
             // Optional - Location permissions for mobile
             implementation(libs.compass.permissions.mobile)
 
-
+            implementation("dev.icerock.moko:socket-io:0.6.0")
         }
     }
 }
@@ -198,7 +198,11 @@ android {
 dependencies {
     implementation(libs.androidx.activity.ktx)
     debugImplementation(compose.uiTooling)
+    implementation("io.socket:socket.io-client:2.1.0") {
+        exclude(group = "org.json", module = "json")
+    }
+    commonMainApi("dev.icerock.moko:socket-io:0.6.0")
 
-    commonMainApi("dev.icerock.moko:socket-io:0.5.0")
+
 }
 
