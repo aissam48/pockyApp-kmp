@@ -64,6 +64,7 @@ fun ChatScreen(
     viewModel: ConversationsViewModel = koinViewModel()
 ) {
 
+
     val chatRequestsMoments by viewModel.chatRequestsMoments.collectAsState()
     val conversationsState by viewModel.conversationsState.collectAsState()
 
@@ -77,7 +78,7 @@ fun ChatScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFFFFFF))
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 10.dp)
     ) {
         item {
             Spacer(modifier = Modifier.height(8.dp))
@@ -136,10 +137,10 @@ fun ChatScreen(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = Color.White),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                         ) {
                             Column(
-                                modifier = Modifier.padding(16.dp)
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 15.dp)
                             ) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -152,21 +153,7 @@ fun ChatScreen(
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 18.sp
                                     )
-                                    Box(
-                                        modifier = Modifier
-                                            .background(
-                                                Color(0xFFDFC46B).copy(alpha = 0.1f),
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    ) {
-                                        Text(
-                                            text = "${chatRequests.size}",
-                                            color = Color(0xFFDFC46B),
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 12.sp
-                                        )
-                                    }
+
                                 }
 
                                 Spacer(modifier = Modifier.height(12.dp))
@@ -174,7 +161,9 @@ fun ChatScreen(
                                 LazyRow(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    items(chatRequests) { request ->
+
+                                    val lid = listOf(chatRequests.last(), chatRequests.last(), chatRequests.last(), chatRequests.last(), chatRequests.last(), chatRequests.last(), chatRequests.last(), chatRequests.last())
+                                    items(lid) { request ->
                                         ChatRequestItem(
                                             request = request,
                                             onClick = {
@@ -389,22 +378,6 @@ fun ChatRequestItem(
                 error = painterResource(Res.drawable.ic_placeholder),
             )
 
-            // New request indicator
-            Box(
-                modifier = Modifier
-                    .size(16.dp)
-                    .background(Color(0xFFE91E63), CircleShape)
-                    .align(Alignment.TopEnd)
-            ) {
-                Text(
-                    text = "!",
-                    color = Color.White,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(6.dp))
@@ -419,12 +392,6 @@ fun ChatRequestItem(
             textAlign = TextAlign.Center
         )
 
-        Text(
-            text = "Chat request",
-            color = Color.Gray,
-            fontSize = 10.sp,
-            textAlign = TextAlign.Center
-        )
     }
 }
 

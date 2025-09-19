@@ -176,7 +176,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 16.dp),
                     shape = RoundedCornerShape(24.dp),
-                    shadowElevation = 8.dp,
+                    shadowElevation = 1.dp,
                     tonalElevation = 0.dp,
                 ) {
                     NavigationBar(

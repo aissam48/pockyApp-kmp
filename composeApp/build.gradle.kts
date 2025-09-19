@@ -36,7 +36,7 @@ kotlin {
         summary = "Some description for the Shared Module"
         homepage = "Link to the Shared Module homepage"
         version = "1.0"
-        ios.deploymentTarget = "15.4"
+        ios.deploymentTarget = "16.6"
         podfile = project.file("../iosApp/Podfile")
         framework {
             baseName = "ComposeApp"
@@ -57,7 +57,7 @@ kotlin {
         pod(name = "mokoSocketIo") {
             extraOpts += listOf("-compiler-option", "-fmodules") // Adding this line fixed the build issue for me
             source = git(url = "https://github.com/icerockdev/moko-socket-io.git") {
-                tag = "release/0.6.0"
+                tag = "release/0.5.0"
             }
         }
 
@@ -199,6 +199,6 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     debugImplementation(compose.uiTooling)
 
-    commonMainApi("dev.icerock.moko:socket-io:0.6.0")
+    commonMainApi("dev.icerock.moko:socket-io:0.5.0")
 }
 
