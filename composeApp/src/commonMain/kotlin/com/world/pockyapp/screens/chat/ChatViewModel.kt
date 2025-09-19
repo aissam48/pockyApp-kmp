@@ -102,7 +102,7 @@ class ChatViewModel(private val sdk: ApiManager) :
 
         viewModelScope.launch {
             delay(1000)
-            for (frame in sdk.ws.incoming) {
+            /*for (frame in sdk.ws.incoming) {
                 frame as Frame.Text ?: continue
                 println("check data send -> " + frame.readText())
                 try {
@@ -114,7 +114,7 @@ class ChatViewModel(private val sdk: ApiManager) :
                 } catch (e: SerializationException) {
                     println("Failed to parse message: ${e.message}")
                 }
-            }
+            }*/
         }
     }
 

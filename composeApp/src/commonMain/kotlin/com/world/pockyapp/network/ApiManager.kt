@@ -647,7 +647,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     }
 
-    lateinit var ws: DefaultClientWebSocketSession
+    //lateinit var ws: DefaultClientWebSocketSession
 
     init {
         try {

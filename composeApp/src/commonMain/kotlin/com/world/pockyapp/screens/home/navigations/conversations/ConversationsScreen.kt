@@ -162,8 +162,7 @@ fun ChatScreen(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
 
-                                    val lid = listOf(chatRequests.last(), chatRequests.last(), chatRequests.last(), chatRequests.last(), chatRequests.last(), chatRequests.last(), chatRequests.last(), chatRequests.last())
-                                    items(lid) { request ->
+                                    items(chatRequests) { request ->
                                         ChatRequestItem(
                                             request = request,
                                             onClick = {
