@@ -10,7 +10,6 @@ plugins {
     kotlin("plugin.serialization")
     id("com.google.gms.google-services")
     alias(libs.plugins.cocoapods)
-
 }
 
 kotlin {
@@ -55,9 +54,17 @@ kotlin {
             extraOpts += listOf("-compiler-option", "-fmodules")
         }
 
+        pod(name = "mokoSocketIo") {
+            extraOpts += listOf("-compiler-option", "-fmodules") // Adding this line fixed the build issue for me
+            source = git(url = "https://github.com/icerockdev/moko-socket-io.git") {
+                tag = "release/0.6.0"
+            }
+        }
+
     }
 
     sourceSets {
+
 
         androidMain.dependencies {
             implementation(compose.preview)
@@ -156,6 +163,7 @@ kotlin {
             // Optional - Location permissions for mobile
             implementation(libs.compass.permissions.mobile)
 
+
         }
     }
 }
@@ -191,6 +199,6 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     debugImplementation(compose.uiTooling)
 
-
+    commonMainApi("dev.icerock.moko:socket-io:0.6.0")
 }
 
