@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-expect fun MomentPreview(navController: NavHostController, path: String)
+expect fun MomentPreview(navController: NavHostController, path: String, viewModel: MomentPreviewViewModel = koinViewModel())

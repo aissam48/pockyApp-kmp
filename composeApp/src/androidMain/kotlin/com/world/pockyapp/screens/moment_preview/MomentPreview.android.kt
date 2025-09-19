@@ -20,7 +20,6 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,7 +47,6 @@ import dev.jordond.compass.geocoder.placeOrNull
 import dev.jordond.compass.geolocation.Geolocator
 import dev.jordond.compass.geolocation.GeolocatorResult
 import dev.jordond.compass.geolocation.mobile
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -62,9 +60,9 @@ import java.io.File
 actual fun MomentPreview(
     navController: NavHostController,
     path: String,
+    viewModel: MomentPreviewViewModel
 ) {
 
-    val viewModel: MomentPreviewViewModel = koinViewModel()
     val imageData = convertImageToByteArray(Uri.parse(path.replace("$", "/")), LocalContext.current)
     println("MomentPreview $imageData")
 

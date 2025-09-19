@@ -15,6 +15,7 @@ import com.world.pockyapp.screens.home.HomeViewModel
 import com.world.pockyapp.screens.home.navigations.conversations.ConversationsViewModel
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverViewModel
 import com.world.pockyapp.screens.home.navigations.hot.HotViewModel
+import com.world.pockyapp.screens.moment_preview.MomentPreviewViewModel
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.profile.ProfileViewModel
 import com.world.pockyapp.screens.post_preview.PostViewModel
@@ -55,6 +56,7 @@ val appModule = module {
     viewModel { HotViewModel(sdk = get()) }
     viewModel { ReportProfileViewModel(sdk = get()) }
     viewModel { GoogleMapsViewModel(sdk = get()) }
+    single { MomentPreviewViewModel(sdk = get()) }
 
 }
 

@@ -108,26 +108,6 @@ private fun StoriesViewer(
             )
         }
 
-        // Close button (Instagram-like X button)
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp)
-                .size(32.dp)
-                .background(
-                    Color.Black.copy(alpha = 0.3f),
-                    CircleShape
-                )
-                .clickable { onStoriesFinished() },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "×",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
     }
 }
 

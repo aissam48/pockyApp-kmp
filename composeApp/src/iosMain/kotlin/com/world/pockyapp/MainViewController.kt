@@ -8,7 +8,7 @@ import platform.UIKit.UIViewController
 
 fun MainViewController(
     mapUIViewController: () -> UIViewController,
-    cameraUIViewController: () -> UIViewController
+    cameraUIViewController: (onMediaCaptured: (ByteArray, String) -> Unit) -> UIViewController
 ) = ComposeUIViewController(
     configure = {
         startKoin {
@@ -23,4 +23,4 @@ fun MainViewController(
 }
 
 lateinit var mapViewController: () -> UIViewController
-lateinit var cameraViewController: () -> UIViewController
+lateinit var cameraViewController: ((ByteArray, String) -> Unit) -> UIViewController

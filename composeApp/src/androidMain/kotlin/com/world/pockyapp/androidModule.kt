@@ -15,6 +15,5 @@ val androidModule = module {
     single<DataStore<Preferences>> { createDataStore(androidApplication()) }
 
     single <Activity>{ Activity() }
-    viewModel { MomentPreviewViewModel(sdk = get()) }
 
 }

@@ -22,6 +22,10 @@ sealed class MomentPreviewUiState {
 class MomentPreviewViewModel(private val sdk: ApiManager) :
     ViewModel() {
 
+    lateinit var fileName: String
+    lateinit var imageByteArray:ByteArray
+
+
     private val _profileState = MutableStateFlow<ProfileModel?>(null)
     val profileState: StateFlow<ProfileModel?> = _profileState.asStateFlow()
 
