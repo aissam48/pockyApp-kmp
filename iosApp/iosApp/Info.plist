@@ -76,5 +76,9 @@
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>Add a description for why you need this permission</string>
 
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app needs access to the microphone to record video audio.</string>
+
+
 </dict>
 </plist>

@@ -273,7 +273,7 @@ fun ProfilePreviewScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFFF5F5F5))
+                    .background(Color(0xFFFFFFFF))
                     .padding(horizontal = 16.dp)
             ) {
                 //profile.value.friend = "PENDING_RECEIVED"
@@ -584,65 +584,56 @@ fun ProfilePreviewScreen(
                                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                                     ) {
                                         Column(
-                                            modifier = Modifier.padding(20.dp),
+                                            modifier = Modifier.padding(20.dp).fillMaxWidth(),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         )
                                         {
-                                            // Profile Picture and Action Buttons
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                verticalAlignment = Alignment.Top
-                                            ) {
-                                                // Profile Picture with Story Border
-                                                val checkIfSeeAllMoments =
-                                                    profile.value.moments.find { !it.viewed }
-                                                Box(
-                                                    modifier = Modifier
-                                                        .size(140.dp)
-                                                        .border(
-                                                            width = 4.dp,
-                                                            brush = Brush.linearGradient(
-                                                                colors = if (checkIfSeeAllMoments != null) {
-                                                                    listOf(
-                                                                        Color(0xFFE91E63),
-                                                                        Color(0xFFFF9800),
-                                                                        Color(0xFFFFEB3B)
-                                                                    )
-                                                                } else {
-                                                                    listOf(
-                                                                        Color.Gray.copy(alpha = 0.3f),
-                                                                        Color.Gray.copy(alpha = 0.3f)
-                                                                    )
-                                                                }
-                                                            ),
-                                                            shape = CircleShape
-                                                        )
-                                                        .padding(4.dp),
-                                                )
-                                                {
-                                                    AsyncImage(
-                                                        model = getUrl(profile.value.photoID),
-                                                        contentDescription = "",
-                                                        contentScale = ContentScale.Crop,
-                                                        modifier = Modifier
-                                                            .fillMaxSize()
-                                                            .clip(CircleShape)
-                                                            .clickable {
-                                                                if (profile.value.moments.isEmpty()) return@clickable
-                                                                val modulesJson =
-                                                                    Json.encodeToString(
-                                                                        listOf(profile.value)
-                                                                    ).replace("/", "%")
-                                                                navController.navigate(
-                                                                    NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/${myProfile.value.id}"
+                                            val checkIfSeeAllMoments =
+                                                profile.value.moments.find { !it.viewed }
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(140.dp)
+                                                    .border(
+                                                        width = 4.dp,
+                                                        brush = Brush.linearGradient(
+                                                            colors = if (checkIfSeeAllMoments != null) {
+                                                                listOf(
+                                                                    Color(0xFFE91E63),
+                                                                    Color(0xFFFF9800),
+                                                                    Color(0xFFFFEB3B)
                                                                 )
-                                                            },
-                                                        placeholder = painterResource(Res.drawable.ic_placeholder),
-                                                        error = painterResource(Res.drawable.ic_placeholder),
+                                                            } else {
+                                                                listOf(
+                                                                    Color.Gray.copy(alpha = 0.3f),
+                                                                    Color.Gray.copy(alpha = 0.3f)
+                                                                )
+                                                            }
+                                                        ),
+                                                        shape = CircleShape
                                                     )
-                                                }
-
+                                                    .padding(4.dp),
+                                            )
+                                            {
+                                                AsyncImage(
+                                                    model = getUrl(profile.value.photoID),
+                                                    contentDescription = "",
+                                                    contentScale = ContentScale.Crop,
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .clip(CircleShape)
+                                                        .clickable {
+                                                            if (profile.value.moments.isEmpty()) return@clickable
+                                                            val modulesJson =
+                                                                Json.encodeToString(
+                                                                    listOf(profile.value)
+                                                                ).replace("/", "%")
+                                                            navController.navigate(
+                                                                NavRoutes.MOMENTS.route + "/${modulesJson}" + "/${0}" + "/${myProfile.value.id}"
+                                                            )
+                                                        },
+                                                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                                                    error = painterResource(Res.drawable.ic_placeholder),
+                                                )
                                             }
 
                                             Spacer(modifier = Modifier.height(20.dp))

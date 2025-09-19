@@ -6,18 +6,9 @@ import com.world.pockyapp.di.appModule
 import platform.UIKit.UIViewController
 
 
-/*fun MainViewController() = ComposeUIViewController(
-    configure = {
-        startKoin {
-            modules(listOf(iosModule, appModule))
-        }
-    }) {
-    App()
-}*/
-
-
 fun MainViewController(
-    mapUIViewController: () -> UIViewController
+    mapUIViewController: () -> UIViewController,
+    cameraUIViewController: () -> UIViewController
 ) = ComposeUIViewController(
     configure = {
         startKoin {
@@ -25,7 +16,11 @@ fun MainViewController(
         }
     }) {
     mapViewController = mapUIViewController
+    cameraViewController = cameraUIViewController
+
+
     App()
 }
 
 lateinit var mapViewController: () -> UIViewController
+lateinit var cameraViewController: () -> UIViewController

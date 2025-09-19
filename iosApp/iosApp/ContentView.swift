@@ -75,11 +75,58 @@ struct GoogleMapView: UIViewRepresentable {
     }
 }
 
+struct CameraSwiftUIView: UIViewControllerRepresentable {
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+                picker.sourceType = .camera
+                picker.mediaTypes = ["public.image", "public.movie"] // ✅ allow image & video
+                picker.videoQuality = .typeHigh
+                picker.allowsEditing = false
+                picker.delegate = context.coordinator
+                picker.modalPresentationStyle = .fullScreen
+                return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            picker.dismiss(animated: true)
+            // You can access the photo here if needed:
+             let image = info[.originalImage] as? UIImage
+            
+            if let image = info[.originalImage] as? UIImage,
+                           let imageData = image.jpegData(compressionQuality: 0.8) {
+                            // ✅ Pass image bytes to callback
+                print(imageData)
+                        }
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            picker.dismiss(animated: true)
+        }
+    }
+}
+
+/*
+mapUIViewController: { () -> UIViewController in
+                return UIHostingController(rootView: CameraSwiftUIView())
+            }
+*/
 struct ComposeView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
         MainViewControllerKt.MainViewController(
-            mapUIViewController: { () -> UIViewController in
-                return UIHostingController(rootView: GoogleMapView())
+
+            mapUIViewController: {
+                UIHostingController(rootView: GoogleMapView())
+            },
+            cameraUIViewController: {
+                UIHostingController(rootView: CameraSwiftUIView())
             }
         )
     }
@@ -90,6 +137,6 @@ struct ComposeView: UIViewControllerRepresentable {
 struct ContentView: View {
     var body: some View {
         ComposeView()
-                .ignoresSafeArea(.keyboard) // Compose has own keyboard handler
+            .ignoresSafeArea(.keyboard) // Compose has own keyboard handler
     }
 }

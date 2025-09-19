@@ -10,10 +10,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -45,6 +47,7 @@ import pockyapp.composeapp.generated.resources.ic_like
 import pockyapp.composeapp.generated.resources.ic_placeholder
 import pockyapp.composeapp.generated.resources.ic_unlike_black
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiscoverScreen(
     navController: NavHostController,
@@ -61,136 +64,238 @@ fun DiscoverScreen(
         viewModel.loadNearbyMoments()
         viewModel.loadNearbyPosts()
     }
-    LazyColumn(
-        modifier = Modifier.padding(start = 10.dp, end = 10.dp)
-    ) {
 
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFFFFFFF))
+            .padding(horizontal = 0.dp)
+    ) {
         item {
-            Text(
-                text = "Friends",
-                color = Color.Black,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
-            Spacer(modifier = Modifier.size(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Friends Moments Section
+        // Friends Stories Section
         item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    Text(
+                        text = "Moments",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                when (profileState) {
-                    is UiState.Loading -> {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
+                    Row(
+                        verticalAlignment = Alignment.Top,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // My Story
+                        when (profileState) {
+                            is UiState.Loading -> {
+                                Box(
+                                    modifier = Modifier.size(70.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = Color(0xFFDFC46B)
+                                    )
+                                }
+                            }
+
+                            is UiState.Success -> {
+                                val profile = (profileState as UiState.Success<ProfileModel>).data
+                                ModernProfileSection(profile = profile, navController = navController)
+                            }
+
+                            is UiState.Error -> {
+                                Box(
+                                    modifier = Modifier.size(70.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("❌", fontSize = 24.sp)
+                                }
+                            }
                         }
-                    }
 
-                    is UiState.Error -> {
-                        ErrorSection(
-                            error = (profileState as UiState.Error).error,
-                            onRetry = { viewModel.loadFriendsMoments() }
-                        )
-                    }
+                        Spacer(modifier = Modifier.width(12.dp))
 
-                    is UiState.Success -> {
-                        val profile = (profileState as UiState.Success<ProfileModel>).data
-                        ProfileSection(profile = profile, navController = navController)
-                    }
-                }
+                        // Friends Stories
+                        when (friendsMomentsState) {
+                            is UiState.Loading -> {
+                                Box(
+                                    modifier = Modifier.weight(1f).height(70.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = Color(0xFFDFC46B)
+                                    )
+                                }
+                            }
 
-                Spacer(modifier = Modifier.width(5.dp))
+                            is UiState.Success -> {
+                                val friends = (friendsMomentsState as UiState.Success<List<ProfileModel>>).data
+                                LazyRow(
+                                    modifier = Modifier.weight(1f),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(friends, key = { it.id }) { friend ->
+                                        ModernMomentItem(
+                                            profile = friend,
+                                            currentUserId = (profileState as? UiState.Success<ProfileModel>)?.data?.id,
+                                            navController = navController
+                                        )
+                                    }
+                                }
+                            }
 
-                Divider(modifier = Modifier.height(45.dp).width(1.dp), color = Color.Black)
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                when (friendsMomentsState) {
-                    is UiState.Loading -> {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
+                            is UiState.Error -> {
+                                Box(
+                                    modifier = Modifier.weight(1f).height(70.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Unable to load stories",
+                                        color = Color.Gray,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            }
                         }
-                    }
-
-                    is UiState.Error -> {
-                        ErrorSection(
-                            error = (friendsMomentsState as UiState.Error).error,
-                            onRetry = { viewModel.loadFriendsMoments() }
-                        )
-                    }
-
-                    is UiState.Success -> {
-                        val friends =
-                            (friendsMomentsState as UiState.Success<List<ProfileModel>>).data
-                        FriendsMomentsSection(
-                            friends = friends,
-                            currentProfile = (profileState as? UiState.Success<ProfileModel>)?.data,
-                            navController = navController
-                        )
                     }
                 }
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         // Nearby Moments Section
-        item {
-            when (nearbyMomentsState) {
-                is UiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                }
-
-                is UiState.Error -> {
-                    ErrorSection(
-                        error = (nearbyMomentsState as UiState.Error).error,
-                        onRetry = { viewModel.loadNearbyMoments() }
-                    )
-                }
-
-                is UiState.Success -> {
-                    val nearbyMoments =
-                        (nearbyMomentsState as UiState.Success<List<ProfileModel>>).data
-                    if (nearbyMoments.isNotEmpty()) {
-                        NearbyMomentsSection(
-                            moments = nearbyMoments,
-                            currentProfile = (profileState as? UiState.Success<ProfileModel>)?.data,
-                            navController = navController
-                        )
+        when (nearbyMomentsState) {
+            is UiState.Loading -> {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = Color(0xFFDFC46B),
+                                strokeWidth = 2.dp
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        // Nearby Posts Section
+            is UiState.Success -> {
+                val nearbyMoments = (nearbyMomentsState as UiState.Success<List<ProfileModel>>).data
+                if (nearbyMoments.isNotEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(10.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Nearby Moments",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 18.sp
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .background(
+                                                Color(0xFFDFC46B).copy(alpha = 0.1f),
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = "${nearbyMoments.size}",
+                                            color = Color(0xFFDFC46B),
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 12.sp
+                                        )
+                                    }
+                                }
 
-        item {
-            Spacer(modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
 
-        }
-        when (nearbyPostsState) {
-            is UiState.Loading -> {
-                item {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(nearbyMoments, key = { it.id }) { profile ->
+                                        if (profile.moments.isNotEmpty()) {
+                                            ModernNearbyMomentItem(
+                                                profile = profile,
+                                                currentUserId = (profileState as? UiState.Success<ProfileModel>)?.data?.id,
+                                                navController = navController
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }
 
             is UiState.Error -> {
                 item {
-                    ErrorSection(
-                        error = (nearbyPostsState as UiState.Error).error,
-                        onRetry = { viewModel.loadNearbyPosts() }
+                    ModernErrorSection(
+                        error = (nearbyMomentsState as UiState.Error).error,
+                        onRetry = { viewModel.loadNearbyMoments() }
                     )
+                }
+            }
+        }
+
+        // Nearby Posts Section
+        when (nearbyPostsState) {
+            is UiState.Loading -> {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = Color(0xFFDFC46B),
+                            strokeWidth = 2.dp
+                        )
+                    }
                 }
             }
 
@@ -198,16 +303,24 @@ fun DiscoverScreen(
                 val posts = (nearbyPostsState as UiState.Success<List<PostModel>>).data
                 if (posts.isNotEmpty()) {
                     item {
-                        Text(
-                            text = "Nearby posts >",
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Spacer(modifier = Modifier.size(5.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Nearby Posts",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                        }
                     }
+
                     items(posts, key = { it.postID }) { post ->
-                        PostItem(
+                        ModernPostItem(
                             post = post,
                             currentUserId = (profileState as? UiState.Success<ProfileModel>)?.data?.id,
                             onLikeClick = { clickedPost ->
@@ -226,267 +339,178 @@ fun DiscoverScreen(
                     }
                 }
             }
+
+            is UiState.Error -> {
+                item {
+                    ModernErrorSection(
+                        error = (nearbyPostsState as UiState.Error).error,
+                        onRetry = { viewModel.loadNearbyPosts() }
+                    )
+                }
+            }
         }
 
         item {
-            Spacer(modifier = Modifier.size(80.dp))
+            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }
 
 @Composable
-fun ErrorSection(
+fun ModernErrorSection(
     error: ErrorModel,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    Card(
         modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF5F5)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        when (error.code) {
-            in 500..599 -> {
-
-            }
-
-            else -> {
-                Text(
-                    text = error.message,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(16.dp)
-                )
+        Column(
+            modifier = Modifier.padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "⚠️",
+                fontSize = 32.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Something went wrong",
+                color = Color(0xFFE53E3E),
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+            Text(
+                text = error.message,
+                color = Color(0xFFE53E3E),
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Box(
+                modifier = Modifier
+                    .background(
+                        Color(0xFFE53E3E),
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clickable(onClick = onRetry)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
                 Text(
                     text = "Retry",
-                    color = Color.Black,
-                    modifier = Modifier
-                        .clickable(onClick = onRetry)
-                        .padding(8.dp)
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp
                 )
             }
         }
-
     }
 }
 
 @Composable
-fun ProfileSection(
+fun ModernProfileSection(
     profile: ProfileModel,
     navController: NavHostController
 ) {
-    val checkIfSeeAllMoments = profile.moments.find { !it.viewed }
-    Box(
-        modifier = Modifier
-            .size(60.dp)
-            .border(
-                width = 2.dp,
-                brush = Brush.linearGradient(
-                    colors = if (checkIfSeeAllMoments != null) {
-                        listOf(Color.Red, Color.Yellow, Color.White)
-                    } else {
-                        listOf(Color.Gray, Color.Gray, Color.Gray)
-                    }
-                ),
-                shape = CircleShape
-            ),
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AsyncImage(
-            model = if (profile.moments.isEmpty()) getUrl(profile.photoID) else getUrl(profile.moments[0].momentID),
-            contentScale = ContentScale.Crop,
-            contentDescription = "",
+        val checkIfSeeAllMoments = profile.moments.find { !it.viewed }
+        Box(
             modifier = Modifier
-                .size(60.dp)
-                .clip(CircleShape)
-                .clickable {
-                    if (profile.moments.isEmpty()) {
-                        navController.navigate(NavRoutes.MY_PROFILE.route)
-                    } else {
-                        val modulesJson = Json.encodeToString(listOf(profile)).replace("/", "%")
-                        navController.navigate(
-                            NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/${profile.id}"
-                        )
-                    }
-                },
-            placeholder = painterResource(Res.drawable.ic_placeholder),
-            error = painterResource(Res.drawable.ic_placeholder),
+                .size(70.dp)
+                .border(
+                    width = 3.dp,
+                    brush = Brush.linearGradient(
+                        colors = if (checkIfSeeAllMoments != null) {
+                            listOf(
+                                Color(0xFFE91E63),
+                                Color(0xFFFF9800),
+                                Color(0xFFFFEB3B)
+                            )
+                        } else {
+                            listOf(
+                                Color.Gray.copy(alpha = 0.3f),
+                                Color.Gray.copy(alpha = 0.3f)
+                            )
+                        }
+                    ),
+                    shape = CircleShape
+                )
+                .padding(2.dp),
+        ) {
+            AsyncImage(
+                model = if (profile.moments.isEmpty())
+                    getUrl(profile.photoID)
+                else
+                    getUrl(profile.moments[0].momentID),
+                contentScale = ContentScale.Crop,
+                contentDescription = "",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .clickable {
+                        if (profile.moments.isEmpty()) {
+                            navController.navigate(NavRoutes.MY_PROFILE.route)
+                        } else {
+                            val modulesJson = Json.encodeToString(listOf(profile)).replace("/", "%")
+                            navController.navigate(
+                                NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/${profile.id}"
+                            )
+                        }
+                    },
+                placeholder = painterResource(Res.drawable.ic_placeholder),
+                error = painterResource(Res.drawable.ic_placeholder),
+            )
+        }
 
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "Your Moment",
+            color = Color.Gray,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium
         )
     }
 }
 
 @Composable
-fun FriendsMomentsSection(
-    friends: List<ProfileModel>,
-    currentProfile: ProfileModel?,
-    navController: NavHostController
-) {
-    LazyRow {
-        items(friends, key = { it.id }) { friend ->
-            MomentItem(
-                profile = friend,
-                currentUserId = currentProfile?.id,
-                navController = navController
-            )
-            Spacer(modifier = Modifier.size(10.dp))
-        }
-    }
-}
-
-@Composable
-fun NearbyMomentsSection(
-    moments: List<ProfileModel>,
-    currentProfile: ProfileModel?,
-    navController: NavHostController
-) {
-    Spacer(modifier = Modifier.size(20.dp))
-
-    Text(
-        text = "Nearby moments >",
-        color = Color.Black,
-        fontWeight = FontWeight.Bold,
-        fontSize = 18.sp
-    )
-    Spacer(modifier = Modifier.size(5.dp))
-
-    LazyRow {
-        items(moments, key = { it.id }) { profile ->
-            if (profile.moments.isNotEmpty()) {
-                NearbyMomentItem(
-                    profile = profile,
-                    currentUserId = currentProfile?.id,
-                    navController = navController
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-            }
-        }
-    }
-}
-
-@Composable
-fun PostItem(
-    post: PostModel,
-    currentUserId: String?,
-    onLikeClick: (PostModel) -> Unit,
-    onProfileClick: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        // Profile Header
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(vertical = 8.dp)
-                .clickable { onProfileClick(post.profile.id) }
-        ) {
-            AsyncImage(
-                model = getUrl(post.profile.photoID),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(35.dp)
-                    .clip(CircleShape),
-                contentDescription = "Profile Photo",
-                placeholder = painterResource(Res.drawable.ic_placeholder),
-                error = painterResource(Res.drawable.ic_placeholder),
-            )
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Column {
-                Text(
-                    text = "${post.profile.firstName} ${post.profile.lastName}",
-                    color = Color.Black,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.size(2.dp))
-                Text(
-                    text = "${post.geoLocation.country} ${post.geoLocation.street}",
-                    color = Color.LightGray,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-        }
-
-        // Post Image
-        Card(
-            backgroundColor = Color.LightGray,
-            elevation = 0.dp,
-            modifier = Modifier
-                .height(400.dp)
-                .fillMaxWidth()
-        ) {
-            AsyncImage(
-                model = getUrl(post.postID),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-                contentDescription = "Post Image",
-                placeholder = painterResource(Res.drawable.ic_placeholder),
-                error = painterResource(Res.drawable.ic_placeholder),
-            )
-        }
-
-        // Like Section
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 5.dp)
-        ) {
-            val isLiked = post.likes.contains(currentUserId)
-            Image(
-                painter = if (isLiked) {
-                    painterResource(Res.drawable.ic_like)
-                } else {
-                    painterResource(Res.drawable.ic_unlike_black)
-                },
-                contentDescription = if (isLiked) "Unlike" else "Like",
-                modifier = Modifier
-                    .size(25.dp)
-                    .clickable { onLikeClick(post) }
-            )
-
-            Spacer(modifier = Modifier.size(5.dp))
-            Text(
-                text = post.likes.size.toString(),
-                color = Color.Black,
-                fontSize = 14.sp
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Text(
-                text = formatCreatedAt(post.createdAt),
-                color = Color.Black,
-                fontSize = 14.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.size(20.dp))
-    }
-}
-
-@Composable
-fun MomentItem(
+fun ModernMomentItem(
     profile: ProfileModel,
     currentUserId: String?,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    Row(modifier = modifier.height(60.dp).width(60.dp)) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         val checkIfSeeAllMoments = profile.moments.find { !it.viewed }
         Box(
             modifier = Modifier
                 .size(60.dp)
                 .border(
-                    width = 2.dp,
+                    width = 2.5.dp,
                     brush = Brush.linearGradient(
                         colors = if (checkIfSeeAllMoments != null) {
-                            listOf(Color.Red, Color.Yellow, Color.White)
+                            listOf(
+                                Color(0xFFE91E63),
+                                Color(0xFFFF9800),
+                                Color(0xFFFFEB3B)
+                            )
                         } else {
-                            listOf(Color.Gray, Color.Gray, Color.Gray)
+                            listOf(
+                                Color.Gray.copy(alpha = 0.3f),
+                                Color.Gray.copy(alpha = 0.3f)
+                            )
                         }
                     ),
                     shape = CircleShape
-                ),
+                )
+                .padding(2.dp),
         ) {
             AsyncImage(
                 model = if (profile.moments.isEmpty()) {
@@ -496,13 +520,12 @@ fun MomentItem(
                 },
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(60.dp)
+                    .fillMaxSize()
                     .clip(CircleShape)
                     .clickable {
                         if (profile.moments.isEmpty()) {
                             navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${profile.id}")
                         } else {
-
                             val modulesJson = Json.encodeToString(listOf(profile))
                                 .replace("/", "%")
                             navController.navigate(
@@ -515,54 +538,207 @@ fun MomentItem(
                 error = painterResource(Res.drawable.ic_placeholder),
             )
         }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = profile.firstName,
+            color = Color.Gray,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1
+        )
     }
 }
 
 @Composable
-fun NearbyMomentItem(
+fun ModernNearbyMomentItem(
     profile: ProfileModel,
     currentUserId: String?,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     val checkIfSeeAllMoments = profile.moments.find { !it.viewed }
-    Box(
+    Card(
         modifier = modifier
-            .height(150.dp)
             .width(90.dp)
-            .border(
-                width = 2.dp,
-                brush = Brush.linearGradient(
-                    colors = if (checkIfSeeAllMoments != null) {
-                        listOf(Color.Red, Color.Yellow, Color.White)
-                    } else {
-                        listOf(Color.Gray, Color.Gray, Color.Gray)
-                    }
-                ),
-                shape = RoundedCornerShape(10.dp)
-            ),
+            .height(120.dp)
+            .clickable {
+                val modulesJson = Json.encodeToString(listOf(profile))
+                    .replace("/", "%")
+                navController.navigate(
+                    NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/$currentUserId"
+                )
+            },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.LightGray),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Card(
-            shape = RoundedCornerShape(10.dp),
-            backgroundColor = Color.LightGray,
-            modifier = Modifier
-                .height(150.dp)
-                .width(90.dp)
-        ) {
+        Box {
             AsyncImage(
                 model = getUrl(profile.moments[0].momentID),
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable {
-                        val modulesJson = Json.encodeToString(listOf(profile))
-                            .replace("/", "%")
-                        navController.navigate(
-                            NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/$currentUserId"
-                        )
-                    },
-                contentDescription = null
+                modifier = Modifier.fillMaxSize(),
+                contentDescription = null,
+                placeholder = painterResource(Res.drawable.ic_placeholder),
+                error = painterResource(Res.drawable.ic_placeholder),
             )
+
+            if (checkIfSeeAllMoments != null) {
+                Box(
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(8.dp)
+                        .background(Color(0xFFE91E63), CircleShape)
+                        .align(Alignment.TopEnd)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.7f)
+                            )
+                        )
+                    )
+                    .align(Alignment.BottomCenter)
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = profile.firstName,
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ModernPostItem(
+    post: PostModel,
+    currentUserId: String?,
+    onLikeClick: (PostModel) -> Unit,
+    onProfileClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Profile Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onProfileClick(post.profile.id) }
+            ) {
+                AsyncImage(
+                    model = getUrl(post.profile.photoID),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape),
+                    contentDescription = "Profile Photo",
+                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                    error = painterResource(Res.drawable.ic_placeholder),
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "${post.profile.firstName} ${post.profile.lastName}",
+                        color = Color.Black,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "${post.geoLocation.country}, ${post.geoLocation.street}",
+                        color = Color.Gray,
+                        fontSize = 13.sp
+                    )
+                }
+
+                Text(
+                    text = formatCreatedAt(post.createdAt),
+                    color = Color.Gray,
+                    fontSize = 12.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Post Image
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.LightGray),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                AsyncImage(
+                    model = getUrl(post.postID),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                    contentDescription = "Post Image",
+                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                    error = painterResource(Res.drawable.ic_placeholder),
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Like Section
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val isLiked = post.likes.contains(currentUserId)
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(
+                            if (isLiked) Color(0xFFE91E63).copy(alpha = 0.1f) else Color.Gray.copy(alpha = 0.1f),
+                            CircleShape
+                        )
+                        .clickable { onLikeClick(post) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = if (isLiked) {
+                            painterResource(Res.drawable.ic_like)
+                        } else {
+                            painterResource(Res.drawable.ic_unlike_black)
+                        },
+                        contentDescription = if (isLiked) "Unlike" else "Like",
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "${post.likes.size} likes",
+                    color = Color.Black,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }

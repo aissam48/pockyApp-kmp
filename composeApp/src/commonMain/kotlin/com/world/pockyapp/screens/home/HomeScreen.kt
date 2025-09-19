@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,11 +14,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -30,6 +34,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -54,7 +60,6 @@ import pockyapp.composeapp.generated.resources.ic_search_black
 import pockyapp.composeapp.generated.resources.icon_world
 import pockyapp.composeapp.generated.resources.nearvibe_logo
 
-
 @Composable
 fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koinViewModel()) {
 
@@ -62,173 +67,270 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
         mutableIntStateOf(viewModel.selectedScreen)
     }
     val snackbarHostState = remember { SnackbarHostState() }
-
     val scope = rememberCoroutineScope()
 
-    scope.launch {
-        snackbarHostState.showSnackbar(
-            message = "test",
-            actionLabel = "Dismiss",
-            duration = SnackbarDuration.Short
-        )
-    }
     Column(
-        modifier = Modifier.fillMaxSize().background(color = Color.White)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color(0xFFFFFFFF))
     ) {
-
-        Column(
-            modifier = Modifier.fillMaxWidth()
-                .padding(top = 20.dp, start = 10.dp, end = 10.dp)
-        ) {
-
-            Row() {
-                Image(
-                    modifier = Modifier.size(30.dp),
-                    painter = painterResource(Res.drawable.nearvibe_logo),
-                    contentDescription = "logo"
-                )
-
-                Spacer(modifier = Modifier.width(15.dp))
-
-                Text(
-                    text = "NearVibe",
-                    fontFamily = FontFamily.Default,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFDFC46B),
-                    fontSize = 30.sp,
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
+        // Modern Header
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color.White,
+            shadowElevation = 0.dp
+        )
+        {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Logo Section
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End
+                    modifier = Modifier.weight(1f)
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(
+                                color = Color(0xFFDFC46B).copy(alpha = 0.1f),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(Res.drawable.nearvibe_logo),
+                            contentDescription = "logo"
+                        )
+                    }
 
-                    Image(
-                        painter = painterResource(Res.drawable.ic_profile_black),
-                        modifier = Modifier.size(33.dp).clickable {
-                            navController.navigate(NavRoutes.MY_PROFILE.route)
-                        },
-                        contentDescription = null,
-                    )
+                    Spacer(modifier = Modifier.width(12.dp))
 
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Image(
-                        painter = painterResource(Res.drawable.ic_search_black),
-                        modifier = Modifier.size(28.dp).clickable {
-                            navController.navigate(NavRoutes.SEARCH.route)
-                        },
-                        contentDescription = null,
+                    Text(
+                        text = "NearVibe",
+                        fontFamily = FontFamily.Default,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1A1A),
+                        fontSize = 24.sp,
                     )
                 }
+
+                // Action Icons
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Search Button
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(
+                                color = Color(0xFFF8F9FA),
+                                shape = CircleShape
+                            )
+                            .clickable {
+                                navController.navigate(NavRoutes.SEARCH.route)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(Res.drawable.ic_search_black),
+                            modifier = Modifier.size(20.dp),
+                            contentDescription = "Search",
+                        )
+                    }
+
+                    // Profile Button
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(
+                                color = Color(0xFFDFC46B),
+                                shape = CircleShape
+                            )
+                            .clickable {
+                                navController.navigate(NavRoutes.MY_PROFILE.route)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(Res.drawable.ic_profile_black),
+                            modifier = Modifier.size(20.dp),
+                            contentDescription = "Profile",
+                        )
+                    }
+                }
             }
-
-            Spacer(modifier = Modifier.size(10.dp))
-
         }
 
         Scaffold(
+            backgroundColor = Color.Transparent,
             bottomBar = {
+                // Modern Bottom Navigation
                 Surface(
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomEnd = 24.dp, bottomStart = 24.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    shape = RoundedCornerShape(24.dp),
                     shadowElevation = 8.dp,
-                    tonalElevation = 8.dp,
-                    modifier = Modifier.padding(20.dp)
+                    tonalElevation = 0.dp,
                 ) {
                     NavigationBar(
-                        modifier = Modifier.height(60.dp),
-                        containerColor = Color(0xFFDFC46B),
-                        contentColor = Color.Yellow
-                    )
-                    {
-                        BottomNavigationItem(
+                        modifier = Modifier.height(70.dp),
+                        containerColor = Color.Transparent,
+                        contentColor = Color.Black,
+                        tonalElevation = 0.dp
+                    ) {
+                        // Discover
+                        NavigationBarItem(
                             selected = selected == 0,
                             onClick = {
                                 selected = 0
                                 viewModel.selectedScreen = 0
                             },
                             icon = {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_discover_black),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .background(
+                                            color = if (selected == 0)
+                                                Color(0xFFDFC46B)
+                                            else
+                                                Color.Transparent,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_discover_black),
+                                        contentDescription = "Discover",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = if (selected == 0) Color.White else Color.Gray
+                                    )
+                                }
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = Color.Transparent
+                            )
                         )
-                        BottomNavigationItem(
+
+                        // Hot
+                        NavigationBarItem(
                             selected = selected == 1,
                             onClick = {
                                 selected = 1
                                 viewModel.selectedScreen = 1
                             },
                             icon = {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_hot_black),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .background(
+                                            color = if (selected == 1)
+                                                Color(0xFFDFC46B)
+                                            else
+                                                Color.Transparent,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_hot_black),
+                                        contentDescription = "Hot",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = if (selected == 1) Color.White else Color.Gray
+                                    )
+                                }
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = Color.Transparent
+                            )
                         )
 
-                        BottomNavigationItem(
+                        // World/Map
+                        NavigationBarItem(
                             selected = selected == 2,
                             onClick = {
                                 selected = 2
                                 viewModel.selectedScreen = 2
                             },
                             icon = {
-                                Icon(
-                                    painter = painterResource(Res.drawable.icon_world),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .background(
+                                            color = if (selected == 2)
+                                                Color(0xFFDFC46B)
+                                            else
+                                                Color.Transparent,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.icon_world),
+                                        contentDescription = "Map",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = if (selected == 2) Color.White else Color.Gray
+                                    )
+                                }
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = Color.Transparent
+                            )
                         )
 
-                        BottomNavigationItem(
+                        // Chat
+                        NavigationBarItem(
                             selected = selected == 3,
                             onClick = {
                                 selected = 3
                                 viewModel.selectedScreen = 3
                             },
                             icon = {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_chat_black),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .background(
+                                            color = if (selected == 3)
+                                                Color(0xFFDFC46B)
+                                            else
+                                                Color.Transparent,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_chat_black),
+                                        contentDescription = "Chat",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = if (selected == 3) Color.White else Color.Gray
+                                    )
+                                }
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = Color.Transparent
+                            )
                         )
-
                     }
                 }
-
             }
-        ) {
-
-            Column() {
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
                 when (selected) {
-                    0 -> {
-                        DiscoverScreen(navController)
-                    }
-
-                    1 -> {
-                        HotScreen(navController)
-                    }
-
-                    2 -> {
-                        MapComponentScreen(navController)
-                    }
-
-                    3 -> {
-                        ChatScreen(navController)
-                    }
+                    0 -> DiscoverScreen(navController)
+                    1 -> HotScreen(navController)
+                    2 -> MapComponentScreen(navController)
+                    3 -> ChatScreen(navController)
                 }
             }
-
         }
     }
 }

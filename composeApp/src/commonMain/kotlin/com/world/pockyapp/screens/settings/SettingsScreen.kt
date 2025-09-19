@@ -3,7 +3,9 @@ package com.world.pockyapp.screens.settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,10 +13,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,6 +45,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_back_black
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     navController: NavHostController,
@@ -55,9 +65,9 @@ fun SettingsScreen(
                     inclusive = true
                 }
             }
-
         }
     }
+
     LaunchedEffect(deleteAccount.value) {
         if (deleteAccount.value == "deleteAccount") {
             navController.navigate(NavRoutes.LOGIN.route) {
@@ -65,7 +75,6 @@ fun SettingsScreen(
                     inclusive = true
                 }
             }
-
         }
     }
 
@@ -95,161 +104,244 @@ fun SettingsScreen(
         )
     }
 
-    Scaffold(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        backgroundColor = Color(0xFFFFFFFF)
+    ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(start = 10.dp, end = 10.dp, top = 15.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
         ) {
-
+            // Header
             item {
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Image(
-                        modifier = Modifier.size(23.dp).clickable {
-                            navController.popBackStack()
-                        },
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable {
+                                navController.popBackStack()
+                            },
                         painter = painterResource(Res.drawable.ic_back_black),
-                        contentDescription = null
+                        contentDescription = "Back"
                     )
-                    Spacer(modifier = Modifier.size(15.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
                     Text(
                         text = "Settings",
                         color = Color.Black,
-                        fontSize = 25.sp,
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
+                Spacer(modifier = Modifier.height(30.dp))
+            }
+
+            // Profile Settings Section
+            item {
+                Text(
+                    text = "Profile",
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+                )
             }
 
             item {
-                Spacer(modifier = Modifier.size(50.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column {
+                        SettingsItem(
+                            icon = "👤",
+                            title = "Edit Profile",
+                            subtitle = "Name, bio, photo",
+                            onClick = { navController.navigate(NavRoutes.EDIT_PROFILE.route) }
+                        )
+
+                        SettingsDivider()
+
+                        SettingsItem(
+                            icon = "🔐",
+                            title = "Password",
+                            subtitle = "Change your password",
+                            onClick = { navController.navigate(NavRoutes.CHANGE_PASSWORD.route) }
+                        )
+
+                        SettingsDivider()
+
+                        SettingsItem(
+                            icon = "📍",
+                            title = "Location",
+                            subtitle = "Update your location",
+                            onClick = { navController.navigate(NavRoutes.EDIT_LOCATION.route) },
+                            isLast = true
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+
+            // Privacy Section
+            item {
+                Text(
+                    text = "Privacy & Safety",
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+                )
             }
 
             item {
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
-                        .height(50.dp)
-                        .clickable {
-                            navController.navigate(NavRoutes.EDIT_PROFILE.route)
-                        }.padding(start = 15.dp)) {
-                    Text(
-                        text = "Edit profile",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterStart)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    SettingsItem(
+                        icon = "🚫",
+                        title = "Blocked Users",
+                        subtitle = "Manage blocked accounts",
+                        onClick = { navController.navigate(NavRoutes.BLOCKED.route) },
+                        isLast = true
                     )
                 }
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+
+            // Account Section
+            item {
+                Text(
+                    text = "Account",
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+                )
             }
 
             item {
-                Spacer(modifier = Modifier.size(15.dp))
-            }
-
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
-                        .height(50.dp)
-                        .clickable {
-                            navController.navigate(NavRoutes.CHANGE_PASSWORD.route)
-                        }.padding(start = 15.dp)) {
-                    Text(
-                        text = "Password",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterStart)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    SettingsItem(
+                        icon = "🚪",
+                        title = "Logout",
+                        subtitle = "Sign out of your account",
+                        onClick = { showDialogLogout = true },
+                        isLast = true
                     )
                 }
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
+            // Danger Zone
             item {
-                Spacer(modifier = Modifier.size(15.dp))
-            }
-
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
-                        .height(50.dp)
-                        .clickable {
-                            navController.navigate(NavRoutes.EDIT_LOCATION.route)
-                        }.padding(start = 15.dp)) {
-                    Text(
-                        text = "Location",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterStart)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF5F5)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    SettingsItem(
+                        icon = "⚠️",
+                        title = "Delete Account",
+                        subtitle = "Permanently delete your account",
+                        onClick = { showDialogDeleteAccount = true },
+                        textColor = Color(0xFFE53E3E),
+                        isLast = true
                     )
                 }
+                Spacer(modifier = Modifier.height(40.dp))
             }
-
-            item {
-                Spacer(modifier = Modifier.size(15.dp))
-            }
-
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
-                        .height(50.dp)
-                        .clickable {
-                            navController.navigate(NavRoutes.BLOCKED.route)
-                        }.padding(start = 15.dp)) {
-                    Text(
-                        text = "Blocked",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    )
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.size(15.dp))
-            }
-
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .background(color = Color.LightGray, shape = RoundedCornerShape(15.dp))
-                        .height(50.dp)
-                        .clickable {
-                            //viewModel.logout()
-                            showDialogLogout = true
-                        }.padding(start = 15.dp)) {
-                    Text(
-                        text = "Logout",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    )
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(35.dp))
-            }
-
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .background(color = Color.Red, shape = RoundedCornerShape(15.dp))
-                        .height(50.dp)
-                        .clickable {
-                            showDialogDeleteAccount = true
-                            //viewModel.deleteAccount()
-                        }.padding(start = 15.dp)) {
-                    Text(
-                        text = "Delete account",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    )
-                }
-            }
-
         }
     }
+}
 
+@Composable
+private fun SettingsItem(
+    icon: String,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    textColor: Color = Color.Black,
+    isLast: Boolean = false
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Icon Container
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(
+                    color = if (textColor == Color.Black)
+                        Color(0xFFDFC46B).copy(alpha = 0.1f)
+                    else
+                        Color(0xFFFFEBEE),
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = icon,
+                fontSize = 18.sp
+            )
+        }
 
+        Spacer(modifier = Modifier.width(16.dp))
+
+        // Content
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = title,
+                color = textColor,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = subtitle,
+                color = if (textColor == Color.Black) Color.Gray else textColor.copy(alpha = 0.7f),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal
+            )
+        }
+
+        // Arrow Icon
+        Text(
+            text = "›",
+            color = Color.Gray,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Light
+        )
+    }
+}
+
+@Composable
+private fun SettingsDivider() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .padding(horizontal = 16.dp)
+            .background(Color.Gray.copy(alpha = 0.1f))
+    )
 }
