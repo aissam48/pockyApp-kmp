@@ -592,6 +592,7 @@ private fun StoryActions(
 
         // Delete button (only for own stories)
         if (myID == story.ownerID) {
+
             Box(
                 modifier = Modifier
                     .size(44.dp)

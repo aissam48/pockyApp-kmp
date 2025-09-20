@@ -19,12 +19,15 @@ sealed class FriendRequestsUiState {
 }
 
 sealed class AcceptRequestsUiState {
+    data object IDel : AcceptRequestsUiState()
+
     data object Loading : AcceptRequestsUiState()
     data class Success(val data: String = "", val message: String = "") : AcceptRequestsUiState()
     data class Error(val error: ErrorModel) : AcceptRequestsUiState()
 }
 
 sealed class RejectRequestsUiState {
+    data object IDel : RejectRequestsUiState()
     data object Loading : RejectRequestsUiState()
     data class Success(val data: String = "", val message: String = "") : RejectRequestsUiState()
     data class Error(val error: ErrorModel) : RejectRequestsUiState()
@@ -37,11 +40,11 @@ class FriendRequestsViewModel(val sdk: ApiManager) : ViewModel() {
     val friendRequestsState: StateFlow<FriendRequestsUiState> = _friendRequestsState.asStateFlow()
 
     private val _acceptRequestState =
-        MutableStateFlow<AcceptRequestsUiState>(AcceptRequestsUiState.Loading)
+        MutableStateFlow<AcceptRequestsUiState>(AcceptRequestsUiState.IDel)
     val acceptRequestState: StateFlow<AcceptRequestsUiState> = _acceptRequestState.asStateFlow()
 
     private val _rejectRequestState =
-        MutableStateFlow<RejectRequestsUiState>(RejectRequestsUiState.Loading)
+        MutableStateFlow<RejectRequestsUiState>(RejectRequestsUiState.IDel)
     val rejectRequestState: StateFlow<RejectRequestsUiState> = _rejectRequestState.asStateFlow()
 
     fun getFriendRequests() {

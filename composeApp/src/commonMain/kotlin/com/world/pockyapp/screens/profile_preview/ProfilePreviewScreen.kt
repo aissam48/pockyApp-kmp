@@ -28,6 +28,9 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.material3.Card
@@ -105,8 +108,14 @@ fun ProfilePreviewScreen(
     val sendChatRequestState by viewModel.sendChatRequestState.collectAsState()
     val responseChatRequestState by viewModel.responseChatRequestState.collectAsState()
 
+    val acceptRequestState by viewModel.acceptRequestState.collectAsState()
+    val rejectRequestState by viewModel.rejectRequestState.collectAsState()
+
     val followState by viewModel.followState.collectAsState()
     val unFollowState by viewModel.unFollowState.collectAsState()
+    val cancelFriendRequestState by viewModel.cancelFriendRequestState.collectAsState()
+
+    val momentsState by viewModel.momentsState.collectAsState()
 
     val myProfile = remember { mutableStateOf(ProfileModel()) }
     val profile = remember { mutableStateOf(ProfileModel()) }
@@ -116,6 +125,7 @@ fun ProfilePreviewScreen(
         viewModel.getMyProfile()
         viewModel.getProfile(id = id)
         viewModel.getPosts(id = id)
+        viewModel.getMoments(id = id)
     }
 
     LaunchedEffect(
@@ -124,7 +134,10 @@ fun ProfilePreviewScreen(
         unFriendState,
         sendChatRequestState,
         followState,
-        unFollowState
+        unFollowState,
+        acceptRequestState,
+        rejectRequestState,
+        cancelFriendRequestState
     ) {
         viewModel.getProfile(id = id)
     }
@@ -155,6 +168,7 @@ fun ProfilePreviewScreen(
         is UnBlockState.Success -> {
             viewModel.getProfile(id = id)
             viewModel.getPosts(id = id)
+            viewModel.getMoments(id = id)
         }
 
         is UnBlockState.Error -> {}
@@ -275,257 +289,12 @@ fun ProfilePreviewScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color(0xFFFFFFFF))
-                    .padding(horizontal = 16.dp)
             ) {
-                //profile.value.friend = "PENDING_RECEIVED"
-                item {
-                    Column {
-                        /*                       // Modern Chat Request Header
-                                               if (profile.value.chatRequest != null && profile.value.chatRequest?.status == "NOT_YET") {
-                                                   Box(
-                                                       modifier = Modifier
-                                                           .fillMaxWidth()
-                                                           .background(
-                                                               brush = Brush.horizontalGradient(
-                                                                   colors = listOf(
-                                                                       Color(0xFFDFC46B),
-                                                                       Color(0xFFDFC46B),
-                                                                       Color(0xFFFFFFFF),
-                                                                   )
-                                                               )
-                                                           )
-                                                           .padding(16.dp)
-                                                   ) {
-                                                       if (myProfile.value.id == profile.value.chatRequest?.senderID) {
-                                                           Column(
-                                                               modifier = Modifier.fillMaxWidth(),
-                                                               horizontalAlignment = Alignment.CenterHorizontally
-                                                           ) {
-                                                               Text(
-                                                                   "Chat Request Sent",
-                                                                   color = Color.White,
-                                                                   fontSize = 18.sp,
-                                                                   fontWeight = FontWeight.Bold
-                                                               )
-                                                               Text(
-                                                                   "Waiting for response...",
-                                                                   color = Color.White.copy(alpha = 0.8f),
-                                                                   fontSize = 14.sp
-                                                               )
-                                                           }
-                                                       } else if (myProfile.value.id.isNotEmpty() && myProfile.value.id != profile.value.chatRequest?.senderID) {
-                                                           Column(
-                                                               modifier = Modifier.fillMaxWidth(),
-                                                               horizontalAlignment = Alignment.CenterHorizontally
-                                                           ) {
-                                                               Text(
-                                                                   "Incoming Chat Request",
-                                                                   color = Color.White,
-                                                                   fontSize = 16.sp,
-                                                                   fontWeight = FontWeight.Bold
-                                                               )
-                                                               Spacer(modifier = Modifier.height(12.dp))
-                                                               Row(
-                                                                   modifier = Modifier.fillMaxWidth(),
-                                                                   horizontalArrangement = Arrangement.SpaceEvenly
-                                                               ) {
-                                                                   // Accept Button
-                                                                   Box(
-                                                                       modifier = Modifier
-                                                                           .background(
-                                                                               color = Color(0xFF4CAF50),
-                                                                               shape = RoundedCornerShape(25.dp)
-                                                                           )
-                                                                           .height(45.dp)
-                                                                           .width(120.dp)
-                                                                           .clickable {
-                                                                               viewModel.responseRequestChat(
-                                                                                   profile.value.chatRequest?.id ?: "",
-                                                                                   true,
-                                                                                   profile.value.chatRequest?.senderID ?: ""
-                                                                               )
-                                                                           }
-                                                                           .shadow(4.dp, RoundedCornerShape(25.dp)),
-                                                                       contentAlignment = Alignment.Center
-                                                                   ) {
-                                                                       Text(
-                                                                           text = "Accept",
-                                                                           color = Color.White,
-                                                                           fontSize = 14.sp,
-                                                                           fontWeight = FontWeight.Bold
-                                                                       )
-                                                                   }
-
-                                                                   // Reject Button
-                                                                   Box(
-                                                                       modifier = Modifier
-                                                                           .background(
-                                                                               color = Color(0xFFF44336),
-                                                                               shape = RoundedCornerShape(25.dp)
-                                                                           )
-                                                                           .height(45.dp)
-                                                                           .width(120.dp)
-                                                                           .clickable {
-                                                                               viewModel.responseRequestChat(
-                                                                                   profile.value.chatRequest?.id ?: "",
-                                                                                   false,
-                                                                                   profile.value.chatRequest?.senderID ?: ""
-                                                                               )
-                                                                           }
-                                                                           .shadow(4.dp, RoundedCornerShape(25.dp)),
-                                                                       contentAlignment = Alignment.Center
-                                                                   ) {
-                                                                       Text(
-                                                                           text = "Decline",
-                                                                           color = Color.White,
-                                                                           fontSize = 14.sp,
-                                                                           fontWeight = FontWeight.Bold
-                                                                       )
-                                                                   }
-                                                               }
-                                                           }
-                                                       }
-                                                   }
-                                               }
-                       */
-                        if (profile.value.friend == "PENDING_RECEIVED") {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(
-                                        brush = Brush.horizontalGradient(
-                                            colors = listOf(
-
-                                                Color(0xFFDFC46B),
-                                                Color(0xFFDFC46B),
-                                                Color(0xFFFFFFFF),
-                                            )
-                                        )
-                                    )
-                                    .padding(16.dp)
-                            )
-                            {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        "👥 Friend Request",
-                                        color = Color.Black,
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Spacer(modifier = Modifier.height(10.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceEvenly
-                                    ) {
-                                        // Accept Friend Button
-                                        Box(
-                                            modifier = Modifier
-                                                .background(
-                                                    color = Color(0xFF4CAF50),
-                                                    shape = RoundedCornerShape(20.dp)
-                                                )
-                                                .height(36.dp)
-                                                .width(100.dp)
-                                                .clickable {
-                                                    //viewModel.acceptFriendRequest(profile.value.id)
-                                                }
-                                                .shadow(3.dp, RoundedCornerShape(20.dp)),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            if (beFriendState is FriendState.Loading) {
-                                                CircularProgressIndicator(
-                                                    modifier = Modifier.size(16.dp),
-                                                    color = Color.White,
-                                                    strokeWidth = 2.dp
-                                                )
-                                            } else {
-                                                Text(
-                                                    text = "Accept",
-                                                    color = Color.White,
-                                                    fontSize = 12.sp,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            }
-                                        }
-
-                                        // Reject Friend Button
-                                        Box(
-                                            modifier = Modifier
-                                                .background(
-                                                    color = Color(0xFFF44336),
-                                                    shape = RoundedCornerShape(20.dp)
-                                                )
-                                                .height(36.dp)
-                                                .width(100.dp)
-                                                .clickable {
-                                                    //viewModel.rejectFriendRequest(profile.value.id)
-                                                }
-                                                .shadow(3.dp, RoundedCornerShape(20.dp)),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            if (unFriendState is FriendState.Loading) {
-                                                CircularProgressIndicator(
-                                                    modifier = Modifier.size(16.dp),
-                                                    color = Color.White,
-                                                    strokeWidth = 2.dp
-                                                )
-                                            } else {
-                                                Text(
-                                                    text = "Decline",
-                                                    color = Color.White,
-                                                    fontSize = 12.sp,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        } /*else if (profile.value.friend == "NOT_YET") {
-                            // Friend Request Sent TopBar
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(
-                                        brush = Brush.horizontalGradient(
-                                            colors = listOf(
-                                                Color(0xFFFFF176),
-                                                Color(0xFFFFF176),
-                                                Color(0xFFFFFFFF),
-                                            )
-                                        )
-                                    )
-                                    .padding(16.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        "👥 Friend Request Sent",
-                                        color = Color.White,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        "Waiting for response...",
-                                        color = Color.White.copy(alpha = 0.8f),
-                                        fontSize = 12.sp
-                                    )
-                                }
-                            }
-                        }*/
-
-                    }
-                }
-
+                // back button and more button
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -551,6 +320,312 @@ fun ProfilePreviewScreen(
 
                     }
                     Spacer(modifier = Modifier.height(10.dp))
+                }
+
+                item {
+                    Column {
+                        if (profile.value.friendRequest != null
+                            && profile.value.friendRequest?.senderID != myProfile.value.id && profile.value.friendRequest?.status == "NOT_YET"
+                        ) {
+
+                            Card(
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(all = 16.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                )
+                                {
+
+                                    Box(
+                                        modifier = Modifier.size(70.dp),
+                                    )
+                                    {
+                                        AsyncImage(
+                                            model = getUrl(myProfile.value.photoID),
+                                            contentDescription = "",
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .size(50.dp)
+                                                .clip(CircleShape)
+                                                .align(Alignment.CenterEnd),
+                                            placeholder = painterResource(Res.drawable.ic_placeholder),
+                                            error = painterResource(Res.drawable.ic_placeholder),
+                                        )
+
+                                        AsyncImage(
+                                            model = getUrl(profile.value.photoID),
+                                            contentDescription = "",
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .clip(CircleShape)
+                                                .size(50.dp)
+                                                .align(Alignment.CenterStart),
+                                            placeholder = painterResource(Res.drawable.ic_placeholder),
+                                            error = painterResource(Res.drawable.ic_placeholder),
+                                        )
+                                    }
+
+                                    Text(
+                                        "👥 Friend Request",
+                                        color = Color.Black,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(15.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceEvenly
+                                    )
+                                    {
+                                        // Reject Button
+                                        Box(
+                                            modifier = Modifier
+                                                .background(
+                                                    Color(0xFFFF0000).copy(alpha = 0.2f),
+                                                    RoundedCornerShape(50)
+                                                ) // light red background
+                                                .height(40.dp)
+                                                .width(120.dp)
+                                                .clickable {
+                                                    viewModel.rejectFriendRequest(profile.value.id)
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (unFriendState is FriendState.Loading) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(16.dp),
+                                                    color = Color.Red,
+                                                    strokeWidth = 2.dp
+                                                )
+                                            } else {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Delete,
+                                                        contentDescription = "Reject",
+                                                        tint = Color.Red,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Text(
+                                                        text = "Delete",
+                                                        color = Color.Red,
+                                                        fontSize = 14.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        // Accept Button
+                                        Box(
+                                            modifier = Modifier
+                                                .background(
+                                                    Color(0xFF008000).copy(alpha = 0.2f),
+                                                    RoundedCornerShape(50)
+                                                ) // light green background
+                                                .height(40.dp)
+                                                .width(120.dp)
+                                                .clickable {
+                                                    viewModel.acceptFriendRequest(profile.value.id)
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (beFriendState is FriendState.Loading) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(16.dp),
+                                                    color = Color(0xFF4CAF50),
+                                                    strokeWidth = 2.dp
+                                                )
+                                            } else {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Check,
+                                                        contentDescription = "Accept",
+                                                        tint = Color(0xFF4CAF50),
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Text(
+                                                        text = "Accept",
+                                                        color = Color(0xFF4CAF50),
+                                                        fontSize = 14.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(15.dp))
+
+                                }
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    Column {
+                        if (profile.value.chatRequest != null
+                            && profile.value.chatRequest?.senderID != myProfile.value.id && profile.value.chatRequest?.status == "NOT_YET"
+                        ) {
+
+                            Card(
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(all = 16.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                )
+                                {
+
+                                    Box(
+                                        modifier = Modifier.size(70.dp),
+                                    )
+                                    {
+                                        AsyncImage(
+                                            model = getUrl(myProfile.value.photoID),
+                                            contentDescription = "",
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .size(50.dp)
+                                                .clip(CircleShape)
+                                                .align(Alignment.CenterEnd),
+                                            placeholder = painterResource(Res.drawable.ic_placeholder),
+                                            error = painterResource(Res.drawable.ic_placeholder),
+                                        )
+
+                                        AsyncImage(
+                                            model = getUrl(profile.value.photoID),
+                                            contentDescription = "",
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .clip(CircleShape)
+                                                .size(50.dp)
+                                                .align(Alignment.CenterStart),
+                                            placeholder = painterResource(Res.drawable.ic_placeholder),
+                                            error = painterResource(Res.drawable.ic_placeholder),
+                                        )
+                                    }
+
+                                    Text(
+                                        "\uD83D\uDCAC Chat Request",
+                                        color = Color.Black,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(15.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceEvenly
+                                    )
+                                    {
+                                        // Reject Button
+                                        Box(
+                                            modifier = Modifier
+                                                .background(
+                                                    Color(0xFFFF0000).copy(alpha = 0.2f),
+                                                    RoundedCornerShape(50)
+                                                ) // light red background
+                                                .height(40.dp)
+                                                .width(120.dp)
+                                                .clickable {
+                                                    viewModel.rejectFriendRequest(profile.value.id)
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (unFriendState is FriendState.Loading) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(16.dp),
+                                                    color = Color.Red,
+                                                    strokeWidth = 2.dp
+                                                )
+                                            } else {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Delete,
+                                                        contentDescription = "Reject",
+                                                        tint = Color.Red,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Text(
+                                                        text = "Delete",
+                                                        color = Color.Red,
+                                                        fontSize = 14.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        // Accept Button
+                                        Box(
+                                            modifier = Modifier
+                                                .background(
+                                                    Color(0xFF008000).copy(alpha = 0.2f),
+                                                    RoundedCornerShape(50)
+                                                ) // light green background
+                                                .height(40.dp)
+                                                .width(120.dp)
+                                                .clickable {
+                                                    viewModel.acceptFriendRequest(profile.value.id)
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (beFriendState is FriendState.Loading) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(16.dp),
+                                                    color = Color(0xFF4CAF50),
+                                                    strokeWidth = 2.dp
+                                                )
+                                            } else {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Check,
+                                                        contentDescription = "Accept",
+                                                        tint = Color(0xFF4CAF50),
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Text(
+                                                        text = "Accept",
+                                                        color = Color(0xFF4CAF50),
+                                                        fontSize = 14.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(15.dp))
+
+                                }
+                            }
+                        }
+                    }
                 }
 
                 when (val state = profileState) {
@@ -579,7 +654,8 @@ fun ProfilePreviewScreen(
                                     Card(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .shadow(0.dp, RoundedCornerShape(24.dp)),
+                                            .shadow(0.dp, RoundedCornerShape(24.dp))
+                                            .padding(horizontal = 16.dp),
                                         shape = RoundedCornerShape(24.dp),
                                         colors = CardDefaults.cardColors(containerColor = Color.White),
                                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -694,7 +770,8 @@ fun ProfilePreviewScreen(
 
                                 item {
                                     Card(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier.fillMaxWidth()
+                                            .padding(horizontal = 16.dp),
                                         shape = RoundedCornerShape(16.dp),
                                         colors = CardDefaults.cardColors(containerColor = Color.White),
                                         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
@@ -805,11 +882,12 @@ fun ProfilePreviewScreen(
                                 // Message Button
                                 item {
                                     Card(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier.fillMaxWidth()
+                                            .padding(horizontal = 16.dp),
                                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                                         colors = CardDefaults.cardColors(
                                             containerColor = Color(
-                                                0xFFF5F5F5
+                                                0xFFFFFFFF
                                             )
                                         ),
                                     ) {
@@ -817,31 +895,85 @@ fun ProfilePreviewScreen(
                                             Box(
                                                 modifier = Modifier.weight(1f).height(40.dp)
                                                     .clickable {
-                                                        if (profile.value.friend == "NO") {
-                                                            viewModel.beFriend(profile.value.id)
-                                                        } else if (profile.value.friend == "YES") {
-                                                            viewModel.removeFriend(profile.value.id)
-                                                        }
-                                                    }.background(
-                                                        Color(
-                                                            when (profile.value.friend) {
-                                                                "NO" -> 0xFF000000
-                                                                "YES" -> 0xFFDFC46B
-                                                                else -> 0xFF808080
+                                                        if (profile.value.friendRequest != null) {
+                                                            when (profile.value.friendRequest?.status) {
+                                                                "ACCEPTED" -> {
+                                                                    viewModel.removeFriend(profile.value.id)
+                                                                }
+
+                                                                "NOT_YET" -> {
+                                                                    viewModel.cancelFriendRequest(
+                                                                        profile.value.friendRequest?.id
+                                                                            ?: ""
+                                                                    )
+                                                                }
+
+                                                                "REJECTED" -> {
+                                                                    viewModel.beFriend(profile.value.id)
+                                                                }
+
                                                             }
-                                                        ),
+                                                        } else {
+                                                            viewModel.beFriend(profile.value.id)
+
+                                                        }
+
+                                                    }.background(
+                                                        color =
+                                                            if (profile.value.friendRequest != null) {
+                                                                when (profile.value.friendRequest?.status) {
+                                                                    "ACCEPTED" -> {
+                                                                        Color(0xFFDFC46B)
+                                                                    }
+
+                                                                    "NOT_YET" -> {
+                                                                        Color(0xFF808080)
+                                                                    }
+
+                                                                    "REJECTED" -> {
+                                                                        Color(0xFF000000)
+                                                                    }
+
+                                                                    else -> {
+                                                                        Color(0xFF000000)
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                Color(0xFF000000)
+
+                                                            },
                                                         shape = RoundedCornerShape(10.dp)
                                                     ),
-                                            ) {
+                                            )
+                                            {
+
 
                                                 Text(
                                                     textAlign = TextAlign.Center,
                                                     modifier = Modifier.align(Alignment.Center),
-                                                    text = when (profile.value.friend) {
-                                                        "NO" -> "Add Friend"
-                                                        "YES" -> "Remove Friend"
-                                                        else -> "Friending requested"
-                                                    },
+                                                    text =
+                                                        if (profile.value.friendRequest != null) {
+                                                            when (profile.value.friendRequest?.status) {
+                                                                "ACCEPTED" -> {
+                                                                    "Remove Friend"
+                                                                }
+
+                                                                "NOT_YET" -> {
+                                                                    "Friending requested"
+                                                                }
+
+                                                                "REJECTED" -> {
+                                                                    "Add Friend"
+                                                                }
+
+                                                                else -> {
+                                                                    "Add Friend"
+                                                                }
+                                                            }
+                                                        } else {
+                                                            "Add Friend"
+
+                                                        },
                                                     color = Color.White,
                                                     fontSize = 12.sp
                                                 )
@@ -853,48 +985,91 @@ fun ProfilePreviewScreen(
                                             Box(
                                                 modifier = Modifier.weight(1f).height(40.dp)
                                                     .clickable {
-                                                        when (true) {
-                                                            (profile.value.chatRequest == null) -> {
-                                                                scope.launch {
+                                                        if (profile.value.chatRequest != null) {
+                                                            when (profile.value.chatRequest?.status) {
+                                                                "ACCEPTED" -> {
+                                                                    navController.navigate(
+                                                                        NavRoutes.CHAT.route + "/${profile.value.conversationID}" + "/${profile.value.id}" + "/${profile.value.chatRequest?.id}"
+                                                                    )
+                                                                }
+
+                                                                "NOT_YET" -> {
+                                                                    viewModel.cancelRequestChat(
+                                                                        profile.value.id
+                                                                    )
+                                                                }
+
+                                                                "REJECTED" -> {
                                                                     viewModel.sendRequestChat(
                                                                         profile.value.id
                                                                     )
                                                                 }
                                                             }
-
-                                                            (profile.value.chatRequest?.status == "ACCEPTED") -> {
-                                                                navController.navigate(
-                                                                    NavRoutes.CHAT.route + "/${profile.value.conversationID}" + "/${profile.value.id}" + "/${profile.value.chatRequest?.id}"
-                                                                )
-                                                            }
-
-                                                            else -> {}
+                                                        } else {
+                                                            viewModel.sendRequestChat(
+                                                                profile.value.id
+                                                            )
                                                         }
+
                                                     }.background(
-                                                        Color(
-                                                            when (true) {
-                                                                (profile.value.chatRequest == null || profile.value.chatRequest?.status == "REJECTED") -> 0xFF000000
-                                                                (profile.value.chatRequest?.status == "ACCEPTED") -> 0xFFDFC46B
-                                                                else -> 0xFF808080
-                                                            }
-                                                        ),
+                                                        color =
+                                                            if (profile.value.chatRequest != null) {
+                                                                when (profile.value.chatRequest?.status) {
+                                                                    "ACCEPTED" -> {
+                                                                        Color(0xFFDFC46B)
+                                                                    }
+
+                                                                    "NOT_YET" -> {
+                                                                        Color(0xFF808080)
+                                                                    }
+
+                                                                    "REJECTED" -> {
+                                                                        Color(0xFF000000)
+                                                                    }
+
+                                                                    else -> {
+                                                                        Color(0xFF000000)
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                Color(0xFF000000)
+
+                                                            },
                                                         shape = RoundedCornerShape(10.dp)
-                                                    )
-                                            ) {
+                                                    ),
+                                            )
+                                            {
+
 
                                                 Text(
                                                     textAlign = TextAlign.Center,
                                                     modifier = Modifier.align(Alignment.Center),
-                                                    text = when (true) {
-                                                        (profile.value.chatRequest == null) -> "Request messaging"
-                                                        (profile.value.chatRequest?.status == "ACCEPTED") -> "Message"
-                                                        (profile.value.chatRequest?.status == "NOT_YET") -> "Messaging requested"
-                                                        else -> "Request Messaging"
-                                                    },
+                                                    text =
+                                                        if (profile.value.chatRequest != null) {
+                                                            when (profile.value.chatRequest?.status) {
+                                                                "ACCEPTED" -> {
+                                                                    "Message"
+                                                                }
+
+                                                                "NOT_YET" -> {
+                                                                    "Messaging requested"
+                                                                }
+
+                                                                "REJECTED" -> {
+                                                                    "Request messaging"
+                                                                }
+
+                                                                else -> {
+                                                                    "Request messaging"
+                                                                }
+                                                            }
+                                                        } else {
+                                                            "Request messaging"
+
+                                                        },
                                                     color = Color.White,
                                                     fontSize = 12.sp
                                                 )
-
                                             }
 
                                             Spacer(modifier = Modifier.width(10.dp))
@@ -937,157 +1112,23 @@ fun ProfilePreviewScreen(
                                     }
                                 }
 
-                                item {
-                                    Spacer(modifier = Modifier.height(10.dp))
-
-                                    Text(
-                                        text = "Moments",
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.sp
-                                    )
-                                    Spacer(modifier = Modifier.height(10.dp))
-
-                                    LazyRow(modifier = Modifier.fillMaxWidth()) {
-
-                                        val groupedByDay: Map<LocalDate, List<MomentModel>> =
-                                            state.profile.album
-                                                .sortedByDescending { it.createdAt }
-                                                .groupBy {
-                                                    val instant = Instant.parse(
-                                                        it.createdAt.replace(
-                                                            " ",
-                                                            "T"
-                                                        ) + ".120Z"
-                                                    )
-                                                    // Convert to local date
-                                                    instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-
-
-                                                }
-
-                                        items(groupedByDay.values.toList()) { coupleOfMoments ->
-
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                when (coupleOfMoments.size) {
-                                                    1 ->
-                                                        Box(modifier = Modifier.clickable {
-                                                            momentsViewModel.moments =
-                                                                listOf(coupleOfMoments)
-                                                            momentsViewModel.myID = state.profile.id
-                                                            momentsViewModel.selectedIndex = 0
-                                                            navController.navigate(NavRoutes.MOMENTS.route)
-
-                                                        }) {
-                                                            CardMomentProfile(
-                                                                myID = state.profile.id,
-                                                                moment = coupleOfMoments[0],
-                                                                navController = navController,
-                                                                rotation = 0f
-                                                            )
-                                                        }
-
-                                                    2 -> {
-                                                        Box(modifier = Modifier.clickable {
-                                                            momentsViewModel.moments =
-                                                                listOf(coupleOfMoments)
-                                                            momentsViewModel.myID = state.profile.id
-                                                            momentsViewModel.selectedIndex = 0
-                                                            navController.navigate(NavRoutes.MOMENTS.route)
-
-                                                        }) {
-                                                            CardMomentProfile(
-                                                                myID = state.profile.id,
-                                                                moment = coupleOfMoments[0],
-                                                                navController = navController,
-                                                                rotation = -5f
-                                                            )
-                                                            CardMomentProfile(
-                                                                myID = state.profile.id,
-                                                                moment = coupleOfMoments[1],
-                                                                navController = navController,
-                                                                rotation = 5f
-                                                            )
-
-                                                        }
-                                                    }
-
-                                                    else -> {
-                                                        Box(modifier = Modifier.clickable {
-                                                            momentsViewModel.moments =
-                                                                listOf(coupleOfMoments)
-                                                            momentsViewModel.myID = state.profile.id
-                                                            momentsViewModel.selectedIndex = 0
-                                                            navController.navigate(NavRoutes.MOMENTS.route)
-
-                                                        }) {
-                                                            CardMomentProfile(
-                                                                myID = state.profile.id,
-                                                                moment = coupleOfMoments[0],
-                                                                navController = navController,
-                                                                rotation = 0f
-                                                            )
-                                                            CardMomentProfile(
-                                                                myID = state.profile.id,
-                                                                moment = coupleOfMoments[1],
-                                                                navController = navController,
-                                                                rotation = 5f
-                                                            )
-
-
-                                                            CardMomentProfile(
-                                                                myID = state.profile.id,
-                                                                moment = coupleOfMoments[2],
-                                                                navController = navController,
-                                                                rotation = -5f
-                                                            )
-
-                                                        }
-                                                    }
-                                                }
-
-                                                Spacer(modifier = Modifier.height(8.dp))
-
-                                                val instant = Instant.parse(
-                                                    coupleOfMoments.last().createdAt.replace(
-                                                        " ",
-                                                        "T"
-                                                    ) + ".120Z"
-                                                )
-                                                // Convert to local date
-                                                val date =
-                                                    instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-                                                Text(
-                                                    text = "${date.dayOfMonth}/${date.monthNumber}/${date.year}",
-                                                    color = Color.Black,
-                                                    fontSize = 10.sp
-                                                )
-                                            }
-
-
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                        }
-                                    }
-
-                                }
-
                             }
 
                             "BLOCKED" -> {
                                 item {
                                     Card(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier.fillMaxWidth()
+                                            .padding(horizontal = 16.dp),
                                         shape = RoundedCornerShape(16.dp),
                                         colors = CardDefaults.cardColors(containerColor = Color.White),
                                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                                     ) {
                                         Column(
-                                            modifier = Modifier.padding(32.dp),
+                                            modifier = Modifier.padding(32.dp).fillMaxWidth(),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
                                             Text(
-                                                text = "PockyApp User",
+                                                text = "NearVibe User",
                                                 color = Color.Black,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 20.sp
@@ -1107,19 +1148,22 @@ fun ProfilePreviewScreen(
                             "BLOCKER" -> {
                                 item {
                                     Card(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier.fillMaxWidth()
+                                            .padding(horizontal = 16.dp),
                                         shape = RoundedCornerShape(16.dp),
                                         colors = CardDefaults.cardColors(containerColor = Color.White),
-                                    ) {
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                                    )
+                                    {
                                         Column(
-                                            modifier = Modifier.padding(32.dp),
+                                            modifier = Modifier.padding(32.dp).fillMaxWidth(),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
                                             Text(
                                                 text = "${profile.value.firstName} ${profile.value.lastName}",
                                                 color = Color.Black,
                                                 fontWeight = FontWeight.Bold,
-                                                fontSize = 20.sp,
+                                                fontSize = 16.sp,
                                                 textAlign = TextAlign.Center
                                             )
 
@@ -1127,8 +1171,8 @@ fun ProfilePreviewScreen(
 
                                             Box(
                                                 modifier = Modifier
-                                                    .height(48.dp)
-                                                    .width(140.dp)
+                                                    .height(40.dp)
+                                                    .width(90.dp)
                                                     .background(
                                                         color = Color(0xFFDFC46B),
                                                         shape = RoundedCornerShape(24.dp)
@@ -1137,8 +1181,7 @@ fun ProfilePreviewScreen(
                                                         if (unBlockState !is UnBlockState.Loading) {
                                                             viewModel.unBlock(profile.value.id)
                                                         }
-                                                    }
-                                                    .shadow(4.dp, RoundedCornerShape(24.dp)),
+                                                    },
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 if (unBlockState is UnBlockState.Loading) {
@@ -1166,7 +1209,7 @@ fun ProfilePreviewScreen(
                     is ProfilePreviewUiState.Error -> {
                         item {
                             Card(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -1190,6 +1233,264 @@ fun ProfilePreviewScreen(
                                 }
                             }
                         }
+                    }
+                }
+
+
+                when (val state = momentsState) {
+                    is MomentsState.Loading -> {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    CircularProgressIndicator(
+                                        color = Color(0xFF667eea),
+                                        strokeWidth = 3.dp
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "Loading moments...",
+                                        color = Color.Gray,
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    is MomentsState.Success -> {
+
+                        item {
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Text(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                text = "Moments",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            if (state.moments.isNotEmpty()) {
+                                LazyRow(
+                                    modifier = Modifier.fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                )
+                                {
+
+                                    val groupedByDay: Map<LocalDate, List<MomentModel>> =
+                                        state.moments
+                                            .sortedByDescending { it.createdAt }
+                                            .groupBy {
+                                                val instant = Instant.parse(
+                                                    it.createdAt.replace(
+                                                        " ",
+                                                        "T"
+                                                    ) + ".120Z"
+                                                )
+                                                // Convert to local date
+                                                instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+
+                                            }
+
+                                    items(groupedByDay.values.toList()) { coupleOfMoments ->
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            when (coupleOfMoments.size) {
+                                                1 ->
+                                                    Box(modifier = Modifier.clickable {
+                                                        momentsViewModel.moments =
+                                                            listOf(coupleOfMoments)
+                                                        momentsViewModel.myID = myProfile.value.id
+                                                        momentsViewModel.selectedIndex = 0
+                                                        navController.navigate(NavRoutes.MOMENTS.route)
+
+                                                    }) {
+                                                        CardMomentProfile(
+                                                            myID = state.moments[0].profile.id,
+                                                            moment = coupleOfMoments[0],
+                                                            navController = navController,
+                                                            rotation = 0f
+                                                        )
+                                                    }
+
+                                                2 -> {
+                                                    Box(modifier = Modifier.clickable {
+                                                        momentsViewModel.moments =
+                                                            listOf(coupleOfMoments)
+                                                        momentsViewModel.myID = myProfile.value.id
+                                                        momentsViewModel.selectedIndex = 0
+                                                        navController.navigate(NavRoutes.MOMENTS.route)
+
+                                                    }) {
+                                                        CardMomentProfile(
+                                                            myID = state.moments[0].profile.id,
+                                                            moment = coupleOfMoments[0],
+                                                            navController = navController,
+                                                            rotation = -5f
+                                                        )
+                                                        CardMomentProfile(
+                                                            myID = state.moments[0].profile.id,
+                                                            moment = coupleOfMoments[1],
+                                                            navController = navController,
+                                                            rotation = 5f
+                                                        )
+
+                                                    }
+                                                }
+
+                                                else -> {
+                                                    Box(modifier = Modifier.clickable {
+                                                        momentsViewModel.moments =
+                                                            listOf(coupleOfMoments)
+                                                        momentsViewModel.myID = myProfile.value.id
+                                                        momentsViewModel.selectedIndex = 0
+                                                        navController.navigate(NavRoutes.MOMENTS.route)
+
+                                                    }) {
+                                                        CardMomentProfile(
+                                                            myID = state.moments[0].profile.id,
+                                                            moment = coupleOfMoments[0],
+                                                            navController = navController,
+                                                            rotation = 0f
+                                                        )
+                                                        CardMomentProfile(
+                                                            myID = state.moments[0].profile.id,
+                                                            moment = coupleOfMoments[1],
+                                                            navController = navController,
+                                                            rotation = 5f
+                                                        )
+
+
+                                                        CardMomentProfile(
+                                                            myID = state.moments[0].profile.id,
+                                                            moment = coupleOfMoments[2],
+                                                            navController = navController,
+                                                            rotation = -5f
+                                                        )
+
+                                                    }
+                                                }
+                                            }
+
+                                            Spacer(modifier = Modifier.height(8.dp))
+
+                                            val instant = Instant.parse(
+                                                coupleOfMoments.last().createdAt.replace(
+                                                    " ",
+                                                    "T"
+                                                ) + ".120Z"
+                                            )
+                                            // Convert to local date
+                                            val date =
+                                                instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
+                                            Text(
+                                                text = "${date.dayOfMonth}/${date.monthNumber}/${date.year}",
+                                                color = Color.Black,
+                                                fontSize = 10.sp
+                                            )
+                                        }
+
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
+                                }
+                            } else {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 20.dp).padding(horizontal = 16.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                                )
+                                {
+                                    Column(
+                                        modifier = Modifier.fillMaxSize().padding(32.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(80.dp)
+                                                .background(
+                                                    Color(0xFF667eea).copy(alpha = 0.1f),
+                                                    CircleShape
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "📸",
+                                                fontSize = 32.sp
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = "No moments yet",
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 18.sp
+                                        )
+                                        Text(
+                                            text = "${profile.value.firstName} hasn't shared any moments",
+                                            color = Color.Gray,
+                                            fontSize = 14.sp,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            }
+
+
+                        }
+
+                    }
+
+                    is MomentsState.Error -> {
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp).padding(horizontal = 16.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(24.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "⚠️",
+                                        fontSize = 32.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        text = "Unable to load posts",
+                                        color = Color(0xFFE65100),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp
+                                    )
+                                    Text(
+                                        text = "Please try again later",
+                                        color = Color(0xFFE65100),
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    MomentsState.Idle -> {
+
                     }
                 }
 
@@ -1226,6 +1527,7 @@ fun ProfilePreviewScreen(
                             Spacer(modifier = Modifier.height(20.dp))
 
                             Text(
+                                modifier = Modifier.padding(horizontal = 16.dp),
                                 text = "Posts",
                                 color = Color.Black,
                                 fontWeight = FontWeight.Bold,
@@ -1237,7 +1539,7 @@ fun ProfilePreviewScreen(
 
                             items(state.posts.chunked(3)) { rowPosts ->
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     rowPosts.forEachIndexed { index, postModel ->
@@ -1271,11 +1573,12 @@ fun ProfilePreviewScreen(
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 20.dp),
+                                        .padding(vertical = 20.dp).padding(horizontal = 16.dp),
                                     shape = RoundedCornerShape(16.dp),
                                     colors = CardDefaults.cardColors(containerColor = Color.White),
                                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                                ) {
+                                )
+                                {
                                     Column(
                                         modifier = Modifier.fillMaxSize().padding(32.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
@@ -1302,7 +1605,7 @@ fun ProfilePreviewScreen(
                                             fontSize = 18.sp
                                         )
                                         Text(
-                                            text = "This user hasn't shared any posts",
+                                            text = "${profile.value.firstName} hasn't shared any posts",
                                             color = Color.Gray,
                                             fontSize = 14.sp,
                                             textAlign = TextAlign.Center
@@ -1318,7 +1621,7 @@ fun ProfilePreviewScreen(
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 16.dp),
+                                    .padding(vertical = 16.dp).padding(horizontal = 16.dp),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -1352,10 +1655,12 @@ fun ProfilePreviewScreen(
                 item {
                     Spacer(modifier = Modifier.height(40.dp))
                 }
+
+
             }
 
             Layout(
-                modifier = Modifier.fillMaxWidth().height(0.dp),
+                modifier = Modifier.fillMaxWidth().height(0.dp).padding(horizontal = 16.dp),
                 measurePolicy = { measurables, constraints ->
                     val width = constraints.maxWidth
                     val height = constraints.maxHeight

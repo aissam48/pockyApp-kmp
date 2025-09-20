@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 sealed class BlockedUiState {
+    data object Idle : BlockedUiState()
     data object Loading : BlockedUiState()
     data class Success(val data: List<ProfileModel> = listOf(), val message: String = "") :
         BlockedUiState()
@@ -19,6 +20,7 @@ sealed class BlockedUiState {
 }
 
 sealed class UnBlockUiState {
+    data object Idle : UnBlockUiState()
     data object Loading : UnBlockUiState()
     data class Success(val data: String = "", val message: String = "") : UnBlockUiState()
     data class Error(val error: ErrorModel) : UnBlockUiState()
@@ -28,11 +30,11 @@ class BlockedViewModel(val sdk: ApiManager) : ViewModel() {
 
     private var isLoadBlocked = false
     private val _blockedState =
-        MutableStateFlow<BlockedUiState>(BlockedUiState.Loading)
+        MutableStateFlow<BlockedUiState>(BlockedUiState.Idle)
     val blockedState: StateFlow<BlockedUiState> = _blockedState.asStateFlow()
 
     private val _unBlockState =
-        MutableStateFlow<UnBlockUiState>(UnBlockUiState.Loading)
+        MutableStateFlow<UnBlockUiState>(UnBlockUiState.Idle)
     val unBlockState: StateFlow<UnBlockUiState> = _unBlockState.asStateFlow()
 
     fun getBlockedUsers() {

@@ -4,8 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.ErrorModel
+import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.friend_request.AcceptRequestsUiState
+import com.world.pockyapp.screens.friend_request.RejectRequestsUiState
 import com.world.pockyapp.screens.profile.ProfileUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +19,7 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
 
     private var isProfileLoadingFirstTime = true
     private var isPostsLoadingFirstTime = true
+    private var isMomentsLoadingFirstTime = true
 
     private val _profileState =
         MutableStateFlow<ProfilePreviewUiState>(ProfilePreviewUiState.Loading)
@@ -35,10 +39,10 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
     private val _myProfileState = MutableStateFlow<MyProfileState>(MyProfileState.Loading)
     val myProfileState: StateFlow<MyProfileState> = _myProfileState.asStateFlow()
 
-    private val _beFriendState = MutableStateFlow<FriendState>(FriendState.Idil)
+    private val _beFriendState = MutableStateFlow<FriendState>(FriendState.Idle)
     val beFriendState: StateFlow<FriendState> = _beFriendState.asStateFlow()
 
-    private val _unFriendState = MutableStateFlow<FriendState>(FriendState.Idil)
+    private val _unFriendState = MutableStateFlow<FriendState>(FriendState.Idle)
     val unFriendState: StateFlow<FriendState> = _unFriendState.asStateFlow()
 
     private val _blockState = MutableStateFlow<BlockState>(BlockState.Idle)
@@ -53,6 +57,22 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
     private val _followState = MutableStateFlow<FollowState>(FollowState.Idle)
     val followState: StateFlow<FollowState> = _followState.asStateFlow()
 
+    private val _acceptRequestState =
+        MutableStateFlow<AcceptRequestsUiState>(AcceptRequestsUiState.IDel)
+    val acceptRequestState: StateFlow<AcceptRequestsUiState> = _acceptRequestState.asStateFlow()
+
+    private val _rejectRequestState =
+        MutableStateFlow<RejectRequestsUiState>(RejectRequestsUiState.IDel)
+    val rejectRequestState: StateFlow<RejectRequestsUiState> = _rejectRequestState.asStateFlow()
+
+
+    private val _cancelFriendRequestState =
+        MutableStateFlow<CancelFriendRequestState>(CancelFriendRequestState.Idle)
+    val cancelFriendRequestState: StateFlow<CancelFriendRequestState> = _cancelFriendRequestState.asStateFlow()
+
+    private val _momentsState =
+        MutableStateFlow<MomentsState>(MomentsState.Idle)
+    val momentsState: StateFlow<MomentsState> = _momentsState.asStateFlow()
 
 
     fun getProfile(id: String) {
@@ -103,6 +123,21 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
             }, { error ->
                 isPostsLoadingFirstTime = true
                 _postsState.value = PostsState.Error(error)
+            })
+        }
+    }
+
+    fun getMoments(id: String) {
+        if (isMomentsLoadingFirstTime){
+            _momentsState.value = MomentsState.Loading
+        }
+        viewModelScope.launch {
+            sdk.getMoments( id,{ success ->
+                isMomentsLoadingFirstTime = false
+                _momentsState.value = MomentsState.Success(success)
+            }, { error ->
+                isMomentsLoadingFirstTime = true
+                _momentsState.value = MomentsState.Error(error)
             })
         }
     }
@@ -188,6 +223,46 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
             })
         }
     }
+
+    fun cancelFriendRequest(id: String) {
+        _cancelFriendRequestState.value = CancelFriendRequestState.Loading
+        viewModelScope.launch {
+            sdk.cancelFriendRequest(id, { success ->
+                _cancelFriendRequestState.value = CancelFriendRequestState.Success(success)
+            }, { error ->
+                _cancelFriendRequestState.value = CancelFriendRequestState.Error(error)
+            })
+        }
+    }
+
+
+    fun acceptFriendRequest(requestID: String) {
+        _acceptRequestState.value = AcceptRequestsUiState.Loading
+        viewModelScope.launch {
+            sdk.acceptFriendRequest(requestID, { success ->
+                _acceptRequestState.value = AcceptRequestsUiState.Success(success)
+            }, { error ->
+                _acceptRequestState.value =
+                    AcceptRequestsUiState.Error(error)
+            })
+        }
+    }
+
+    fun rejectFriendRequest(requestID: String) {
+        _rejectRequestState.value = RejectRequestsUiState.Loading
+        viewModelScope.launch {
+            sdk.rejectFriendRequest(requestID, { success ->
+                _rejectRequestState.value = RejectRequestsUiState.Success(success)
+            }, { error ->
+                _rejectRequestState.value =
+                    RejectRequestsUiState.Error(error)
+            })
+        }
+    }
+
+    fun cancelRequestChat(id: String) {
+
+    }
 }
 
 sealed class ProfilePreviewUiState {
@@ -215,7 +290,7 @@ sealed class MyProfileState {
 }
 
 sealed class FriendState {
-    data object Idil : FriendState()
+    data object Idle : FriendState()
     data object Loading : FriendState()
     data class Success(val message: String) : FriendState()
     data class Error(val error: ErrorModel) : FriendState()
@@ -245,4 +320,17 @@ sealed class UnFollowState {
     data object Idle : UnFollowState()
     data class Success(val message: String) : UnFollowState()
     data class Error(val error: ErrorModel) : UnFollowState()
+}
+
+sealed class CancelFriendRequestState {
+    data object Loading : CancelFriendRequestState()
+    data object Idle : CancelFriendRequestState()
+    data class Success(val message: String) : CancelFriendRequestState()
+    data class Error(val error: ErrorModel) : CancelFriendRequestState()
+}
+sealed class MomentsState {
+    data object Loading : MomentsState()
+    data object Idle : MomentsState()
+    data class Success(val moments: List<MomentModel>) : MomentsState()
+    data class Error(val error: ErrorModel) : MomentsState()
 }

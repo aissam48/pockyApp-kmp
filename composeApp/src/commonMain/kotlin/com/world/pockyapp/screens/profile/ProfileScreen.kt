@@ -97,10 +97,13 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
 
     val profile = remember { mutableStateOf(ProfileModel()) }
 
+    val myMomentsState by viewModel.myMomentsState.collectAsState()
+
+
     LaunchedEffect(Unit) {
         viewModel.getProfile()
-        delay(1000)
         viewModel.getMyPosts()
+        viewModel.getMyMoments()
     }
 
     Scaffold(
@@ -505,139 +508,6 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                             Spacer(modifier = Modifier.height(10.dp))
                         }
 
-                        // Album Section
-                        item {
-                            Text(
-                                text = "Your Moments",
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            LazyRow(modifier = Modifier.fillMaxWidth()) {
-                                val moments =
-                                    state.profile.album.sortedByDescending { it.createdAt }
-                                val groupedByDay: Map<LocalDate, List<MomentModel>> =
-                                    state.profile.album
-                                        .sortedByDescending { it.createdAt }
-                                        .groupBy {
-                                            val instant = Instant.parse(
-                                                it.createdAt.replace(
-                                                    " ",
-                                                    "T"
-                                                ) + ".120Z"
-                                            )
-                                            // Convert to local date
-                                            instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-
-
-                                        }
-
-                                items(groupedByDay.values.toList()) { coupleOfMoments ->
-
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        when (coupleOfMoments.size) {
-                                            1 ->
-                                                Box(modifier = Modifier.clickable {
-                                                    momentsViewModel.moments =
-                                                        listOf(coupleOfMoments)
-                                                    momentsViewModel.myID = state.profile.id
-                                                    momentsViewModel.selectedIndex = 0
-                                                    navController.navigate(NavRoutes.MOMENTS.route)
-
-                                                }) {
-                                                    CardMomentProfile(
-                                                        myID = state.profile.id,
-                                                        moment = coupleOfMoments[0],
-                                                        navController = navController,
-                                                        rotation = 0f
-                                                    )
-                                                }
-
-                                            2 -> {
-                                                Box(modifier = Modifier.clickable {
-                                                    momentsViewModel.moments =
-                                                        listOf(coupleOfMoments)
-                                                    momentsViewModel.myID = state.profile.id
-                                                    momentsViewModel.selectedIndex = 0
-                                                    navController.navigate(NavRoutes.MOMENTS.route)
-
-                                                }) {
-                                                    CardMomentProfile(
-                                                        myID = state.profile.id,
-                                                        moment = coupleOfMoments[0],
-                                                        navController = navController,
-                                                        rotation = -5f
-                                                    )
-                                                    CardMomentProfile(
-                                                        myID = state.profile.id,
-                                                        moment = coupleOfMoments[1],
-                                                        navController = navController,
-                                                        rotation = 5f
-                                                    )
-
-                                                }
-                                            }
-
-                                            else -> {
-                                                Box(modifier = Modifier.clickable {
-                                                    momentsViewModel.moments =
-                                                        listOf(coupleOfMoments)
-                                                    momentsViewModel.myID = state.profile.id
-                                                    momentsViewModel.selectedIndex = 0
-                                                    navController.navigate(NavRoutes.MOMENTS.route)
-
-                                                }) {
-                                                    CardMomentProfile(
-                                                        myID = state.profile.id,
-                                                        moment = coupleOfMoments[0],
-                                                        navController = navController,
-                                                        rotation = 0f
-                                                    )
-                                                    CardMomentProfile(
-                                                        myID = state.profile.id,
-                                                        moment = coupleOfMoments[1],
-                                                        navController = navController,
-                                                        rotation = 5f
-                                                    )
-
-
-                                                    CardMomentProfile(
-                                                        myID = state.profile.id,
-                                                        moment = coupleOfMoments[2],
-                                                        navController = navController,
-                                                        rotation = -5f
-                                                    )
-
-                                                }
-                                            }
-                                        }
-
-                                        Spacer(modifier = Modifier.height(8.dp))
-
-                                        val instant = Instant.parse(
-                                            coupleOfMoments.last().createdAt.replace(
-                                                " ",
-                                                "T"
-                                            ) + ".120Z"
-                                        )
-                                        // Convert to local date
-                                        val date =
-                                            instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-                                        Text(
-                                            text = "${date.dayOfMonth}/${date.monthNumber}/${date.year}",
-                                            color = Color.Black,
-                                            fontSize = 10.sp
-                                        )
-                                    }
-
-
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                }
-                            }
-                        }
                     }
 
                     is ProfileUiState.Error -> {
@@ -670,6 +540,257 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                     }
                 }
 
+                when (val state = myMomentsState) {
+                    is MyMomentsState.Loading -> {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    CircularProgressIndicator(
+                                        color = Color(0xFF667eea),
+                                        strokeWidth = 3.dp
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "Loading moments...",
+                                        color = Color.Gray,
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    is MyMomentsState.Success -> {
+
+                        item {
+                            Text(
+                                text = "Your Moments",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            if (state.moments.isNotEmpty()) {
+                                LazyRow(modifier = Modifier.fillMaxWidth())
+                                {
+                                    val moments =
+                                        state.moments.sortedByDescending { it.createdAt }
+                                    val groupedByDay: Map<LocalDate, List<MomentModel>> =
+                                        state.moments
+                                            .sortedByDescending { it.createdAt }
+                                            .groupBy {
+                                                val instant = Instant.parse(
+                                                    it.createdAt.replace(
+                                                        " ",
+                                                        "T"
+                                                    ) + ".120Z"
+                                                )
+                                                // Convert to local date
+                                                instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+
+                                            }
+
+                                    items(groupedByDay.values.toList()) { coupleOfMoments ->
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            when (coupleOfMoments.size) {
+                                                1 ->
+                                                    Box(modifier = Modifier.clickable {
+                                                        momentsViewModel.moments =
+                                                            listOf(coupleOfMoments)
+                                                        momentsViewModel.myID = profile.value.id
+                                                        momentsViewModel.selectedIndex = 0
+                                                        navController.navigate(NavRoutes.MOMENTS.route)
+
+                                                    }) {
+                                                        CardMomentProfile(
+                                                            myID = profile.value.id,
+                                                            moment = coupleOfMoments[0],
+                                                            navController = navController,
+                                                            rotation = 0f
+                                                        )
+                                                    }
+
+                                                2 -> {
+                                                    Box(modifier = Modifier.clickable {
+                                                        momentsViewModel.moments =
+                                                            listOf(coupleOfMoments)
+                                                        momentsViewModel.myID = profile.value.id
+                                                        momentsViewModel.selectedIndex = 0
+                                                        navController.navigate(NavRoutes.MOMENTS.route)
+
+                                                    }) {
+                                                        CardMomentProfile(
+                                                            myID = profile.value.id,
+                                                            moment = coupleOfMoments[0],
+                                                            navController = navController,
+                                                            rotation = -5f
+                                                        )
+                                                        CardMomentProfile(
+                                                            myID = profile.value.id,
+                                                            moment = coupleOfMoments[1],
+                                                            navController = navController,
+                                                            rotation = 5f
+                                                        )
+
+                                                    }
+                                                }
+
+                                                else -> {
+                                                    Box(modifier = Modifier.clickable {
+                                                        momentsViewModel.moments =
+                                                            listOf(coupleOfMoments)
+                                                        momentsViewModel.myID = profile.value.id
+                                                        momentsViewModel.selectedIndex = 0
+                                                        navController.navigate(NavRoutes.MOMENTS.route)
+
+                                                    }) {
+                                                        CardMomentProfile(
+                                                            myID = profile.value.id,
+                                                            moment = coupleOfMoments[0],
+                                                            navController = navController,
+                                                            rotation = 0f
+                                                        )
+                                                        CardMomentProfile(
+                                                            myID = profile.value.id,
+                                                            moment = coupleOfMoments[1],
+                                                            navController = navController,
+                                                            rotation = 5f
+                                                        )
+
+
+                                                        CardMomentProfile(
+                                                            myID = profile.value.id,
+                                                            moment = coupleOfMoments[2],
+                                                            navController = navController,
+                                                            rotation = -5f
+                                                        )
+
+                                                    }
+                                                }
+                                            }
+
+                                            Spacer(modifier = Modifier.height(8.dp))
+
+                                            val instant = Instant.parse(
+                                                coupleOfMoments.last().createdAt.replace(
+                                                    " ",
+                                                    "T"
+                                                ) + ".120Z"
+                                            )
+                                            // Convert to local date
+                                            val date =
+                                                instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
+                                            Text(
+                                                text = "${date.dayOfMonth}/${date.monthNumber}/${date.year}",
+                                                color = Color.Black,
+                                                fontSize = 10.sp
+                                            )
+                                        }
+
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
+                                }
+                            } else {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 20.dp).padding(horizontal = 16.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                                )
+                                {
+                                    Column(
+                                        modifier = Modifier.fillMaxSize().padding(32.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(80.dp)
+                                                .background(
+                                                    Color(0xFF667eea).copy(alpha = 0.1f),
+                                                    CircleShape
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "📸",
+                                                fontSize = 32.sp
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = "No moments yet",
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 18.sp
+                                        )
+                                        Text(
+                                            text = "You didn't shared any moments",
+                                            color = Color.Gray,
+                                            fontSize = 14.sp,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+
+                    is MyMomentsState.Error -> {
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(24.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "⚠️",
+                                        fontSize = 32.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        text = "Unable to load posts",
+                                        color = Color(0xFFE65100),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp
+                                    )
+                                    Text(
+                                        text = "Please try again later",
+                                        color = Color(0xFFE65100),
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    is MyMomentsState.Idle -> {
+
+                    }
+                }
+
+
                 when (val state = postsState) {
                     is PostsUiState.Loading -> {
                         item {
@@ -698,18 +819,19 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                     }
 
                     is PostsUiState.Success -> {
-                        if (state.posts.isNotEmpty()) {
 
-                            item {
-                                Spacer(modifier = Modifier.height(20.dp))
-                                Text(
-                                    text = "Your Posts",
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
-                                )
-                                Spacer(modifier = Modifier.height(10.dp))
-                            }
+                        item {
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Text(
+                                text = "Your Posts",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                        }
+
+                        if (state.posts.isNotEmpty()) {
 
                             items(state.posts.chunked(3)) { rowPosts ->
                                 Row(

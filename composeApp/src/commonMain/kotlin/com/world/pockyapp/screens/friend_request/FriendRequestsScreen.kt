@@ -1,4 +1,4 @@
-package com.world.pockyapp.screens.blocked
+package com.world.pockyapp.screens.friend_request
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,7 +24,6 @@ import androidx.compose.material.Text
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,7 +41,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
-import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.network.models.model.FriendRequestModel
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -51,24 +50,34 @@ import pockyapp.composeapp.generated.resources.ic_placeholder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BlockedScreen(
+fun FriendRequestsScreen(
     navController: NavHostController,
-    viewModel: BlockedViewModel = koinViewModel()
+    viewModel: FriendRequestsViewModel = koinViewModel()
 ) {
 
-    val blockedState = viewModel.blockedState.collectAsState()
-    val unBlockState = viewModel.unBlockState.collectAsState()
+    val friendRequestsState = viewModel.friendRequestsState.collectAsState()
+    val acceptRequestState = viewModel.acceptRequestState.collectAsState()
+    val rejectRequestState = viewModel.rejectRequestState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getBlockedUsers()
+        viewModel.getFriendRequests()
     }
 
-    LaunchedEffect(unBlockState.value) {
-        when (unBlockState.value) {
-            is UnBlockUiState.Success -> {
-                viewModel.getBlockedUsers()
+    // Handle state changes for accept/reject
+    LaunchedEffect(acceptRequestState.value) {
+        when (acceptRequestState.value) {
+            is AcceptRequestsUiState.Success -> {
+                viewModel.getFriendRequests()
             }
+            else -> {}
+        }
+    }
 
+    LaunchedEffect(rejectRequestState.value) {
+        when (rejectRequestState.value) {
+            is RejectRequestsUiState.Success -> {
+                viewModel.getFriendRequests()
+            }
             else -> {}
         }
     }
@@ -110,7 +119,7 @@ fun BlockedScreen(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Text(
-                    text = "Blocked Users",
+                    text = "Friend Requests",
                     color = Color.Black,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
@@ -120,8 +129,8 @@ fun BlockedScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Content
-            when (val state = blockedState.value) {
-                is BlockedUiState.Loading -> {
+            when (val state = friendRequestsState.value) {
+                is FriendRequestsUiState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -135,7 +144,7 @@ fun BlockedScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "Loading blocked users...",
+                                text = "Loading friend requests...",
                                 color = Color.Gray,
                                 fontSize = 14.sp
                             )
@@ -143,7 +152,7 @@ fun BlockedScreen(
                     }
                 }
 
-                is BlockedUiState.Success -> {
+                is FriendRequestsUiState.Success -> {
                     if (state.data.isNotEmpty()) {
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -155,7 +164,7 @@ fun BlockedScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Blocked Users",
+                                        text = "Requests",
                                         color = Color.Black,
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight.Bold
@@ -163,14 +172,14 @@ fun BlockedScreen(
                                     Box(
                                         modifier = Modifier
                                             .background(
-                                                Color(0xFFEF4444).copy(alpha = 0.1f),
+                                                Color(0xFFDFC46B).copy(alpha = 0.1f),
                                                 RoundedCornerShape(8.dp)
                                             )
                                             .padding(horizontal = 8.dp, vertical = 4.dp)
                                     ) {
                                         Text(
                                             text = "${state.data.size}",
-                                            color = Color(0xFFEF4444),
+                                            color = Color(0xFFDFC46B),
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 12.sp
                                         )
@@ -179,14 +188,16 @@ fun BlockedScreen(
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
 
-                            items(state.data) { user ->
-                                BlockedUserItem(
-                                    user = user,
-                                    onUnblock = { viewModel.unBlock(user.id) },
+                            items(state.data) { request ->
+                                FriendRequestItem(
+                                    request = request,
+                                    onAccept = { viewModel.acceptFriendRequest(request.id) },
+                                    onReject = { viewModel.rejectFriendRequest(request.id) },
                                     onProfileClick = {
-                                        navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${user.id}")
+                                        navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${request.profile.id}")
                                     },
-                                    isUnblocking = unBlockState.value is UnBlockUiState.Loading
+                                    isAccepting = acceptRequestState.value is AcceptRequestsUiState.Loading,
+                                    isRejecting = rejectRequestState.value is RejectRequestsUiState.Loading
                                 )
                             }
 
@@ -207,25 +218,25 @@ fun BlockedScreen(
                                     modifier = Modifier
                                         .size(80.dp)
                                         .background(
-                                            Color.Gray.copy(alpha = 0.1f),
+                                            Color(0xFFDFC46B).copy(alpha = 0.1f),
                                             CircleShape
                                         ),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "🚫",
+                                        text = "👥",
                                         fontSize = 32.sp
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
-                                    text = "No blocked users",
+                                    text = "No friend requests",
                                     color = Color.Black,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 18.sp
                                 )
                                 Text(
-                                    text = "You haven't blocked anyone yet",
+                                    text = "You're all caught up!",
                                     color = Color.Gray,
                                     fontSize = 14.sp,
                                     textAlign = TextAlign.Center
@@ -235,7 +246,7 @@ fun BlockedScreen(
                     }
                 }
 
-                is BlockedUiState.Error -> {
+                is FriendRequestsUiState.Error -> {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
@@ -252,7 +263,7 @@ fun BlockedScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Failed to load blocked users",
+                                text = "Failed to load requests",
                                 color = Color(0xFFE53E3E),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp
@@ -266,21 +277,19 @@ fun BlockedScreen(
                         }
                     }
                 }
-
-                is BlockedUiState.Idle -> {
-
-                }
             }
         }
     }
 }
 
 @Composable
-fun BlockedUserItem(
-    user: ProfileModel,
-    onUnblock: () -> Unit,
+fun FriendRequestItem(
+    request: FriendRequestModel,
+    onAccept: () -> Unit,
+    onReject: () -> Unit,
     onProfileClick: () -> Unit,
-    isUnblocking: Boolean,
+    isAccepting: Boolean,
+    isRejecting: Boolean,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -311,7 +320,7 @@ fun BlockedUserItem(
                         )
                 ) {
                     AsyncImage(
-                        model = getUrl(user.photoID),
+                        model = getUrl(request.profile.photoID),
                         contentDescription = "Profile Photo",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -326,49 +335,77 @@ fun BlockedUserItem(
 
                 Column {
                     Text(
-                        text = "${user.firstName} ${user.lastName}",
+                        text = "${request.profile.firstName} ${request.profile.lastName}",
                         color = Color.Black,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp
                     )
                     Text(
-                        text = "@${user.username}",
+                        text = "@${request.profile.username}",
                         color = Color.Gray,
                         fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Blocked",
-                        color = Color(0xFFEF4444),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
                     )
                 }
             }
 
-            // Unblock Button
-            Box(
-                modifier = Modifier
-                    .background(
-                        Color(0xFF10B981),
-                        RoundedCornerShape(8.dp)
-                    )
-                    .clickable(enabled = !isUnblocking) { onUnblock() }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                contentAlignment = Alignment.Center
+            // Action Buttons
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (isUnblocking) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(
-                        text = "Unblock",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                // Accept Button
+                Box(
+                    modifier = Modifier
+                        .background(
+                            Color(0xFF10B981),
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clickable(enabled = !isAccepting && !isRejecting) { onAccept() }
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .shadow(2.dp, RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isAccepting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = "Accept",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+
+                // Reject Button
+                Box(
+                    modifier = Modifier
+                        .background(
+                            Color(0xFFEF4444),
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clickable(enabled = !isAccepting && !isRejecting) { onReject() }
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .shadow(2.dp, RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isRejecting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = "Decline",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         }

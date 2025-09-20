@@ -11,24 +11,28 @@ import kotlinx.coroutines.launch
 
 // Define ResultState for each operation separately
 sealed class PostResultState {
+    object Idle : PostResultState()
     object Loading : PostResultState()
     data class Success(val post: PostModel) : PostResultState()
     data class Error(val error: ErrorModel) : PostResultState()
 }
 
 sealed class LikeResultState {
+    object Idle : LikeResultState()
     object Loading : LikeResultState()
     data class Success(val message: String) : LikeResultState()
     data class Error(val error: ErrorModel) : LikeResultState()
 }
 
 sealed class UnLikeResultState {
+    object Idle : UnLikeResultState()
     object Loading : UnLikeResultState()
     data class Success(val message: String) : UnLikeResultState()
     data class Error(val error: ErrorModel) : UnLikeResultState()
 }
 
 sealed class DeleteResultState {
+    object Idle : DeleteResultState()
     object Loading : DeleteResultState()
     data class Success(val message: String) : DeleteResultState()
     data class Error(val error: ErrorModel) : DeleteResultState()
@@ -36,16 +40,16 @@ sealed class DeleteResultState {
 
 class ViewPostViewModel(val sdk: ApiManager) : ViewModel() {
 
-    private val _postState = MutableStateFlow<PostResultState>(PostResultState.Loading)
+    private val _postState = MutableStateFlow<PostResultState>(PostResultState.Idle)
     val postState = _postState.asStateFlow()
 
-    private val _likeState = MutableStateFlow<LikeResultState>(LikeResultState.Loading)
+    private val _likeState = MutableStateFlow<LikeResultState>(LikeResultState.Idle)
     val likeState = _likeState.asStateFlow()
 
-    private val _unLikeState = MutableStateFlow<UnLikeResultState>(UnLikeResultState.Loading)
+    private val _unLikeState = MutableStateFlow<UnLikeResultState>(UnLikeResultState.Idle)
     val unLikeState = _unLikeState.asStateFlow()
 
-    private val _deleteState = MutableStateFlow<DeleteResultState>(DeleteResultState.Loading)
+    private val _deleteState = MutableStateFlow<DeleteResultState>(DeleteResultState.Idle)
     val deleteState = _deleteState.asStateFlow()
 
     fun getPost(postID: String) {
