@@ -341,7 +341,7 @@ private fun CountryPhoneCodeItem(
 
 // Usage Example in your RegisterScreen:
 @Composable
-fun PhoneNumberFieldWithCountryCode(selectedCode: (CountryPhoneCode, phone: String) -> Unit) {
+fun PhoneNumberFieldWithCountryCode(selectedCode: (selectedCountryCode:CountryPhoneCode, phone: String) -> Unit) {
     val selectedCountryCode = remember { mutableStateOf(CountryPhoneCode("Morocco", "+212", "🇲🇦")) }
     val showCountryCodeDialog = remember { mutableStateOf(false) }
     val phoneNumber = remember { mutableStateOf("") }

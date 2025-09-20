@@ -64,6 +64,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.DataModel
+import com.world.pockyapp.screens.auth.register.CountryPhoneCode
 import com.world.pockyapp.screens.auth.register.PhoneNumberFieldWithCountryCode
 import com.world.pockyapp.screens.auth.register.RegisterScreenViewModel
 import kotlinx.coroutines.launch
@@ -93,7 +94,7 @@ fun RegisterScreen(
     val firstName = remember { mutableStateOf("") }
     val lastName = remember { mutableStateOf("") }
     val username = remember { mutableStateOf("") }
-    val phone = remember { mutableStateOf("") }
+    val phoneNumber = remember { mutableStateOf("") }
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val confirmPassword = remember { mutableStateOf("") }
@@ -321,7 +322,9 @@ fun RegisterScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    PhoneNumberFieldWithCountryCode()
+                    PhoneNumberFieldWithCountryCode{ selectedCountryCode: CountryPhoneCode, phone: String->
+                        phoneNumber.value = "${selectedCountryCode.code} $phone"
+                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -579,7 +582,7 @@ fun RegisterScreen(
                         viewModel.firstName = firstName.value
                         viewModel.lastName = lastName.value
                         viewModel.username = username.value
-                        viewModel.phone = phone.value
+                        viewModel.phone = phoneNumber.value
                         viewModel.email = email.value
                         viewModel.password = password.value
                         viewModel.confirmPassword = confirmPassword.value
