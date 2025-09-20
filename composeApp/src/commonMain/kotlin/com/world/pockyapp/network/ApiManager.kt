@@ -70,9 +70,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.collections.contains
 
 
 class ApiManager(val dataStore: DataStore<Preferences>) {
@@ -82,10 +90,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     private val client = if (getPlatform().name.contains("Android")) {
         HttpClient(CIO) {
-            install(WebSockets) {
-                maxFrameSize = Long.MAX_VALUE
-                pingIntervalMillis = 20_000
-            }
+
             install(HttpTimeout) {
                 requestTimeoutMillis = 300_000
                 connectTimeoutMillis = 300_000
@@ -119,6 +124,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             }
         }
     }
+
 
     private suspend fun getToken(): String {
         val preferences = dataStore.edit { }
@@ -1400,8 +1406,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     }
 
     suspend fun reportProfile(
-        id:String,
-        content:String,
+        id: String,
+        content: String,
         onSuccess: (ResponseMessageModel) -> Unit,
         onFailure: (ErrorModel) -> Unit
     ) {
@@ -1427,7 +1433,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     }
 
     suspend fun followProfile(
-        id:String,
+        id: String,
         onSuccess: (ResponseMessageModel) -> Unit,
         onFailure: (ErrorModel) -> Unit
     ) {
@@ -1453,7 +1459,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     }
 
     suspend fun unFollowProfile(
-        id:String,
+        id: String,
         onSuccess: (ResponseMessageModel) -> Unit,
         onFailure: (ErrorModel) -> Unit
     ) {
@@ -1478,51 +1484,6 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         }
     }
 
-
-    val socket = Socket(
-        endpoint = Constant.ws,
-        config = SocketOptions(
-            queryParams = mapOf("token" to "MySuperToken"),
-            transport = SocketOptions.Transport.WEBSOCKET
-        )
-    ) {
-
-        on(SocketEvent.Connect) {
-            println("connect")
-        }
-
-        on(SocketEvent.Connecting) {
-            println("connecting")
-        }
-
-        on(SocketEvent.Disconnect) {
-            println("disconnect")
-        }
-
-        on(SocketEvent.Error) {
-            println("error $it")
-        }
-
-        on(SocketEvent.Reconnect) {
-            println("reconnect")
-        }
-
-        on(SocketEvent.ReconnectAttempt) {
-            println("reconnect attempt $it")
-        }
-
-        on(SocketEvent.Ping) {
-            println("ping")
-        }
-
-        on(SocketEvent.Pong) {
-            println("pong")
-        }
-
-        on("employee.connected") { data ->
-
-        }
-    }
 
 }
 

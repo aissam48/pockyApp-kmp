@@ -105,7 +105,7 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.jetbrains.kotlinx.serialization.json)
-            implementation("io.ktor:ktor-client-websockets:3.0.1")
+            //implementation("io.ktor:ktor-client-websockets:3.0.1")
 
             api(libs.datastore)
             api(libs.datastore.prefrences)
@@ -163,7 +163,6 @@ kotlin {
             // Optional - Location permissions for mobile
             implementation(libs.compass.permissions.mobile)
 
-            implementation("dev.icerock.moko:socket-io:0.6.0")
         }
     }
 }
@@ -198,10 +197,10 @@ android {
 dependencies {
     implementation(libs.androidx.activity.ktx)
     debugImplementation(compose.uiTooling)
-    implementation("io.socket:socket.io-client:2.1.0") {
+    implementation("io.socket:socket.io-client:1.0.0") {
         exclude(group = "org.json", module = "json")
     }
-    commonMainApi("dev.icerock.moko:socket-io:0.6.0")
+    commonMainApi("dev.icerock.moko:socket-io:0.5.0")
 
 
 }
