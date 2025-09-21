@@ -303,7 +303,7 @@ fun ChatScreen(
                             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                         ) {
                             Column(
-                                modifier = Modifier.padding(32.dp),
+                                modifier = Modifier.padding(32.dp).fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Box(

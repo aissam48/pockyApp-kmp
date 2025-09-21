@@ -4,7 +4,17 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -15,7 +25,6 @@ import androidx.compose.material.Text
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -35,11 +43,11 @@ import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ErrorModel
+import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.utils.Utils.formatCreatedAt
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -54,12 +62,14 @@ fun DiscoverScreen(
     viewModel: DiscoverViewModel = koinViewModel()
 ) {
     val profileState by viewModel.profileState.collectAsState()
+    val myDailyMomentsState by viewModel.myDailyMomentsState.collectAsState()
     val friendsMomentsState by viewModel.friendsMomentsState.collectAsState()
     val nearbyMomentsState by viewModel.nearbyMomentsState.collectAsState()
     val nearbyPostsState by viewModel.nearbyPostsState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.getProfile()
+        viewModel.loadMyDailyMoments()
         viewModel.loadFriendsMoments()
         viewModel.loadNearbyMoments()
         viewModel.loadNearbyPosts()
@@ -100,7 +110,7 @@ fun DiscoverScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         // My Story
-                        when (profileState) {
+                        when (myDailyMomentsState) {
                             is UiState.Loading -> {
                                 Box(
                                     modifier = Modifier.size(70.dp),
@@ -115,8 +125,12 @@ fun DiscoverScreen(
                             }
 
                             is UiState.Success -> {
-                                val profile = (profileState as UiState.Success<ProfileModel>).data
-                                ModernProfileSection(profile = profile, navController = navController)
+                                val myDailyMoments = (myDailyMomentsState as UiState.Success<List<MomentModel>>).data
+                                ModernProfileSection(
+                                    myDailyMomentsRandom = myDailyMoments,
+                                    navController = navController,
+                                    profileState = profileState
+                                )
                             }
 
                             is UiState.Error -> {
@@ -147,16 +161,27 @@ fun DiscoverScreen(
                             }
 
                             is UiState.Success -> {
-                                val friends = (friendsMomentsState as UiState.Success<List<ProfileModel>>).data
+                                val friendsMoments = (friendsMomentsState as UiState.Success<List<MomentModel>>).data
+                                val friends = friendsMoments.map { it.profile }.distinctBy { it.id }
+                                val groupedFriendsMoments =
+                                    mutableListOf<MutableList<MomentModel>>()
+
+                                friends.forEach { friend ->
+                                    val friendMoments =
+                                        friendsMoments.filter { it.profile.id == friend.id }
+                                    groupedFriendsMoments.add(friendMoments.toMutableList())
+                                }
+
                                 LazyRow(
                                     modifier = Modifier.weight(1f),
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    items(friends, key = { it.id }) { friend ->
+                                    items(groupedFriendsMoments) { friendMoments ->
                                         ModernMomentItem(
-                                            profile = friend,
+                                            friendMoments = friendMoments,
                                             currentUserId = (profileState as? UiState.Success<ProfileModel>)?.data?.id,
-                                            navController = navController
+                                            navController = navController,
+                                            groupedFriendsMoments = groupedFriendsMoments
                                         )
                                     }
                                 }
@@ -208,7 +233,18 @@ fun DiscoverScreen(
             }
 
             is UiState.Success -> {
-                val nearbyMoments = (nearbyMomentsState as UiState.Success<List<ProfileModel>>).data
+
+                val nearbyMoments = (nearbyMomentsState as UiState.Success<List<MomentModel>>).data
+                val friends = nearbyMoments.map { it.profile }.distinctBy { it.id }
+                val groupedFriendsMoments =
+                    mutableListOf<MutableList<MomentModel>>()
+
+                friends.forEach { friend ->
+                    val friendMoments =
+                        nearbyMoments.filter { it.profile.id == friend.id }
+                    groupedFriendsMoments.add(friendMoments.toMutableList())
+                }
+
                 if (nearbyMoments.isNotEmpty()) {
                     item {
                         Card(
@@ -231,21 +267,6 @@ fun DiscoverScreen(
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 18.sp
                                     )
-                                    Box(
-                                        modifier = Modifier
-                                            .background(
-                                                Color(0xFFDFC46B).copy(alpha = 0.1f),
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    ) {
-                                        Text(
-                                            text = "${nearbyMoments.size}",
-                                            color = Color(0xFFDFC46B),
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 12.sp
-                                        )
-                                    }
                                 }
 
                                 Spacer(modifier = Modifier.height(12.dp))
@@ -253,12 +274,13 @@ fun DiscoverScreen(
                                 LazyRow(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    items(nearbyMoments, key = { it.id }) { profile ->
-                                        if (profile.moments.isNotEmpty()) {
+                                    items(groupedFriendsMoments) { profileMoments ->
+                                        if (profileMoments.isNotEmpty()) {
                                             ModernNearbyMomentItem(
-                                                profile = profile,
+                                                profileMoments = profileMoments,
                                                 currentUserId = (profileState as? UiState.Success<ProfileModel>)?.data?.id,
-                                                navController = navController
+                                                navController = navController,
+                                                groupedFriendsMoments= groupedFriendsMoments
                                             )
                                         }
                                     }
@@ -411,13 +433,18 @@ fun ModernErrorSection(
 
 @Composable
 fun ModernProfileSection(
-    profile: ProfileModel,
-    navController: NavHostController
+    myDailyMomentsRandom: List<MomentModel>,
+    navController: NavHostController,
+    profileState: UiState<ProfileModel>
 ) {
+
+    val myDailyMoments = myDailyMomentsRandom.sortedBy { it.createdAt }
+    val momentsViewModel: MomentsViewModel = koinViewModel()
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val checkIfSeeAllMoments = profile.moments.find { !it.viewed }
+        val checkIfSeeAllMoments = myDailyMoments.find { !it.viewed }
         Box(
             modifier = Modifier
                 .size(70.dp)
@@ -442,22 +469,31 @@ fun ModernProfileSection(
                 .padding(2.dp),
         ) {
             AsyncImage(
-                model = if (profile.moments.isEmpty())
-                    getUrl(profile.photoID)
-                else
-                    getUrl(profile.moments[0].momentID),
+                model = if (myDailyMoments.isEmpty()){
+                    if (profileState is UiState.Success){
+                        getUrl(profileState.data.photoID)
+                    } else {
+                        getUrl("")
+                    }
+                }
+                else {
+                    getUrl(myDailyMoments[0].momentID)
+                },
                 contentScale = ContentScale.Crop,
                 contentDescription = "",
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(CircleShape)
                     .clickable {
-                        if (profile.moments.isEmpty()) {
+                        if (myDailyMoments.isEmpty()) {
                             navController.navigate(NavRoutes.MY_PROFILE.route)
                         } else {
-                            val modulesJson = Json.encodeToString(listOf(profile)).replace("/", "%")
+                            momentsViewModel.myID = myDailyMoments[0].profile.id
+                            momentsViewModel.selectedIndex = 0
+                            momentsViewModel.moments = mutableListOf(myDailyMoments)
+
                             navController.navigate(
-                                NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/${profile.id}"
+                                NavRoutes.MOMENTS.route
                             )
                         }
                     },
@@ -479,16 +515,19 @@ fun ModernProfileSection(
 
 @Composable
 fun ModernMomentItem(
-    profile: ProfileModel,
+    friendMoments: MutableList<MomentModel>,
     currentUserId: String?,
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    groupedFriendsMoments: MutableList<MutableList<MomentModel>>
 ) {
+
+    val momentsViewModel: MomentsViewModel = koinViewModel()
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val checkIfSeeAllMoments = profile.moments.find { !it.viewed }
+        val checkIfSeeAllMoments = friendMoments.find { !it.viewed }
         Box(
             modifier = Modifier
                 .size(60.dp)
@@ -513,25 +552,20 @@ fun ModernMomentItem(
                 .padding(2.dp),
         ) {
             AsyncImage(
-                model = if (profile.moments.isEmpty()) {
-                    getUrl(profile.photoID)
-                } else {
-                    getUrl(profile.moments[0].momentID)
-                },
+                model = getUrl(friendMoments[0].profile.photoID),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(CircleShape)
                     .clickable {
-                        if (profile.moments.isEmpty()) {
-                            navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${profile.id}")
-                        } else {
-                            val modulesJson = Json.encodeToString(listOf(profile))
-                                .replace("/", "%")
-                            navController.navigate(
-                                NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/$currentUserId"
-                            )
-                        }
+
+                        momentsViewModel.moments = groupedFriendsMoments
+                        momentsViewModel.myID = currentUserId
+                        momentsViewModel.selectedIndex =
+                            groupedFriendsMoments.indexOf(friendMoments)
+                        navController.navigate(
+                            NavRoutes.MOMENTS.route
+                        )
                     },
                 contentDescription = null,
                 placeholder = painterResource(Res.drawable.ic_placeholder),
@@ -542,7 +576,7 @@ fun ModernMomentItem(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = profile.firstName,
+            text = friendMoments[0].profile.firstName,
             color = Color.Gray,
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
@@ -553,21 +587,25 @@ fun ModernMomentItem(
 
 @Composable
 fun ModernNearbyMomentItem(
-    profile: ProfileModel,
+    profileMoments: MutableList<MomentModel>,
     currentUserId: String?,
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    groupedFriendsMoments: MutableList<MutableList<MomentModel>>
 ) {
-    val checkIfSeeAllMoments = profile.moments.find { !it.viewed }
+    val momentsViewModel: MomentsViewModel = koinViewModel()
+    val checkIfSeeAllMoments = profileMoments.find { !it.viewed }
     Card(
         modifier = modifier
-            .width(90.dp)
-            .height(120.dp)
+            .width(110.dp)
+            .height(150.dp)
             .clickable {
-                val modulesJson = Json.encodeToString(listOf(profile))
-                    .replace("/", "%")
+                momentsViewModel.moments = groupedFriendsMoments
+                momentsViewModel.myID = currentUserId
+                momentsViewModel.selectedIndex =
+                    groupedFriendsMoments.indexOf(profileMoments)
                 navController.navigate(
-                    NavRoutes.MOMENTS.route + "/${modulesJson}" + "/0" + "/$currentUserId"
+                    NavRoutes.MOMENTS.route
                 )
             },
         shape = RoundedCornerShape(12.dp),
@@ -576,7 +614,7 @@ fun ModernNearbyMomentItem(
     ) {
         Box {
             AsyncImage(
-                model = getUrl(profile.moments[0].momentID),
+                model = getUrl(profileMoments[0].profile.photoID),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
                 contentDescription = null,
@@ -609,7 +647,7 @@ fun ModernNearbyMomentItem(
                     .padding(8.dp)
             ) {
                 Text(
-                    text = profile.firstName,
+                    text = profileMoments[0].profile.firstName,
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold
@@ -713,7 +751,9 @@ fun ModernPostItem(
                     modifier = Modifier
                         .size(36.dp)
                         .background(
-                            if (isLiked) Color(0xFFE91E63).copy(alpha = 0.1f) else Color.Gray.copy(alpha = 0.1f),
+                            if (isLiked) Color(0xFFE91E63).copy(alpha = 0.1f) else Color.Gray.copy(
+                                alpha = 0.1f
+                            ),
                             CircleShape
                         )
                         .clickable { onLikeClick(post) },

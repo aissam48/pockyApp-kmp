@@ -340,8 +340,7 @@ fun ChatScreen(
                                         listState.animateScrollToItem(0)
                                     }
                                 }
-                            }
-                            .shadow(if (message.value.isNotBlank()) 4.dp else 0.dp, CircleShape),
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(

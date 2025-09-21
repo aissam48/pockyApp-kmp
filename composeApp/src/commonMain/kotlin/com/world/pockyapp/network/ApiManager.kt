@@ -420,11 +420,11 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     }
 
     suspend fun getFriendsMoments(
-        onSuccess: (List<ProfileModel>) -> Unit,
+        onSuccess: (List<MomentModel>) -> Unit,
         onFailure: (ErrorModel) -> Unit
     ) {
         try {
-            val response: HttpResponse = client.get("$baseUrl/operations/friendsmoments") {
+            val response: HttpResponse = client.get("$baseUrl/operations/friends-moments") {
                 contentType(ContentType.Application.Json)
                 val token = getToken()
 
@@ -433,7 +433,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             }
 
             if (response.status.isSuccess()) {
-                val responseBody: List<ProfileModel> =
+                val responseBody: List<MomentModel> =
                     response.body()
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
@@ -449,11 +449,11 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     }
 
     suspend fun getNearbyMoments(
-        onSuccess: (List<ProfileModel>) -> Unit,
+        onSuccess: (List<MomentModel>) -> Unit,
         onFailure: (ErrorModel) -> Unit
     ) {
         try {
-            val response: HttpResponse = client.get("$baseUrl/operations/nearbymoments") {
+            val response: HttpResponse = client.get("$baseUrl/operations/nearby-moments") {
                 contentType(ContentType.Application.Json)
                 val token = getToken()
 
@@ -462,7 +462,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             }
 
             if (response.status.isSuccess()) {
-                val responseBody: List<ProfileModel> =
+                val responseBody: List<MomentModel> =
                     response.body()
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
@@ -702,14 +702,13 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     suspend fun responseRequestChat(
         id: String,
         status: Boolean,
-        senderID: String,
         onSuccess: (String) -> Unit,
         onFailure: (ErrorModel) -> Unit
     ) {
         try {
-            val responseChatRequestModel = ResponseChatRequestModel(id, senderID, status)
+            val responseChatRequestModel = ResponseChatRequestModel(id, "senderID", status)
 
-            val response: HttpResponse = client.post("$baseUrl/operations/responserequestchat") {
+            val response: HttpResponse = client.post("$baseUrl/operations/response-request-chat") {
                 val token = getToken()
                 contentType(ContentType.Application.Json)
                 setBody(responseChatRequestModel)
@@ -1263,6 +1262,31 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     ) {
         try {
             val response: HttpResponse = client.get("$baseUrl/operations/my-moments") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<MomentModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
+    suspend fun getMyDailyMoments(
+        onSuccess: (List<MomentModel>) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/my-daily-moments") {
                 val token = getToken()
                 contentType(ContentType.Application.Json)
                 headers { append(HttpHeaders.Authorization, "Bearer $token") }

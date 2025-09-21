@@ -33,6 +33,8 @@ import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.home.navigations.discover.UiState
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
+import com.world.pockyapp.screens.profile.ProfileUiState
+import com.world.pockyapp.screens.profile.ProfileViewModel
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
@@ -47,47 +49,16 @@ import kotlin.math.sqrt
 actual fun MapComponentScreen(navController: NavHostController) {
     val viewModel: GoogleMapsViewModel = koinViewModel()
     val globalMomentsState by viewModel.globalMomentsState.collectAsState()
-    val momentsViewModel: MomentsViewModel = koinViewModel() // Koin inject
+    val momentsViewModel: MomentsViewModel = koinViewModel()
+    val profileViewModel: ProfileViewModel = koinViewModel()
 
-    //val heatmapData = remember { mutableStateOf(emptyList<WeightedLatLng>()) }
-    //val moments = remember { mutableStateOf(emptyList<MomentModel>()) }
+    val profileState by profileViewModel.profileState.collectAsState()
 
     LaunchedEffect(Unit) {
+        profileViewModel.getProfile()
         viewModel.loadGlobalMoments()
     }
 
-/*
-    when(val state = globalMomentsState){
-        is UiState.Loading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
-
-        is UiState.Success -> {
-            moments.value = state.data
-            println("moments UiState.Success-> $moments")
-            println("moments UiState.Success-> 1")
-            if (state.data.isNotEmpty()){
-                println("moments UiState.Success-> 2")
-                heatmapData.value = state.data.map {
-                    WeightedLatLng(
-                        LatLng(it.geoLocation.latitude, it.geoLocation.longitude),
-                        calculateMomentWeight(it)
-                    )
-                }
-            }
-
-            println("heatmapData UiState.Success-> ${heatmapData.value}")
-
-        }
-
-        is UiState.Error -> {
-
-        }
-
-    }
-*/
     val heatmapData: List<WeightedLatLng> = when (val state = globalMomentsState) {
         is UiState.Success -> state.data.map {
             WeightedLatLng(
@@ -95,6 +66,7 @@ actual fun MapComponentScreen(navController: NavHostController) {
                 1.0
             )
         }
+
         else -> emptyList()
     }
 
@@ -129,28 +101,35 @@ actual fun MapComponentScreen(navController: NavHostController) {
     }
 
 
-    Scaffold (modifier = Modifier.fillMaxSize()){ paddingValues ->
+    Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
         GoogleMap(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(
                 mapType = MapType.TERRAIN,
             ),
             onMapClick = { clickedLatLng ->
                 println("ClickedOnMap: $clickedLatLng")
-                if (globalMomentsState is UiState.Success){
-                    val momentsAround = handleMapClick(clickedLatLng, (globalMomentsState as UiState.Success<List<MomentModel>>).data, cameraPositionState.position.zoom)
+                if (globalMomentsState is UiState.Success) {
+                    val momentsAround = handleMapClick(
+                        clickedLatLng,
+                        (globalMomentsState as UiState.Success<List<MomentModel>>).data,
+                        cameraPositionState.position.zoom
+                    )
+
+                    if (momentsAround.isEmpty()) return@GoogleMap
 
                     println(momentsAround)
-                    momentsViewModel.moments = listOf<List<MomentModel>>(listOf(momentsAround.last(), momentsAround.last(),  momentsAround.last()),listOf(momentsAround.last(), momentsAround.last()),momentsAround)
+                    momentsViewModel.moments = listOf(momentsAround)
                     momentsViewModel.selectedIndex = 0
-                    momentsViewModel.myID = "d140fd44-4879-486f-b6a6-445a15f7d0f0"
+                    momentsViewModel.myID =
+                        if (profileState is ProfileUiState.Success) (profileState as ProfileUiState.Success).profile.id else ""
                     navController.navigate(
                         NavRoutes.MOMENTS.route
                     )
                 }
-                //
-
 
             }
         ) {

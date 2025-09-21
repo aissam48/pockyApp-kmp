@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.ErrorModel
+import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,19 +28,25 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
 
     private var isProfileLoadingFirstTime = true
     private var isFriendsMomentsLoadingFirstTime = true
+    private var isMyDailyMomentsLoadingFirstTime = true
     private var isNearbyMomentsLoadingFirstTime = true
     private var isNearbyPostsLoadingFirstTime = true
 
     private val _profileState = MutableStateFlow<UiState<ProfileModel>>(UiState.Loading)
     val profileState: StateFlow<UiState<ProfileModel>> = _profileState.asStateFlow()
 
+    private val _myDailyMomentsState =
+        MutableStateFlow<UiState<List<MomentModel>>>(UiState.Loading)
+    val myDailyMomentsState: StateFlow<UiState<List<MomentModel>>> =
+        _myDailyMomentsState.asStateFlow()
+
     private val _friendsMomentsState =
-        MutableStateFlow<UiState<List<ProfileModel>>>(UiState.Loading)
-    val friendsMomentsState: StateFlow<UiState<List<ProfileModel>>> =
+        MutableStateFlow<UiState<List<MomentModel>>>(UiState.Loading)
+    val friendsMomentsState: StateFlow<UiState<List<MomentModel>>> =
         _friendsMomentsState.asStateFlow()
 
-    private val _nearbyMomentsState = MutableStateFlow<UiState<List<ProfileModel>>>(UiState.Loading)
-    val nearbyMomentsState: StateFlow<UiState<List<ProfileModel>>> =
+    private val _nearbyMomentsState = MutableStateFlow<UiState<List<MomentModel>>>(UiState.Loading)
+    val nearbyMomentsState: StateFlow<UiState<List<MomentModel>>> =
         _nearbyMomentsState.asStateFlow()
 
     private val _nearbyPostsState = MutableStateFlow<UiState<List<PostModel>>>(UiState.Loading)
@@ -75,6 +82,34 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
             }
         }
     }
+
+    fun loadMyDailyMoments() {
+        viewModelScope.launch {
+            if (isMyDailyMomentsLoadingFirstTime) {
+                _myDailyMomentsState.value = UiState.Loading
+            }
+            try {
+                sdk.getMyDailyMoments(
+                    onSuccess = { moments ->
+                        isMyDailyMomentsLoadingFirstTime = false
+                        _myDailyMomentsState.value = UiState.Success(moments)
+                    },
+                    onFailure = { error ->
+                        isMyDailyMomentsLoadingFirstTime = true
+                        _myDailyMomentsState.value = UiState.Error(error)
+                    }
+                )
+            } catch (e: Exception) {
+                _myDailyMomentsState.value = UiState.Error(
+                    error = ErrorModel(
+                        message = "Network error. Please try again later.",
+                        code = 500
+                    )
+                )
+            }
+        }
+    }
+
 
     fun loadFriendsMoments() {
         viewModelScope.launch {

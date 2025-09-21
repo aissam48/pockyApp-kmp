@@ -157,10 +157,10 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
         }
     }
 
-    fun responseRequestChat(id: String, status: Boolean, senderID: String) {
+    fun responseRequestChat(id: String, status: Boolean) {
         _responseChatRequestState.value = ChatRequestState.Loading
         viewModelScope.launch {
-            sdk.responseRequestChat(id, status, senderID, { success ->
+            sdk.responseRequestChat(id, status, { success ->
                 _responseChatRequestState.value = ChatRequestState.Success(success)
             }, { error ->
                 _responseChatRequestState.value = ChatRequestState.Error(error)
@@ -199,11 +199,6 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
                 _unBlockState.value = UnBlockState.Error(error)
             })
         }
-    }
-
-    fun report(id: String) {
-
-
     }
 
     fun follow(id: String) {
