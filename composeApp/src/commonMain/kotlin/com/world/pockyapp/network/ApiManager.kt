@@ -1229,6 +1229,33 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     }
 
+    suspend fun cancelChatRequest(
+        requestID: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.delete("$baseUrl/operations/cancel-chat-request") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("requestId", requestID)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody.message)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+
+    }
+
 
     suspend fun getMyMoments(
         onSuccess: (List<MomentModel>) -> Unit,

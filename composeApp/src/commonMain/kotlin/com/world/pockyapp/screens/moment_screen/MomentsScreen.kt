@@ -39,7 +39,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.*
 
-// Story duration constants
 private const val STORY_DURATION_MS = 5000L
 private const val LONG_PRESS_THRESHOLD_MS = 200L
 

@@ -5,34 +5,27 @@ import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
@@ -48,236 +41,277 @@ import dev.jordond.compass.geolocation.Geolocator
 import dev.jordond.compass.geolocation.GeolocatorResult
 import dev.jordond.compass.geolocation.mobile
 import org.jetbrains.compose.resources.painterResource
-import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_arrow_right_white
 import pockyapp.composeapp.generated.resources.ic_close_black
 import java.io.File
 
-@OptIn(KoinExperimentalAPI::class)
+// 🔹 Dialog state sealed class
+sealed class DialogState {
+    object None : DialogState()
+    data class Success(val message: String) : DialogState()
+    data class Error(val message: String) : DialogState()
+    data class Loading(val message: String) : DialogState()
+}
+
+@OptIn(KoinExperimentalAPI::class, ExperimentalMaterial3Api::class)
 @Composable
 actual fun MomentPreview(
     navController: NavHostController,
     path: String,
     viewModel: MomentPreviewViewModel
 ) {
-
     val imageData = convertImageToByteArray(Uri.parse(path.replace("$", "/")), LocalContext.current)
-    println("MomentPreview $imageData")
-
     var isChecked by remember { mutableStateOf(false) }
-
     val uiState by viewModel.uiState.collectAsState()
 
-    var showDialog by remember { mutableStateOf(false) }
-    var showDialog2 by remember { mutableStateOf(false) }
-    var showDialog3 by remember { mutableStateOf(false) }
+    var dialogState by remember { mutableStateOf<DialogState>(DialogState.None) }
+    var geoLocationModel by remember { mutableStateOf(GeoLocationModel()) }
 
-    val title = remember {
-        mutableStateOf("")
-    }
-    val scope = rememberCoroutineScope()
     val geolocator: Geolocator = Geolocator.mobile()
 
-    val geoLocationModel by remember { mutableStateOf(GeoLocationModel()) }
-
+    // 🔹 Handle location fetching when user enables toggle
     LaunchedEffect(isChecked) {
-        if (!isChecked) {
-            return@LaunchedEffect
-        }
-        title.value = "Fetching your location..."
-        showDialog3 = true
+        if (!isChecked) return@LaunchedEffect
+
+        dialogState = DialogState.Loading("Fetching your location...")
+
         when (val result: GeolocatorResult = geolocator.current(priority = Priority.HighAccuracy)) {
             is GeolocatorResult.Success -> {
                 val geocoder = Geocoder()
                 val place = geocoder.placeOrNull(result.data.coordinates)
-                geoLocationModel.latitude = result.data.coordinates.latitude
-                geoLocationModel.longitude = result.data.coordinates.longitude
-                geoLocationModel.street = place?.street.toString()
-                geoLocationModel.country = place?.country.toString()
-                geoLocationModel.postalCode = place?.postalCode.toString()
-                geoLocationModel.name = place?.name.toString()
-
-                println(geoLocationModel)
-                showDialog3 = false
+                geoLocationModel = geoLocationModel.copy(
+                    latitude = result.data.coordinates.latitude,
+                    longitude = result.data.coordinates.longitude,
+                    street = place?.street.orEmpty(),
+                    country = place?.country.orEmpty(),
+                    postalCode = place?.postalCode.orEmpty(),
+                    name = place?.name.orEmpty()
+                )
+                dialogState = DialogState.None
             }
-
             is GeolocatorResult.Error -> {
-                showDialog3 = false
-                when (result) {
-                    is GeolocatorResult.NotSupported -> {
-                        isChecked = false
-                        title.value = "Enable GPS"
-                        showDialog2 = true
-                    }
-
-                    is GeolocatorResult.NotFound -> {
-                        isChecked = false
-                    }
-
-                    is GeolocatorResult.PermissionError -> {
-                        isChecked = false
-                    }
-
-                    is GeolocatorResult.GeolocationFailed -> {
-                        isChecked = false
-                    }
-
-                    else -> {
-                        isChecked = false
-                    }
+                isChecked = false
+                dialogState = when (result) {
+                    is GeolocatorResult.NotSupported ->
+                        DialogState.Error("Please enable GPS to share location")
+                    else ->
+                        DialogState.Error("Unable to get your location")
                 }
             }
         }
+    }
 
-
-    }
-    if (showDialog) {
-        CustomDialogSuccess(
-            title = title.value,
-            action = "Close",
-            onCancel = {
-                showDialog = false
-                navController.popBackStack()
-            }
-        )
-    }
-    if (showDialog2) {
-        CustomDialogSuccess(
-            title = title.value,
-            action = "Close",
-            onCancel = {
-                showDialog2 = false
-                //navController.popBackStack()
-            }
-        )
-    }
-    if (showDialog3) {
-        CustomDialogLoading(
-            title = title.value,
-        )
-    }
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
+            is MomentPreviewUiState.Success -> {
+                dialogState = DialogState.Success("Your moment has been shared successfully")
+
+            }
+            is MomentPreviewUiState.Error -> {
+                dialogState = DialogState.Error(state.error.message)
+            }
             is MomentPreviewUiState.Loading -> {
 
             }
-
-            is MomentPreviewUiState.Success -> {
-                title.value = "Your moment has shared successfully"
-                showDialog = true
-            }
-
-            is MomentPreviewUiState.Error -> {
-                title.value = state.error.message
-                showDialog = true
-            }
-
-            is MomentPreviewUiState.Idle -> {}
+            else -> {}
         }
     }
+
+    // 🔹 Show dialogs
+    when (val state = dialogState) {
+        is DialogState.Success -> CustomDialogSuccess(
+            title = state.message,
+            action = "OK",
+            onCancel = {
+                dialogState = DialogState.None
+                navController.popBackStack()
+            }
+        )
+        is DialogState.Error -> CustomDialogSuccess(
+            title = state.message,
+            action = "OK",
+            onCancel = { dialogState = DialogState.None }
+        )
+        is DialogState.Loading -> CustomDialogLoading(title = state.message)
+        DialogState.None -> {}
+    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = Color.DarkGray)
+                .background(Color(0xFF1A1A1A))
         ) {
-            Image(
-                painter = rememberAsyncImagePainter(path.replace("$", "/")),
-                contentDescription = "Captured Image",
+            // Moment Image Preview
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
-                contentScale = ContentScale.FillHeight,
-
-                )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
+                    .weight(1f)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent)
             ) {
+                Image(
+                    painter = rememberAsyncImagePainter(path.replace("$", "/")),
+                    contentDescription = "Moment Preview",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
-                Row(
-                    modifier = Modifier.align(Alignment.CenterStart),
-                    verticalAlignment = Alignment.CenterVertically
+            // Controls Section
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFF1A1A1A),
+                shadowElevation = 8.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
                 ) {
-                    Text(text = "Share to nearby", color = Color.White, fontSize = 13.sp)
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Switch(
-                        checked = isChecked,
-                        onCheckedChange = { isChecked = it },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color(0xFFF3C623),
-                            uncheckedThumbColor = Color.Gray
-                        )
-                    )
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .background(
-                            color = Color.Black,
-                            shape = RoundedCornerShape(15.dp)
-                        )
-                        .height(50.dp)
-                        .width(130.dp)
-                        .padding(5.dp)
-                        .align(Alignment.CenterEnd)
-                        .clickable {
-                            viewModel.shareMoment(imageData, isChecked, geoLocationModel)
-                        }
-
-                ) {
-
-                    when (uiState) {
-                        is MomentPreviewUiState.Loading -> {
+                    // Location Toggle Card
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF2A2A2A)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Box(
-                                contentAlignment = Alignment.Center,
                                 modifier = Modifier
-                                    .height(50.dp)
-                                    .width(130.dp)
+                                    .size(40.dp)
+                                    .background(
+                                        Color(0xFFDFC46B).copy(alpha = 0.1f),
+                                        CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator(modifier = Modifier.size(30.dp))
+                                Icon(
+                                    imageVector = Icons.Default.LocationOn,
+                                    contentDescription = "Location",
+                                    tint = Color(0xFFDFC46B),
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
-                        }
 
-                        else -> {
-                            Text("Share moment", color = Color.White)
+                            Spacer(modifier = Modifier.width(12.dp))
 
-                            Spacer(modifier = Modifier.size(15.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Share to nearby",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = "Let people nearby see your moment",
+                                    color = Color.Gray,
+                                    fontSize = 14.sp
+                                )
+                            }
 
-                            Image(
-                                painter = painterResource(Res.drawable.ic_arrow_right_white),
-                                contentDescription = null,
-                                modifier = Modifier.size(30.dp)
+                            Switch(
+                                checked = isChecked,
+                                onCheckedChange = { isChecked = it },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color(0xFFDFC46B),
+                                    checkedTrackColor = Color(0xFFDFC46B).copy(alpha = 0.5f),
+                                    uncheckedThumbColor = Color.Gray,
+                                    uncheckedTrackColor = Color.Gray.copy(alpha = 0.3f)
+                                )
                             )
                         }
+                    }
 
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Share Button
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .background(
+                                Color(0xFFDFC46B),
+                                RoundedCornerShape(16.dp)
+                            )
+                            .clickable{
+                                viewModel.shareMoment(imageData, isChecked, geoLocationModel)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        when (uiState) {
+                            is MomentPreviewUiState.Loading -> {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = Color.White,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = "Sharing...",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+                            else -> {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "Share Moment",
+                                        color = Color.White,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Image(
+                                        painter = painterResource(Res.drawable.ic_arrow_right_white),
+                                        contentDescription = "Share",
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        Image(
-            painter = painterResource(Res.drawable.ic_close_black),
-            contentDescription = null,
+        // Close Button
+        Box(
             modifier = Modifier
-                .padding(start = 15.dp, top = 15.dp)
-                .align(Alignment.TopStart)
+                .padding(16.dp)
                 .size(40.dp)
-                .clickable {
-                    navController.popBackStack()
-                })
+                .background(
+                    Color.White.copy(alpha = 0.5f),
+                    CircleShape
+                )
+                .clickable { navController.popBackStack() }
+                .align(Alignment.TopStart),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.ic_close_black),
+                contentDescription = "Close",
+                modifier = Modifier.size(20.dp)
+            )
+        }
     }
 
-
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.clearUiState()
+        }
+    }
 }
 
 private fun convertImageToByteArray(uri: Uri, context: Context): ByteArray {

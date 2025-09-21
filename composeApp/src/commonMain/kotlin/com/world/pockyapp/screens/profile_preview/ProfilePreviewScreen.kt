@@ -114,12 +114,12 @@ fun ProfilePreviewScreen(
     val followState by viewModel.followState.collectAsState()
     val unFollowState by viewModel.unFollowState.collectAsState()
     val cancelFriendRequestState by viewModel.cancelFriendRequestState.collectAsState()
+    val cancelChatRequestState by viewModel.cancelChatRequestState.collectAsState()
 
     val momentsState by viewModel.momentsState.collectAsState()
 
     val myProfile = remember { mutableStateOf(ProfileModel()) }
     val profile = remember { mutableStateOf(ProfileModel()) }
-    val posts = remember { mutableStateOf(mutableSetOf<PostModel>()) }
 
     LaunchedEffect(Unit) {
         viewModel.getMyProfile()
@@ -137,7 +137,8 @@ fun ProfilePreviewScreen(
         unFollowState,
         acceptRequestState,
         rejectRequestState,
-        cancelFriendRequestState
+        cancelFriendRequestState,
+        cancelChatRequestState
     ) {
         viewModel.getProfile(id = id)
     }
@@ -156,7 +157,6 @@ fun ProfilePreviewScreen(
         is BlockState.Success -> {
             viewModel.getProfile(id = id)
             viewModel.getPosts(id = id)
-            posts.value = mutableSetOf()
         }
 
         is BlockState.Error -> {}
@@ -995,7 +995,8 @@ fun ProfilePreviewScreen(
 
                                                                 "NOT_YET" -> {
                                                                     viewModel.cancelRequestChat(
-                                                                        profile.value.id
+                                                                        profile.value.chatRequest?.id
+                                                                            ?: ""
                                                                     )
                                                                 }
 

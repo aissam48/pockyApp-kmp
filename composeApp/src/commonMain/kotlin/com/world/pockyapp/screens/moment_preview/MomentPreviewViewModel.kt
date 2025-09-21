@@ -6,6 +6,7 @@ import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.GeoLocationModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +24,7 @@ class MomentPreviewViewModel(private val sdk: ApiManager) :
     ViewModel() {
 
     lateinit var fileName: String
-    lateinit var imageByteArray:ByteArray
+    lateinit var imageByteArray: ByteArray
 
 
     private val _profileState = MutableStateFlow<ProfileModel?>(null)
@@ -34,16 +35,19 @@ class MomentPreviewViewModel(private val sdk: ApiManager) :
 
 
     fun shareMoment(byteArray: ByteArray?, isNearby: Boolean, geoLocationModel: GeoLocationModel) {
-
         viewModelScope.launch {
             _uiState.value = MomentPreviewUiState.Loading
-            sdk.shareMoment(byteArray,isNearby,geoLocationModel, { success ->
+            sdk.shareMoment(byteArray, isNearby, geoLocationModel, { success ->
                 _uiState.value = MomentPreviewUiState.Success()
 
             }, { error ->
                 _uiState.value = MomentPreviewUiState.Error(error)
             })
         }
+    }
+
+    fun clearUiState() {
+        _uiState.value = MomentPreviewUiState.Idle
     }
 }
 

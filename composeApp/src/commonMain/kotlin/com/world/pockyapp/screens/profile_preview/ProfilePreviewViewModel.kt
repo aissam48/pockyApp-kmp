@@ -70,6 +70,10 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
         MutableStateFlow<CancelFriendRequestState>(CancelFriendRequestState.Idle)
     val cancelFriendRequestState: StateFlow<CancelFriendRequestState> = _cancelFriendRequestState.asStateFlow()
 
+    private val _cancelChatRequestState =
+        MutableStateFlow<CancelChatRequestState>(CancelChatRequestState.Idle)
+    val cancelChatRequestState: StateFlow<CancelChatRequestState> = _cancelChatRequestState.asStateFlow()
+
     private val _momentsState =
         MutableStateFlow<MomentsState>(MomentsState.Idle)
     val momentsState: StateFlow<MomentsState> = _momentsState.asStateFlow()
@@ -261,7 +265,14 @@ class ProfilePreviewViewModel(private val sdk: ApiManager) : ViewModel() {
     }
 
     fun cancelRequestChat(id: String) {
-
+        _cancelChatRequestState.value = CancelChatRequestState.Loading
+        viewModelScope.launch {
+            sdk.cancelChatRequest(id, { success ->
+                _cancelChatRequestState.value = CancelChatRequestState.Success(success)
+            }, { error ->
+                _cancelChatRequestState.value = CancelChatRequestState.Error(error)
+            })
+        }
     }
 }
 
@@ -327,6 +338,12 @@ sealed class CancelFriendRequestState {
     data object Idle : CancelFriendRequestState()
     data class Success(val message: String) : CancelFriendRequestState()
     data class Error(val error: ErrorModel) : CancelFriendRequestState()
+}
+sealed class CancelChatRequestState {
+    data object Loading : CancelChatRequestState()
+    data object Idle : CancelChatRequestState()
+    data class Success(val message: String) : CancelChatRequestState()
+    data class Error(val error: ErrorModel) : CancelChatRequestState()
 }
 sealed class MomentsState {
     data object Loading : MomentsState()
