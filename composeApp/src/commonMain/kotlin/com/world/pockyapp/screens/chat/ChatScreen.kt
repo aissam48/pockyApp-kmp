@@ -55,6 +55,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
@@ -93,12 +96,30 @@ fun ChatScreen(
 
     viewModel.conversationID = conversationID
 
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    viewModel.subscribeToConversation(conversationID)
+    //viewModel.subscribeToConversation(conversationID)
 
-    DisposableEffect(Unit){
+    DisposableEffect(lifecycleOwner){
+
+        val observer = LifecycleEventObserver { _, event ->
+
+            println("ChatScreen event $event")
+            when(event){
+                Lifecycle.Event.ON_PAUSE -> {}
+                Lifecycle.Event.ON_RESUME -> {viewModel.unSubscribeToConversation(conversationID)}
+                Lifecycle.Event.ON_CREATE -> {}
+                Lifecycle.Event.ON_START -> {}
+                Lifecycle.Event.ON_STOP -> viewModel.subscribeToConversation(conversationID)
+                Lifecycle.Event.ON_DESTROY -> {}
+                Lifecycle.Event.ON_ANY -> {}
+            }
+
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
-            viewModel.unSubscribeToConversation(conversationID)
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
