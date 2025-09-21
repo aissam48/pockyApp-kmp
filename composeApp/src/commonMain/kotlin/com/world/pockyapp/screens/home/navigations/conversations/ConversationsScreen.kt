@@ -400,6 +400,8 @@ fun ConversationItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isFriend =  true // Adjust based on your friend status field
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -412,28 +414,55 @@ fun ConversationItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Profile Image
+            // Profile Image with Friend Indicator
             Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .background(
-                        Color.Gray.copy(alpha = 0.1f),
-                        CircleShape
-                    )
+                modifier = Modifier.size(60.dp)
             ) {
-                AsyncImage(
-                    model = getUrl(conversation.profile.photoID),
-                    contentDescription = "Profile Photo",
-                    contentScale = ContentScale.Crop,
+                // Profile Image Background Ring
+                Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape),
-                    placeholder = painterResource(Res.drawable.ic_placeholder),
-                    error = painterResource(Res.drawable.ic_placeholder),
-                )
+                        .size(60.dp)
+                        .background(
+                            if (isFriend) Color(0xFFDFC46B) else Color.Gray.copy(alpha = 0.2f),
+                            CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AsyncImage(
+                        model = getUrl(conversation.profile.photoID),
+                        contentDescription = "Profile Photo",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(54.dp)
+                            .clip(CircleShape),
+                        placeholder = painterResource(Res.drawable.ic_placeholder),
+                        error = painterResource(Res.drawable.ic_placeholder),
+                    )
+                }
+
+                // Friend Badge
+                if (isFriend) {
+                    Box(
+                        modifier = Modifier
+                            .size(18.dp)
+                            .background(
+                                Color(0xFFDFC46B),
+                                CircleShape
+                            )
+                            .align(Alignment.BottomEnd),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "✓",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -442,14 +471,38 @@ fun ConversationItem(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(
-                    text = "${conversation.profile.firstName} ${conversation.profile.lastName}",
-                    color = Color.Black,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${conversation.profile.firstName} ${conversation.profile.lastName}",
+                        color = Color.Black,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    // Friend Status Badge
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                if (isFriend) Color(0xFFDFC46B).copy(alpha = 0.15f) else Color.Gray.copy(alpha = 0.15f),
+                                RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = if (isFriend) "Friend" else "Contact",
+                            color = if (isFriend) Color(0xFFDFC46B) else Color.Gray,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -464,7 +517,7 @@ fun ConversationItem(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Time
+            // Time and Status
             Column(
                 horizontalAlignment = Alignment.End
             ) {
@@ -476,12 +529,15 @@ fun ConversationItem(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Unread indicator (you can implement unread count logic)
-                // Box(
-                //     modifier = Modifier
-                //         .size(8.dp)
-                //         .background(Color(0xFFE91E63), CircleShape)
-                // )
+                // Connection Status Dot
+                /*Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(
+                            if (isFriend) Color(0xFF10B981) else Color(0xFFDFC46B),
+                            CircleShape
+                        )
+                )*/
             }
         }
     }

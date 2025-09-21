@@ -5,76 +5,308 @@ import GoogleMaps
 import GoogleMapsUtils
 
 struct GoogleMapView: UIViewRepresentable {
-
-    private let googleMapsViewModel: GoogleMapsViewModel
-
+    
+    private let googleMapsVM: GoogleMapsViewModel
+    private let momentsVM: MomentsViewModel
+    private let profileVM: ProfileViewModel
+    
     init() {
-        // This should work now since Koin is already initialized
-        googleMapsViewModel = ViewModelProvider().getGoogleMapsViewModel()
-
+        googleMapsVM = ViewModelProvider().getGoogleMapsViewModel()
+        momentsVM = ViewModelProvider().getMomentsViewModel()
+        profileVM = ViewModelProvider().getProfileViewModel()
     }
-
+    
     func makeUIView(context: Context) -> GMSMapView {
-        let options = GMSMapViewOptions()
-
-        googleMapsViewModel.loadGlobalMoments()
-
-        options.camera = GMSCameraPosition.camera(
-            withLatitude: 33.5731,
-            longitude: -7.5898,
-            zoom: 12.0
-        )
-        let mapView = GMSMapView(options: options)
-
-        // Creates a marker in the center of the map.
-
-
-        // Add heatmap
-        addHeatmap(to: mapView)
-
+        let camera = GMSCameraPosition(latitude: 33.6, longitude: -7.6, zoom: 6.0)
+        let mapView = GMSMapView(frame: .zero, camera: camera)
+        mapView.delegate = context.coordinator
+        mapView.mapType = .terrain
+        
+        // Set up coordinator
+        context.coordinator.parent = self
+        context.coordinator.mapView = mapView
+        context.coordinator.googleMapsVM = googleMapsVM
+        context.coordinator.momentsVM = momentsVM
+        context.coordinator.profileVM = profileVM
+        
+        // Load data
+        profileVM.getProfile()
+        googleMapsVM.loadGlobalMoments()
+        
+        // Start observation
+        context.coordinator.startObservation()
+        
+        print("🗺️ GoogleMapView created, starting observation")
         return mapView
     }
-
+    
     func updateUIView(_ uiView: GMSMapView, context: Context) {
+        // Updates handled by coordinator
     }
-
-    private func addHeatmap(to mapView: GMSMapView) {
-        // Sample data points for heatmap (you can replace with your actual data)
-        let heatmapData: [GMUWeightedLatLng] = [
-            GMUWeightedLatLng(coordinate: CLLocationCoordinate2D(latitude: 33.5731, longitude: -7.5898), intensity: 1.0), // Casablanca
-            GMUWeightedLatLng(coordinate: CLLocationCoordinate2D(latitude: 33.7000, longitude: -7.3500), intensity: 0.8), // Between Casa & Rabat
-            GMUWeightedLatLng(coordinate: CLLocationCoordinate2D(latitude: 33.8500, longitude: -7.1000), intensity: 0.9), // Midpoint closer to Rabat
-            GMUWeightedLatLng(coordinate: CLLocationCoordinate2D(latitude: 33.9500, longitude: -6.9500), intensity: 0.7),
-            GMUWeightedLatLng(coordinate: CLLocationCoordinate2D(latitude: 34.0209, longitude: -6.8416), intensity: 0.6), // Rabat
-            GMUWeightedLatLng(coordinate: CLLocationCoordinate2D(latitude: 33.8000, longitude: -7.2000), intensity: 0.8),
-            GMUWeightedLatLng(coordinate: CLLocationCoordinate2D(latitude: 33.9000, longitude: -7.0000), intensity: 0.5),
-            GMUWeightedLatLng(coordinate: CLLocationCoordinate2D(latitude: 33.7500, longitude: -7.3000), intensity: 0.9),
-            GMUWeightedLatLng(coordinate: CLLocationCoordinate2D(latitude: 33.8200, longitude: -7.1500), intensity: 0.7),
-            GMUWeightedLatLng(coordinate: CLLocationCoordinate2D(latitude: 33.8800, longitude: -7.0500), intensity: 0.8)
-        ]
-
-
-        // Create heatmap layer
-        let heatmapLayer = GMUHeatmapTileLayer()
-        heatmapLayer.weightedData = heatmapData
-
-        // Customize heatmap appearance (optional)
-        heatmapLayer.radius = 80 // Radius of influence for each point
-        heatmapLayer.opacity = 0.7 // Transparency of the heatmap
-
-        let gradientColors: [UIColor] = [.yellow, .orange, .red]
-        let gradientStartPoints: [NSNumber] = [0.2, 0.5, 1.0]
-
-        heatmapLayer.gradient = GMUGradient(
-            colors: gradientColors,
-            startPoints: gradientStartPoints,
-            colorMapSize: 256
-        )
-
-        // Add heatmap to map
-        heatmapLayer.map = mapView
+    
+    func makeCoordinator() -> Coordinator {
+        return Coordinator()
+    }
+    
+    // MARK: - Coordinator
+    class Coordinator: NSObject, GMSMapViewDelegate {
+        var parent: GoogleMapView?
+        var mapView: GMSMapView?
+        var googleMapsVM: GoogleMapsViewModel?
+        var momentsVM: MomentsViewModel?
+        var profileVM: ProfileViewModel?
+        
+        private var currentHeatmapLayer: GMUHeatmapTileLayer?
+        private var observationTimer: Timer?
+        private var lastProcessedMomentsCount = -1
+        private var observationStarted = false
+        
+        func startObservation() {
+            guard let googleMapsVM = googleMapsVM, !observationStarted else { return }
+            
+            print("🔍 Starting observation")
+            observationStarted = true
+            
+            // Initial check
+            checkStateAndUpdate()
+            
+            // Use a timer to check state changes
+            observationTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+                self?.checkStateAndUpdate()
+            }
+        }
+        
+        private func checkStateAndUpdate() {
+            guard let googleMapsVM = googleMapsVM else { return }
+            
+            // Get the current state
+            let currentState = googleMapsVM.globalMomentsState.value
+            
+            // Extract moments using multiple approaches
+            let moments = extractMoments(from: currentState)
+            
+            // Update heatmap if we have new data
+            if !moments.isEmpty && moments.count != lastProcessedMomentsCount {
+                print("🎨 New data detected (\(moments.count) moments), updating heatmap")
+                updateHeatmap(with: moments)
+                lastProcessedMomentsCount = moments.count
+            }
+        }
+        
+        private func extractMoments(from state: Any) -> [MomentModel] {
+            // Approach 1: Check if it's our custom wrapper
+            if let successState = state as? UiStateSuccess {
+                return successState.data
+            }
+            
+            // Approach 2: Use reflection to extract data
+            let mirror = Mirror(reflecting: state)
+            
+            for child in mirror.children {
+                let label = child.label ?? ""
+                
+                // Look for 'data' property
+                if label == "data", let moments = child.value as? [MomentModel] {
+                    return moments
+                }
+                
+                // Look for 'value' property that might contain data
+                if label == "value" {
+                    let valueMirror = Mirror(reflecting: child.value)
+                    for valueChild in valueMirror.children {
+                        if valueChild.label == "data", let moments = valueChild.value as? [MomentModel] {
+                            return moments
+                        }
+                    }
+                }
+            }
+            
+            // Approach 3: Check if it's a KMP Success state
+            let stateString = String(describing: type(of: state))
+            if stateString.contains("Success") {
+                print("⚠️ Found Success state but couldn't extract data directly")
+                logStateProperties(state)
+            }
+            
+            return []
+        }
+        
+        private func logStateProperties(_ state: Any) {
+            print("🐛 Detailed state inspection for type: \(type(of: state))")
+            let mirror = Mirror(reflecting: state)
+            
+            for child in mirror.children {
+                let label = child.label ?? "unnamed"
+                let valueType = type(of: child.value)
+                print("  - \(label): \(valueType)")
+                
+                // Log string representation for debugging
+                if let stringConvertible = child.value as? CustomStringConvertible {
+                    print("    Value: \(stringConvertible.description)")
+                }
+            }
+        }
+        
+        private func updateHeatmap(with moments: [MomentModel]) {
+            guard let mapView = mapView else { return }
+            
+            // Remove existing heatmap
+            currentHeatmapLayer?.map = nil
+            
+            // Create heatmap data with validation
+            let heatmapData: [GMUWeightedLatLng] = moments.compactMap { moment in
+                let lat = moment.geoLocation.latitude
+                let lng = moment.geoLocation.longitude
+                
+                guard (-90...90).contains(lat) && (-180...180).contains(lng) else {
+                    print("❌ Invalid coordinates: lat=\(lat), lng=\(lng)")
+                    return nil
+                }
+                
+                return GMUWeightedLatLng(
+                    coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lng),
+                    intensity: 1.0
+                )
+            }
+            
+            guard !heatmapData.isEmpty else {
+                print("❌ No valid heatmap data to display")
+                return
+            }
+            
+            print("📍 Creating heatmap with \(heatmapData.count) valid points")
+            
+            // Create heatmap layer
+            let heatmapLayer = GMUHeatmapTileLayer()
+            heatmapLayer.weightedData = heatmapData
+            heatmapLayer.radius = 50
+            heatmapLayer.opacity = 0.7
+            
+            // Create gradient
+            let gradientColors: [UIColor] = [
+                UIColor(red: 1.0, green: 1.0, blue: 0.0, alpha: 0.0),
+                UIColor(red: 1.0, green: 1.0, blue: 0.0, alpha: 1.0),
+                UIColor(red: 1.0, green: 0.647, blue: 0.0, alpha: 1.0),
+                UIColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
+            ]
+            let gradientStartPoints: [NSNumber] = [0.0, 0.3, 0.7, 1.0]
+            
+            heatmapLayer.gradient = GMUGradient(
+                colors: gradientColors,
+                startPoints: gradientStartPoints,
+                colorMapSize: 256
+            )
+            
+            heatmapLayer.map = mapView
+            currentHeatmapLayer = heatmapLayer
+            
+            print("✅ Heatmap successfully updated!")
+        }
+        
+        // MARK: - GMSMapViewDelegate
+        func mapView(_ mapView: GMSMapView, didTapAt coordinate: CLLocationCoordinate2D) {
+            guard let googleMapsVM = googleMapsVM,
+                  let momentsVM = momentsVM,
+                  let profileVM = profileVM else { return }
+            
+            print("🎯 Map tapped at: \(coordinate)")
+            
+            // Get moments
+            let currentState = googleMapsVM.globalMomentsState.value
+            let moments = extractMoments(from: currentState)
+            
+            guard !moments.isEmpty else {
+                print("❌ No moments available for tap handling")
+                return
+            }
+            
+            // Handle map click
+            let momentsAround = handleMapClick(
+                clickedCoordinate: coordinate,
+                moments: moments,
+                zoomLevel: mapView.camera.zoom
+            )
+            
+            guard !momentsAround.isEmpty else {
+                print("No moments found around tap location")
+                return
+            }
+            
+            print("✅ Found \(momentsAround.count) moments around tap")
+            
+            // Update MomentsViewModel
+            momentsVM.moments = [momentsAround]
+            momentsVM.selectedIndex = 0
+            
+            // Set myID based on profile state
+            let profileState = profileVM.profileState.value
+            if let profileString = String(describing: profileState).lowercased(),
+               profileString.contains("success"),
+               let profileMirror = Mirror(reflecting: profileState).children.first(where: { $0.label == "profile" }),
+               let profile = profileMirror.value as? ProfileModel {
+                momentsVM.myID = profile.id
+            } else {
+                momentsVM.myID = ""
+            }
+            
+            print("🎯 Ready to navigate to moments screen")
+        }
+        
+        // MARK: - Helper Methods
+        private func handleMapClick(
+            clickedCoordinate: CLLocationCoordinate2D,
+            moments: [MomentModel],
+            zoomLevel: Float
+        ) -> [MomentModel] {
+            let baseRadius = 20000.0
+            let radiusInMeters = max(50.0, min(50000.0, baseRadius / pow(Double(zoomLevel) / 6.0, 1.5)))
+            
+            return moments.filter { moment in
+                haversineDistance(
+                    lat1: clickedCoordinate.latitude,
+                    lon1: clickedCoordinate.longitude,
+                    lat2: moment.geoLocation.latitude,
+                    lon2: moment.geoLocation.longitude
+                ) <= radiusInMeters
+            }
+        }
+        
+        private func haversineDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double) -> Double {
+            let R = 6371000.0
+            let dLat = (lat2 - lat1).degreesToRadians
+            let dLon = (lon2 - lon1).degreesToRadians
+            let a = sin(dLat / 2) * sin(dLat / 2) +
+                    cos(lat1.degreesToRadians) *
+                    cos(lat2.degreesToRadians) *
+                    sin(dLon / 2) * sin(dLon / 2)
+            let c = 2 * atan2(sqrt(a), sqrt(1 - a))
+            return R * c
+        }
+        
+        deinit {
+            observationTimer?.invalidate()
+            print("🗑️ GoogleMapView Coordinator deinitialized")
+        }
     }
 }
+
+private extension Double {
+    var degreesToRadians: Double { self * .pi / 180.0 }
+}
+
+// MARK: - UiState wrapper helpers for Swift
+protocol UiStateValue {}
+
+struct UiStateSuccess: UiStateValue {
+    let data: [MomentModel]
+}
+
+struct ProfileUiStateSuccess: UiStateValue {
+    let profile: ProfileModel
+}
+
+
+
 
 struct CameraSwiftUIView: UIViewControllerRepresentable {
 

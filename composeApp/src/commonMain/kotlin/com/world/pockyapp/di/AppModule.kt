@@ -64,4 +64,11 @@ object ViewModelProvider {
     fun getGoogleMapsViewModel(): GoogleMapsViewModel {
         return KoinPlatform.getKoin().get()
     }
+    fun getMomentsViewModel(): MomentsViewModel {
+        return KoinPlatform.getKoin().get()
+    }
+    fun getProfileViewModel(): ProfileViewModel {
+        return KoinPlatform.getKoin().get()
+    }
+
 }

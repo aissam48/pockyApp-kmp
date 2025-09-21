@@ -151,7 +151,7 @@ private fun handleMapClick(
     zoomLevel: Float
 ): List<MomentModel> {
     val baseRadius = 20000.0
-    val radiusInMeters = baseRadius / (zoomLevel / 6.0).pow(1.5)
+    val radiusInMeters = (baseRadius / (zoomLevel / 6.0).pow(1.5)).coerceIn(50.0, 50000.0)
     return moments.filter { point ->
         haversineDistance(
             clickedLatLng.latitude,
