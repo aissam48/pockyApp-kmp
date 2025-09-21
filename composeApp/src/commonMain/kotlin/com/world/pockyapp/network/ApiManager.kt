@@ -1616,5 +1616,34 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     }
 
 
+
+
+    suspend fun updateFcmToken(
+        tokenFcm: String,
+        onSuccess: (ResponseMessageModel) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.put("$baseUrl/operations/update-fcm-token") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("tokenFcm" to tokenFcm))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
+
 }
 

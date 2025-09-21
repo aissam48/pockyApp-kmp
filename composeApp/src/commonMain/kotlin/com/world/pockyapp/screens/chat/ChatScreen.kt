@@ -34,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -91,6 +92,15 @@ fun ChatScreen(
     val cancelConversation by viewModel.cancelConversationState.collectAsState()
 
     viewModel.conversationID = conversationID
+
+
+    viewModel.subscribeToConversation(conversationID)
+
+    DisposableEffect(Unit){
+        onDispose {
+            viewModel.unSubscribeToConversation(conversationID)
+        }
+    }
 
     LaunchedEffect(newMessages) {
         messages.addAll(newMessages)
@@ -422,6 +432,7 @@ fun ChatScreen(
             }
         }
     }
+
 }
 
 @Composable
@@ -507,4 +518,6 @@ fun MessageBubble(
             }
         }
     }
+
+
 }

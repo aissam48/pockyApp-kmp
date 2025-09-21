@@ -37,7 +37,7 @@ val appModule = module {
     viewModel { SplashViewModel(dataStore = get()) }
     viewModel { LoginScreenViewModel(sdk = get(), dataStore = get()) }
     viewModel { RegisterScreenViewModel(sdk = get(), dataStore = get()) }
-    viewModel { HomeViewModel(sdk = get()) }
+    single { HomeViewModel(sdk = get()) }
     viewModel { PostViewModel(sdk = get()) }
     viewModel { ProfileViewModel(sdk = get()) }
     viewModel { DiscoverViewModel(sdk = get()) }
@@ -46,7 +46,7 @@ val appModule = module {
     viewModel { SearchViewModel(sdk = get()) }
     viewModel { ProfilePreviewViewModel(sdk = get()) }
     viewModel { ChangePasswordViewModel(sdk = get()) }
-    viewModel { ChatViewModel(sdk = get()) }
+    single { ChatViewModel(sdk = get()) }
     viewModel { ConversationsViewModel(sdk = get()) }
     single { MomentsViewModel(sdk = get()) }
     viewModel { ViewPostViewModel(sdk = get()) }

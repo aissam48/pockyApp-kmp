@@ -13,8 +13,10 @@ import dev.icerock.moko.socket.SocketOptions
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -66,6 +68,12 @@ class ChatViewModel(private val sdk: ApiManager) :
     val cancelConversationState: StateFlow<CancelChatUiState> =
         _cancelConversationState.asStateFlow()
 
+    private val _subscribeConversationSharedFlow = MutableSharedFlow<String>()
+    val subscribeConversationSharedFlow = _subscribeConversationSharedFlow.asSharedFlow()
+
+    private val _unSubscribeConversationSharedFlow = MutableSharedFlow<String>()
+    val unSubscribeConversationSharedFlow = _unSubscribeConversationSharedFlow.asSharedFlow()
+
     fun cancelConversation(
         conversationID: String,
         chatRequestID: String,
@@ -112,8 +120,24 @@ class ChatViewModel(private val sdk: ApiManager) :
 
     lateinit var socket: Socket
 
-    init {
 
+    fun unSubscribeToConversation(conversationID: String) {
+        viewModelScope.launch {
+            delay(1000)
+            _unSubscribeConversationSharedFlow.emit(conversationID)
+            println("ChatViewModel unSubscribe $conversationID")
+        }
+    }
+
+    fun subscribeToConversation(conversationID: String) {
+        viewModelScope.launch {
+            delay(1000)
+            _subscribeConversationSharedFlow.emit(conversationID)
+            println("ChatViewModel subscribe $conversationID")
+        }
+    }
+
+    init {
 
         viewModelScope.launch {
             delay(1000)
@@ -172,6 +196,10 @@ class ChatViewModel(private val sdk: ApiManager) :
             }
         }
     }
+
+
+
+
 
 }
 
