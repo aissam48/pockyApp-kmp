@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -154,13 +155,18 @@ fun ChatScreen(
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
-        ) {
+        )
+        {
             // Modern Header
-            Surface(
+            val isFriend =  profile?.friendRequest?.status == "ACCEPTED"
+
+            Card (
                 modifier = Modifier.fillMaxWidth(),
-                color = Color.White,
-                shadowElevation = 2.dp
-            ) {
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                shape = RoundedCornerShape(0.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            )
+            {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -187,7 +193,7 @@ fun ChatScreen(
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    // Profile Section
+
                     Row(
                         modifier = Modifier
                             .weight(1f)
@@ -195,65 +201,122 @@ fun ChatScreen(
                                 navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${profile?.id}")
                             },
                         verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    )
+                    {
+                        // Profile Image with Friend Indicator
                         Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .background(
-                                    Color.Gray.copy(alpha = 0.1f),
-                                    CircleShape
-                                )
+                            modifier = Modifier.size(40.dp)
                         ) {
-                            AsyncImage(
-                                model = getUrl(profile?.photoID),
-                                contentDescription = "Profile Photo",
-                                contentScale = ContentScale.Crop,
+                            // Profile Image Background Ring
+                            Box(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape),
-                                placeholder = painterResource(Res.drawable.ic_placeholder),
-                                error = painterResource(Res.drawable.ic_placeholder),
-                            )
+                                    .size(40.dp)
+                                    .background(
+                                        if (isFriend) Color(0xFFDFC46B) else Color.Gray.copy(alpha = 0.2f),
+                                        CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                AsyncImage(
+                                    model = getUrl(profile?.photoID),
+                                    contentDescription = "Profile Photo",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape),
+                                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                                    error = painterResource(Res.drawable.ic_placeholder),
+                                )
+                            }
+
+                            // Friend Badge
+                            if (isFriend) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(14.dp)
+                                        .background(
+                                            Color(0xFFDFC46B),
+                                            CircleShape
+                                        )
+                                        .align(Alignment.BottomEnd),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "✓",
+                                        color = Color.White,
+                                        fontSize = 8.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
                         }
 
                         Spacer(modifier = Modifier.width(12.dp))
 
                         Column {
-                            Text(
-                                text = "${profile?.firstName ?: ""} ${profile?.lastName ?: ""}",
-                                color = Color.Black,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "${profile?.firstName ?: ""} ${profile?.lastName ?: ""}",
+                                    color = Color.Black,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.weight(1f, fill = false)
+                                )
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                // Friend Status Badge
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            if (isFriend) Color(0xFFDFC46B).copy(alpha = 0.15f) else Color.Gray.copy(alpha = 0.15f),
+                                            RoundedCornerShape(6.dp)
+                                        )
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = if (isFriend) "Friend" else "Contact",
+                                        color = if (isFriend) Color(0xFFDFC46B) else Color.Gray,
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
                         }
                     }
 
                     // Cancel Chat Button
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                Color(0xFFEF4444),
-                                RoundedCornerShape(8.dp)
+                    if (!isFriend){
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    Color(0xFFEF4444),
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable { showDialogResult = true }
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+
+                            Text(
+                                text = "End Chat",
+                                color = Color.White,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 12.sp
                             )
-                            .clickable { showDialogResult = true }
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "End Chat",
-                            color = Color.White,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 12.sp
-                        )
+                        }
                     }
+
                 }
             }
 
-            // Messages Area
+            Spacer(modifier = Modifier.height(0.5.dp))
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .background(Color(0xFFF8F9FA))
+                    .background(Color(0xFFFFFFFF))
                     .padding(horizontal = 16.dp),
                 state = listState,
                 reverseLayout = true,
@@ -284,7 +347,7 @@ fun ChatScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Card(
@@ -292,12 +355,13 @@ fun ChatScreen(
                         shape = RoundedCornerShape(24.dp),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA)),
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                    ) {
+                    )
+                    {
                         OutlinedTextField(
                             value = message.value,
                             onValueChange = { message.value = it },
                             singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().height(55.dp),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 textColor = Color.Black,
@@ -306,11 +370,15 @@ fun ChatScreen(
                                 unfocusedBorderColor = Color.Transparent,
                                 backgroundColor = Color.Transparent
                             ),
+                            textStyle = TextStyle(
+                                fontSize = 12.sp,
+                                color = Color.Black
+                            ),
                             placeholder = {
                                 Text(
                                     "Type a message...",
                                     color = Color.Gray,
-                                    fontSize = 16.sp
+                                    fontSize = 12.sp
                                 )
                             }
                         )
@@ -321,7 +389,7 @@ fun ChatScreen(
                     // Send Button
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(40.dp)
                             .background(
                                 if (message.value.isNotBlank()) Color(0xFFDFC46B) else Color.Gray.copy(alpha = 0.3f),
                                 CircleShape
@@ -385,7 +453,7 @@ fun MessageBubble(
                         bottomEnd = 4.dp
                     ),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFDFC46B)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
                 ) {
                     Text(
                         text = message.content,
@@ -419,7 +487,7 @@ fun MessageBubble(
                         bottomEnd = 20.dp
                     ),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
                 ) {
                     Text(
                         text = message.content,

@@ -163,6 +163,7 @@ kotlin {
             // Optional - Location permissions for mobile
             implementation(libs.compass.permissions.mobile)
 
+
         }
     }
 }
@@ -202,6 +203,6 @@ dependencies {
     }
     commonMainApi("dev.icerock.moko:socket-io:0.5.0")
 
-
+    api("com.google.firebase:firebase-messaging:23.4.0")
 }
 

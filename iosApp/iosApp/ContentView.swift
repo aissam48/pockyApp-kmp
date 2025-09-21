@@ -239,15 +239,7 @@ struct GoogleMapView: UIViewRepresentable {
             momentsVM.selectedIndex = 0
             
             // Set myID based on profile state
-            let profileState = profileVM.profileState.value
-            if let profileString = String(describing: profileState).lowercased(),
-               profileString.contains("success"),
-               let profileMirror = Mirror(reflecting: profileState).children.first(where: { $0.label == "profile" }),
-               let profile = profileMirror.value as? ProfileModel {
-                momentsVM.myID = profile.id
-            } else {
-                momentsVM.myID = ""
-            }
+           
             
             print("🎯 Ready to navigate to moments screen")
         }
