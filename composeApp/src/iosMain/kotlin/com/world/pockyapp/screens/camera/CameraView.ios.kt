@@ -16,20 +16,14 @@ import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitViewController
 import androidx.navigation.NavHostController
 import com.world.pockyapp.cameraViewController
-import com.world.pockyapp.mapViewController
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.screens.moment_preview.MomentPreviewViewModel
-import com.world.pockyapp.screens.settings.SettingsViewModel
-import platform.AVFoundation.*
-import platform.Foundation.*
-import kotlinx.cinterop.ExperimentalForeignApi
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
-import platform.darwin.NSObject
+import platform.AVFoundation.*
+import platform.Foundation.*
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.ic_capture_white
 import pockyapp.composeapp.generated.resources.ic_close_black
-import pockyapp.composeapp.generated.resources.ic_close_white
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
