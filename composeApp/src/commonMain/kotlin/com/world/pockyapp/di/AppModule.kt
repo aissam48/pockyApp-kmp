@@ -7,6 +7,7 @@ import com.world.pockyapp.screens.auth.register.RegisterScreenViewModel
 import com.world.pockyapp.screens.blocked.BlockedViewModel
 import com.world.pockyapp.screens.change_password.ChangePasswordViewModel
 import com.world.pockyapp.screens.chat.ChatViewModel
+import com.world.pockyapp.screens.control_account.ControlViewModel
 import com.world.pockyapp.screens.edit_location.EditLocationViewModel
 import com.world.pockyapp.screens.edit_profile.EditProfileViewModel
 import com.world.pockyapp.screens.friend_request.FriendRequestsViewModel
@@ -56,6 +57,8 @@ val appModule = module {
     viewModel { HotViewModel(sdk = get()) }
     viewModel { ReportProfileViewModel(sdk = get()) }
     viewModel { GoogleMapsViewModel(sdk = get()) }
+
+    viewModel { ControlViewModel(sdk = get()) }
     single { MomentPreviewViewModel(sdk = get()) }
 
 }

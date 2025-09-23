@@ -5,24 +5,23 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.world.pockyapp.screens.google_maps.MapComponentScreen
-import com.world.pockyapp.screens.google_maps.GoogleMapsScreen
 import com.world.pockyapp.network.models.model.MomentModel
-import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.network.models.model.StreetModel
-import com.world.pockyapp.screens.camera.CameraView
-import com.world.pockyapp.screens.edit_location.EditLocationScreen
-import com.world.pockyapp.screens.edit_profile.EditProfileScreen
-import com.world.pockyapp.screens.home.HomeScreen
 import com.world.pockyapp.screens.auth.login.LoginScreen
 import com.world.pockyapp.screens.blocked.BlockedScreen
+import com.world.pockyapp.screens.camera.CameraView
 import com.world.pockyapp.screens.change_password.ChangePasswordScreen
 import com.world.pockyapp.screens.chat.ChatScreen
+import com.world.pockyapp.screens.control_account.AccountControlScreen
+import com.world.pockyapp.screens.edit_location.EditLocationScreen
+import com.world.pockyapp.screens.edit_profile.EditProfileScreen
 import com.world.pockyapp.screens.friend_request.FriendRequestsScreen
+import com.world.pockyapp.screens.google_maps.GoogleMapsScreen
+import com.world.pockyapp.screens.google_maps.MapComponentScreen
+import com.world.pockyapp.screens.home.HomeScreen
 import com.world.pockyapp.screens.moment_by_locationscreen.MomentsByLocationScreen
 import com.world.pockyapp.screens.moment_preview.MomentPreview
 import com.world.pockyapp.screens.moment_screen.MomentsScreen
-import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.post_preview.PostPreview
 import com.world.pockyapp.screens.profile.ProfileScreen
 import com.world.pockyapp.screens.profile_preview.ProfilePreviewScreen
@@ -32,10 +31,7 @@ import com.world.pockyapp.screens.settings.SettingsScreen
 import com.world.pockyapp.screens.show_moment.ShowMoments
 import com.world.pockyapp.screens.splash_screen.SplashScreen
 import com.world.pockyapp.screens.view_post.ViewPostScreen
-import kotlinx.coroutines.NonCancellable.get
 import kotlinx.serialization.json.Json
-import org.koin.compose.viewmodel.koinViewModel
-import kotlin.coroutines.EmptyCoroutineContext.get
 
 @Composable
 fun NavigationHost(navController: NavHostController) {
@@ -107,6 +103,10 @@ fun NavigationHost(navController: NavHostController) {
 
         composable(NavRoutes.BLOCKED.route) {
             BlockedScreen(navController)
+        }
+
+        composable(NavRoutes.CONTROL_ACCOUNT.route) {
+            AccountControlScreen(navController)
         }
 
         composable(route = "${NavRoutes.MOMENTS.route}") { backStackEntry ->
