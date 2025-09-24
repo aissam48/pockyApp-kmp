@@ -701,12 +701,13 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
 
     suspend fun responseRequestChat(
         id: String,
+        senderId: String,
         status: Boolean,
         onSuccess: (String) -> Unit,
         onFailure: (ErrorModel) -> Unit
     ) {
         try {
-            val responseChatRequestModel = ResponseChatRequestModel(id, "senderID", status)
+            val responseChatRequestModel = ResponseChatRequestModel(id, senderId, status)
 
             val response: HttpResponse = client.post("$baseUrl/operations/response-request-chat") {
                 val token = getToken()

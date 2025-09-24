@@ -392,7 +392,9 @@ fun ProfilePreviewScreen(
                                                 .height(40.dp)
                                                 .width(120.dp)
                                                 .clickable {
-                                                    viewModel.rejectFriendRequest(profile.value.friendRequest?.id ?: "")
+                                                    viewModel.rejectFriendRequest(
+                                                        profile.value.friendRequest?.id ?: ""
+                                                    )
                                                 },
                                             contentAlignment = Alignment.Center
                                         ) {
@@ -434,7 +436,9 @@ fun ProfilePreviewScreen(
                                                 .height(40.dp)
                                                 .width(120.dp)
                                                 .clickable {
-                                                    viewModel.acceptFriendRequest(profile.value.friendRequest?.id ?: "")
+                                                    viewModel.acceptFriendRequest(
+                                                        profile.value.friendRequest?.id ?: ""
+                                                    )
                                                 },
                                             contentAlignment = Alignment.Center
                                         ) {
@@ -546,7 +550,11 @@ fun ProfilePreviewScreen(
                                                 .width(120.dp)
                                                 .clickable {
                                                     //viewModel.rejectChatRequest(profile.value.id)
-                                                    viewModel.responseRequestChat(profile.value.chatRequest?.id ?: "", false)
+                                                    viewModel.responseRequestChat(
+                                                        profile.value.chatRequest?.id ?: "",
+                                                        profile.value.chatRequest?.senderID ?: "",
+                                                        false
+                                                    )
                                                 },
                                             contentAlignment = Alignment.Center
                                         ) {
@@ -589,7 +597,11 @@ fun ProfilePreviewScreen(
                                                 .width(120.dp)
                                                 .clickable {
                                                     //viewModel.acceptChatRequest(profile.value.id)
-                                                    viewModel.responseRequestChat(profile.value.chatRequest?.id ?: "", true)
+                                                    viewModel.responseRequestChat(
+                                                        profile.value.chatRequest?.id ?: "",
+                                                        profile.value.chatRequest?.senderID ?: "",
+                                                        true
+                                                    )
                                                 },
                                             contentAlignment = Alignment.Center
                                         ) {

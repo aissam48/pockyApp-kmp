@@ -100,7 +100,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            contentPadding = PaddingValues(horizontal = 10.dp)
         ) {
             // Modern Header
             item {
@@ -153,7 +153,7 @@ fun SettingsScreen(
                         title = "Control Zone",
                         subtitle = "Control see moments and posts around you",
                         onClick = {
-                            navController.navigate("${NavRoutes.CONTROL_ACCOUNT.route}")
+                            navController.navigate(NavRoutes.CONTROL_ZONE.route)
                         }
                     )
 
@@ -162,7 +162,7 @@ fun SettingsScreen(
                         title = "Follower Visibility",
                         subtitle = "Control who can see your followers",
                         onClick = {
-                            navController.navigate("${NavRoutes.CONTROL_ACCOUNT.route}")
+                            navController.navigate(NavRoutes.CONTROL_ACCOUNT.route)
                         }
                     )
 
@@ -171,7 +171,7 @@ fun SettingsScreen(
                         title = "Activity Status",
                         subtitle = "Show when you're active",
                         onClick = {
-                            navController.navigate("${NavRoutes.CONTROL_ACCOUNT.route}")
+                            navController.navigate(NavRoutes.CONTROL_ACCOUNT.route)
                         }
                     )
 

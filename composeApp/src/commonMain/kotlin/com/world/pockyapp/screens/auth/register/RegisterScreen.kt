@@ -324,6 +324,7 @@ fun RegisterScreen(
 
                     PhoneNumberFieldWithCountryCode{ selectedCountryCode: CountryPhoneCode, phone: String->
                         phoneNumber.value = "${selectedCountryCode.code} $phone"
+                        phoneNumber.value = phone
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))

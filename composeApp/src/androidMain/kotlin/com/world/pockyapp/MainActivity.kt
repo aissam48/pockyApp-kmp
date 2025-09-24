@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.messaging.FirebaseMessaging
 import com.world.pockyapp.screens.chat.ChatViewModel
@@ -20,18 +22,20 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //WindowCompat.setDecorFitsSystemWindows(window, false) // Draw behind system bars
 
+        enableEdgeToEdge() // Add this
 
         lifecycleScope.launch {
 
-            homeViewModel.informInHomeSharedFlow.collect {
+            /*homeViewModel.informInHomeSharedFlow.collect {
                 FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val token = task.result
                         homeViewModel.updateFcmToken(token)
                     }
                 }
-            }
+            }*/
         }
 
         lifecycleScope.launch {

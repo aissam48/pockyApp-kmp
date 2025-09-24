@@ -51,11 +51,11 @@ fun AccountControlScreen(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            contentPadding = PaddingValues(horizontal = 10.dp)
         ) {
             item {
                 ModernHeader(
-                    title = "Follower Visibility",
+                    title = "Your Network Visibility",
                     onBackClick = { navController.popBackStack() },
                     textColor = textPrimary
                 )
@@ -84,9 +84,88 @@ fun FollowerVisibilityControls(
     var selectedOption by remember { mutableStateOf("everyone") }
 
     ModernSettingsSection(
+        title = "Who can see your friends",
+        backgroundColor = backgroundColor
+    )
+    {
+        Column {
+            VisibilityOption(
+                title = "Everyone",
+                subtitle = "Anyone can see who follows you",
+                isSelected = selectedOption == "everyone",
+                onClick = { selectedOption = "everyone" },
+                textPrimary = textPrimary,
+                textSecondary = textSecondary,
+                primaryColor = primaryColor
+            )
+
+            VisibilityOption(
+                title = "Friends Only",
+                subtitle = "Only your friends can see your followers",
+                isSelected = selectedOption == "friends",
+                onClick = { selectedOption = "friends" },
+                textPrimary = textPrimary,
+                textSecondary = textSecondary,
+                primaryColor = primaryColor
+            )
+
+            VisibilityOption(
+                title = "Nobody",
+                subtitle = "Hide your followers from everyone",
+                isSelected = selectedOption == "nobody",
+                onClick = { selectedOption = "nobody" },
+                textPrimary = textPrimary,
+                textSecondary = textSecondary,
+                primaryColor = primaryColor,
+                showDivider = false
+            )
+        }
+    }
+
+    ModernSettingsSection(
         title = "Who can see your followers",
         backgroundColor = backgroundColor
-    ) {
+    )
+    {
+        Column {
+            VisibilityOption(
+                title = "Everyone",
+                subtitle = "Anyone can see who follows you",
+                isSelected = selectedOption == "everyone",
+                onClick = { selectedOption = "everyone" },
+                textPrimary = textPrimary,
+                textSecondary = textSecondary,
+                primaryColor = primaryColor
+            )
+
+            VisibilityOption(
+                title = "Friends Only",
+                subtitle = "Only your friends can see your followers",
+                isSelected = selectedOption == "friends",
+                onClick = { selectedOption = "friends" },
+                textPrimary = textPrimary,
+                textSecondary = textSecondary,
+                primaryColor = primaryColor
+            )
+
+            VisibilityOption(
+                title = "Nobody",
+                subtitle = "Hide your followers from everyone",
+                isSelected = selectedOption == "nobody",
+                onClick = { selectedOption = "nobody" },
+                textPrimary = textPrimary,
+                textSecondary = textSecondary,
+                primaryColor = primaryColor,
+                showDivider = false
+            )
+        }
+    }
+
+    ModernSettingsSection(
+        title = "Who can see your followings",
+        backgroundColor = backgroundColor
+    )
+    {
         Column {
             VisibilityOption(
                 title = "Everyone",

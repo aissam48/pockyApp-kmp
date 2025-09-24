@@ -18,21 +18,21 @@ class HomeViewModel(private val sdk: ApiManager):ViewModel() {
     private val _informInHomeSharedFlow = MutableSharedFlow<Boolean>()
     val informInHomeSharedFlow = _informInHomeSharedFlow.asSharedFlow()
 
-    init {
+    /*init {
         viewModelScope.launch {
             delay(1000)
             _informInHomeSharedFlow.emit(true)
             println("HomeViewModel Received informInHomeShare")
 
         }
-    }
+    }*/
 
 
-    fun updateFcmToken(token: String) {
+    /*fun updateFcmToken(token: String) {
 
         viewModelScope.launch {
             sdk.updateFcmToken(tokenFcm = token,{},{})
         }
 
-    }
+    }*/
 }

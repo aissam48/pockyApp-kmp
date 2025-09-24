@@ -96,11 +96,13 @@ fun ChatScreen(
 
     viewModel.conversationID = conversationID
 
+    viewModel.connectS()
+
     val lifecycleOwner = LocalLifecycleOwner.current
 
     //viewModel.subscribeToConversation(conversationID)
 
-    DisposableEffect(lifecycleOwner){
+    /*DisposableEffect(lifecycleOwner){
 
         val observer = LifecycleEventObserver { _, event ->
 
@@ -121,7 +123,7 @@ fun ChatScreen(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
-    }
+    }*/
 
     LaunchedEffect(newMessages) {
         messages.addAll(newMessages)
@@ -172,10 +174,12 @@ fun ChatScreen(
                 showDialog = true
                 title.value = "This chat has been cancelled successfully"
             }
+
             is CancelChatUiState.Error -> {
                 showDialog = true
                 title.value = state.error.message
             }
+
             is CancelChatUiState.Idle -> {}
         }
     }
@@ -189,9 +193,9 @@ fun ChatScreen(
         )
         {
             // Modern Header
-            val isFriend =  profile?.friendRequest?.status == "ACCEPTED"
+            val isFriend = profile?.friendRequest?.status == "ACCEPTED"
 
-            Card (
+            Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 shape = RoundedCornerShape(0.dp),
@@ -302,7 +306,9 @@ fun ChatScreen(
                                 Box(
                                     modifier = Modifier
                                         .background(
-                                            if (isFriend) Color(0xFFDFC46B).copy(alpha = 0.15f) else Color.Gray.copy(alpha = 0.15f),
+                                            if (isFriend) Color(0xFFDFC46B).copy(alpha = 0.15f) else Color.Gray.copy(
+                                                alpha = 0.15f
+                                            ),
                                             RoundedCornerShape(6.dp)
                                         )
                                         .padding(horizontal = 6.dp, vertical = 2.dp)
@@ -319,7 +325,7 @@ fun ChatScreen(
                     }
 
                     // Cancel Chat Button
-                    if (!isFriend){
+                    if (!isFriend) {
                         Box(
                             modifier = Modifier
                                 .background(
@@ -422,23 +428,25 @@ fun ChatScreen(
                         modifier = Modifier
                             .size(40.dp)
                             .background(
-                                if (message.value.isNotBlank()) Color(0xFFDFC46B) else Color.Gray.copy(alpha = 0.3f),
+                                if (message.value.isNotBlank()) Color(0xFFDFC46B) else Color.Gray.copy(
+                                    alpha = 0.3f
+                                ),
                                 CircleShape
                             )
                             .clickable(enabled = message.value.isNotBlank()) {
-                                if (message.value.isNotBlank()) {
-                                    val data = MessageModel(
-                                        content = message.value,
-                                        conversationID = conversationID,
-                                        senderID = me?.id ?: "",
-                                        id = Uuid.random().toString()
-                                    )
-                                    viewModel.sendMessage(data)
-                                    message.value = ""
-                                    coroutineScope.launch {
-                                        listState.animateScrollToItem(0)
-                                    }
+
+                                val data = MessageModel(
+                                    content = message.value,
+                                    conversationID = conversationID,
+                                    senderID = me?.id ?: "",
+                                    id = Uuid.random().toString()
+                                )
+                                viewModel.sendMessage(data)
+                                message.value = ""
+                                coroutineScope.launch {
+                                    listState.animateScrollToItem(0)
                                 }
+
                             },
                         contentAlignment = Alignment.Center
                     ) {

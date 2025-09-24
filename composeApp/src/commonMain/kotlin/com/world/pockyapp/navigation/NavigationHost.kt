@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.StreetModel
+import com.world.pockyapp.screens.controlZone.ControlZoneScreen
 import com.world.pockyapp.screens.auth.login.LoginScreen
 import com.world.pockyapp.screens.blocked.BlockedScreen
 import com.world.pockyapp.screens.camera.CameraView
@@ -40,6 +41,10 @@ fun NavigationHost(navController: NavHostController) {
         navController = navController,
         startDestination = NavRoutes.SPLASH.route,
     ) {
+
+        composable(NavRoutes.CONTROL_ZONE.route) {
+            ControlZoneScreen(navController)
+        }
 
         composable(NavRoutes.MAP_COMPONENT.route) {
             MapComponentScreen(navController)

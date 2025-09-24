@@ -58,6 +58,7 @@ class ConversationsViewModel(val sdk: ApiManager) : ViewModel() {
                 _conversationsState.value = UIState.Success(success)
             }, { error ->
                 isConversationsLoadingFirstTime = true
+                println("sdfdfsdfsdfsdfsdfsd $error")
                 _conversationsState.value = UIState.Error(error)
             })
         }

@@ -28,4 +28,6 @@ enum class NavRoutes(val route: String) {
     REPORT_PROFILE("report_profile"),
 
     CONTROL_ACCOUNT("control_account"),
+    CONTROL_ZONE("control_zone"),
+
 }

@@ -45,8 +45,7 @@ sealed class CancelChatUiState {
     data class Error(val error: ErrorModel) : CancelChatUiState()
 }
 
-class ChatViewModel(private val sdk: ApiManager) :
-    ViewModel() {
+class ChatViewModel(private val sdk: ApiManager) : ViewModel() {
 
 
     var conversationID = ""
@@ -137,11 +136,34 @@ class ChatViewModel(private val sdk: ApiManager) :
         }
     }
 
-    init {
+
+    fun sendMessage(data: MessageModel) {
+
+        print("sendddddd 0")
 
         viewModelScope.launch {
-            delay(1000)
+            print("sendddddd 1")
+            try {
+                // Build JsonObject manually
+                val messageJsonObject = buildJsonObject {
+                    put("senderID", data.senderID)
+                    put("content", data.content)
+                    put("conversationID", data.conversationID)
+                    put("id", data.id)
+                }
 
+                socket.emit("send_message", messageJsonObject)
+
+                println("Sent message: ${Json.encodeToString(data)}")
+            } catch (e: Exception) {
+                println("Failed to send message: $e")
+            }
+        }
+    }
+
+    var sent = false
+    fun connectS() {
+        if (!sent){
             socket = Socket(
                 endpoint = Constant.ws,
                 config = SocketOptions(
@@ -172,33 +194,10 @@ class ChatViewModel(private val sdk: ApiManager) :
             }
             socket.connect()
 
+            sent = true
         }
+
     }
-
-    fun sendMessage(data: MessageModel) {
-
-
-        viewModelScope.launch {
-            try {
-                // Build JsonObject manually
-                val messageJsonObject = buildJsonObject {
-                    put("senderID", data.senderID)
-                    put("content", data.content)
-                    put("conversationID", data.conversationID)
-                    put("id", data.id)
-                }
-
-                socket.emit("send_message", messageJsonObject)
-
-                println("Sent message: ${Json.encodeToString(data)}")
-            } catch (e: Exception) {
-                println("Failed to send message: $e")
-            }
-        }
-    }
-
-
-
 
 
 }
