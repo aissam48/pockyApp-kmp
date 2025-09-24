@@ -1,11 +1,9 @@
 package com.world.pockyapp.screens.settings
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -17,18 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.world.pockyapp.navigation.NavRoutes
-import com.world.pockyapp.screens.components.CustomDialog
-import com.world.pockyapp.screens.control_account.ModernSettingsSection
-import org.jetbrains.compose.resources.painterResource
+import com.world.pockyapp.screens.controlAccount.ModernSettingsSection
 import org.koin.compose.viewmodel.koinViewModel
-import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.ic_back_black
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -159,8 +152,8 @@ fun SettingsScreen(
 
                     ModernSettingsItem(
                         icon = "👥",
-                        title = "Follower Visibility",
-                        subtitle = "Control who can see your followers",
+                        title = "Network Visibility",
+                        subtitle = "Control who can see your friends, followers, followings",
                         onClick = {
                             navController.navigate(NavRoutes.CONTROL_ACCOUNT.route)
                         }

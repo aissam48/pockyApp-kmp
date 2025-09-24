@@ -1,4 +1,4 @@
-package com.world.pockyapp.screens.control_account
+package com.world.pockyapp.screens.controlAccount
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +21,9 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,16 +36,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.network.models.model.ResponseMessageModel
 import com.world.pockyapp.screens.settings.ModernHeader
+import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
-fun AccountControlScreen(navController: NavHostController) {
+fun ControlAccountScreen(
+    navController: NavHostController,
+    viewModel: ControlAccountViewModel = koinViewModel()
+) {
     val backgroundColor = Color(0xFFF8F9FA)
     val cardBackground = Color.White
     val primaryGold = Color(0xFFDFC46B)
     val textPrimary = Color(0xFF212529)
     val textSecondary = Color(0xFF6C757D)
+
+    val followersVisibilityState = viewModel.followersVisibilityStateFlow.collectAsState()
+    val followingsVisibilityState = viewModel.followingsVisibilityStateFlow.collectAsState()
+    val friendsVisibilityState = viewModel.friendsVisibilityStateFlow.collectAsState()
+    val profileState = viewModel.profileState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getProfile()
+    }
 
     Scaffold(
         containerColor = backgroundColor
@@ -66,7 +84,12 @@ fun AccountControlScreen(navController: NavHostController) {
                     backgroundColor = cardBackground,
                     primaryColor = primaryGold,
                     textPrimary = textPrimary,
-                    textSecondary = textSecondary
+                    textSecondary = textSecondary,
+                    followersVisibilityState = followersVisibilityState,
+                    followingsVisibilityState = followingsVisibilityState,
+                    friendsVisibilityState = friendsVisibilityState,
+                    profileState = profileState,
+                    viewModel = viewModel
                 )
             }
         }
@@ -79,9 +102,30 @@ fun FollowerVisibilityControls(
     backgroundColor: Color,
     primaryColor: Color,
     textPrimary: Color,
-    textSecondary: Color
+    textSecondary: Color,
+    friendsVisibilityState: State<ResponseState<ResponseMessageModel>>,
+    followersVisibilityState: State<ResponseState<ResponseMessageModel>>,
+    followingsVisibilityState: State<ResponseState<ResponseMessageModel>>,
+    profileState: State<ResponseState<ProfileModel>>,
+    viewModel: ControlAccountViewModel
 ) {
-    var selectedOption by remember { mutableStateOf("everyone") }
+    var selectedOptionFriends by remember { mutableStateOf("everyone") }
+    var selectedOptionFollowers by remember { mutableStateOf("everyone") }
+    var selectedOptionFollowings by remember { mutableStateOf("everyone") }
+
+
+    when (val state = profileState.value) {
+        is ResponseState.Success -> {
+            selectedOptionFriends = state.data.friendsVisibility.lowercase()
+            selectedOptionFollowers = state.data.followersVisibility.lowercase()
+            selectedOptionFollowings = state.data.followingsVisibility.lowercase()
+        }
+
+        else -> {
+
+        }
+    }
+
 
     ModernSettingsSection(
         title = "Who can see your friends",
@@ -92,8 +136,11 @@ fun FollowerVisibilityControls(
             VisibilityOption(
                 title = "Everyone",
                 subtitle = "Anyone can see who follows you",
-                isSelected = selectedOption == "everyone",
-                onClick = { selectedOption = "everyone" },
+                isSelected = selectedOptionFriends == "everyone",
+                onClick = {
+                    selectedOptionFriends = "everyone"
+                    viewModel.friendsVisibility("EVERYONE")
+                },
                 textPrimary = textPrimary,
                 textSecondary = textSecondary,
                 primaryColor = primaryColor
@@ -102,8 +149,11 @@ fun FollowerVisibilityControls(
             VisibilityOption(
                 title = "Friends Only",
                 subtitle = "Only your friends can see your followers",
-                isSelected = selectedOption == "friends",
-                onClick = { selectedOption = "friends" },
+                isSelected = selectedOptionFriends == "friends",
+                onClick = {
+                    selectedOptionFriends = "friends"
+                    viewModel.friendsVisibility("FRIENDS")
+                },
                 textPrimary = textPrimary,
                 textSecondary = textSecondary,
                 primaryColor = primaryColor
@@ -112,8 +162,11 @@ fun FollowerVisibilityControls(
             VisibilityOption(
                 title = "Nobody",
                 subtitle = "Hide your followers from everyone",
-                isSelected = selectedOption == "nobody",
-                onClick = { selectedOption = "nobody" },
+                isSelected = selectedOptionFriends == "nobody",
+                onClick = {
+                    selectedOptionFriends = "nobody"
+                    viewModel.friendsVisibility("NOBODY")
+                },
                 textPrimary = textPrimary,
                 textSecondary = textSecondary,
                 primaryColor = primaryColor,
@@ -131,8 +184,11 @@ fun FollowerVisibilityControls(
             VisibilityOption(
                 title = "Everyone",
                 subtitle = "Anyone can see who follows you",
-                isSelected = selectedOption == "everyone",
-                onClick = { selectedOption = "everyone" },
+                isSelected = selectedOptionFollowers == "everyone",
+                onClick = {
+                    selectedOptionFollowers = "everyone"
+                    viewModel.followersVisibility("EVERYONE")
+                },
                 textPrimary = textPrimary,
                 textSecondary = textSecondary,
                 primaryColor = primaryColor
@@ -141,8 +197,11 @@ fun FollowerVisibilityControls(
             VisibilityOption(
                 title = "Friends Only",
                 subtitle = "Only your friends can see your followers",
-                isSelected = selectedOption == "friends",
-                onClick = { selectedOption = "friends" },
+                isSelected = selectedOptionFollowers == "friends",
+                onClick = {
+                    selectedOptionFollowers = "friends"
+                    viewModel.followersVisibility("FRIENDS")
+                },
                 textPrimary = textPrimary,
                 textSecondary = textSecondary,
                 primaryColor = primaryColor
@@ -151,8 +210,12 @@ fun FollowerVisibilityControls(
             VisibilityOption(
                 title = "Nobody",
                 subtitle = "Hide your followers from everyone",
-                isSelected = selectedOption == "nobody",
-                onClick = { selectedOption = "nobody" },
+                isSelected = selectedOptionFollowers == "nobody",
+                onClick = {
+                    selectedOptionFollowers = "nobody"
+                    viewModel.followersVisibility("NOBODY")
+
+                },
                 textPrimary = textPrimary,
                 textSecondary = textSecondary,
                 primaryColor = primaryColor,
@@ -170,8 +233,11 @@ fun FollowerVisibilityControls(
             VisibilityOption(
                 title = "Everyone",
                 subtitle = "Anyone can see who follows you",
-                isSelected = selectedOption == "everyone",
-                onClick = { selectedOption = "everyone" },
+                isSelected = selectedOptionFollowings == "everyone",
+                onClick = {
+                    selectedOptionFollowings = "everyone"
+                    viewModel.followingsVisibility("EVERYONE")
+                },
                 textPrimary = textPrimary,
                 textSecondary = textSecondary,
                 primaryColor = primaryColor
@@ -180,8 +246,11 @@ fun FollowerVisibilityControls(
             VisibilityOption(
                 title = "Friends Only",
                 subtitle = "Only your friends can see your followers",
-                isSelected = selectedOption == "friends",
-                onClick = { selectedOption = "friends" },
+                isSelected = selectedOptionFollowings == "friends",
+                onClick = {
+                    selectedOptionFollowings = "friends"
+                    viewModel.followingsVisibility("FRIENDS")
+                },
                 textPrimary = textPrimary,
                 textSecondary = textSecondary,
                 primaryColor = primaryColor
@@ -190,8 +259,11 @@ fun FollowerVisibilityControls(
             VisibilityOption(
                 title = "Nobody",
                 subtitle = "Hide your followers from everyone",
-                isSelected = selectedOption == "nobody",
-                onClick = { selectedOption = "nobody" },
+                isSelected = selectedOptionFollowings == "nobody",
+                onClick = {
+                    selectedOptionFollowings = "nobody"
+                    viewModel.followingsVisibility("NOBODY")
+                },
                 textPrimary = textPrimary,
                 textSecondary = textSecondary,
                 primaryColor = primaryColor,

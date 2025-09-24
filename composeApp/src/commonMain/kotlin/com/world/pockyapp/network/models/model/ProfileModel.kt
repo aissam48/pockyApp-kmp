@@ -21,7 +21,6 @@ data class ProfileModel(
     val chatRequest: ChatRequestModel? = null,
     val conversationID: String = "",
     val friendRequest: FriendRequestModel? = null,
-    //var friend: String = "NO",
     val block: String = "NO",
     val follower: Boolean = false,
     val following: Boolean = false,
@@ -30,4 +29,7 @@ data class ProfileModel(
     val friendsCount: Int = 0,
     val postsCount: Int = 0,
     val momentsCount: Int = 0,
+    val friendsVisibility: String = "EVERYONE",
+    val followingsVisibility: String = "EVERYONE",
+    val followersVisibility: String = "EVERYONE",
 )

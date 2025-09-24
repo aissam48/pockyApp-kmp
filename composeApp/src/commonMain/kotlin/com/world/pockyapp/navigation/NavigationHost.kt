@@ -13,7 +13,7 @@ import com.world.pockyapp.screens.blocked.BlockedScreen
 import com.world.pockyapp.screens.camera.CameraView
 import com.world.pockyapp.screens.change_password.ChangePasswordScreen
 import com.world.pockyapp.screens.chat.ChatScreen
-import com.world.pockyapp.screens.control_account.AccountControlScreen
+import com.world.pockyapp.screens.controlAccount.ControlAccountScreen
 import com.world.pockyapp.screens.edit_location.EditLocationScreen
 import com.world.pockyapp.screens.edit_profile.EditProfileScreen
 import com.world.pockyapp.screens.friend_request.FriendRequestsScreen
@@ -111,7 +111,7 @@ fun NavigationHost(navController: NavHostController) {
         }
 
         composable(NavRoutes.CONTROL_ACCOUNT.route) {
-            AccountControlScreen(navController)
+            ControlAccountScreen(navController)
         }
 
         composable(route = "${NavRoutes.MOMENTS.route}") { backStackEntry ->

@@ -1617,8 +1617,6 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     }
 
 
-
-
     suspend fun updateFcmToken(
         tokenFcm: String,
         onSuccess: (ResponseMessageModel) -> Unit,
@@ -1629,6 +1627,89 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 val token = getToken()
                 contentType(ContentType.Application.Json)
                 setBody(mapOf("tokenFcm" to tokenFcm))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
+
+    suspend fun updateFollowersVisibility(
+        visibility: String,
+        onSuccess: (ResponseMessageModel) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.put("$baseUrl/operations/followers-visibility") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("visibility" to visibility))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                println("success-----> $errorMessage")
+
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
+
+    suspend fun updateFollowingsVisibility(
+        visibility: String,
+        onSuccess: (ResponseMessageModel) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.put("$baseUrl/operations/followings-visibility") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("visibility" to visibility))
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ResponseMessageModel = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
+
+    suspend fun updateFriendsVisibility(
+        visibility: String,
+        onSuccess: (ResponseMessageModel) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.put("$baseUrl/operations/friends-visibility") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("visibility" to visibility))
                 headers { append(HttpHeaders.Authorization, "Bearer $token") }
             }
 
