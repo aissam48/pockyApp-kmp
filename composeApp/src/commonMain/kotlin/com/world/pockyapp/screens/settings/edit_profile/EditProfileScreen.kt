@@ -1,4 +1,4 @@
-package com.world.pockyapp.screens.edit_profile
+package com.world.pockyapp.screens.settings.edit_profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,7 +25,6 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
@@ -52,17 +50,12 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
-import com.world.pockyapp.Constant
 import com.world.pockyapp.Constant.getUrl
-import com.world.pockyapp.navigation.NavRoutes
-import com.world.pockyapp.screens.components.CustomDialog
 import com.world.pockyapp.screens.components.CustomDialogSuccess
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.compose_multiplatform
 import pockyapp.composeapp.generated.resources.ic_back_black
-import pockyapp.composeapp.generated.resources.ic_close_black
 import pockyapp.composeapp.generated.resources.ic_edit_black
 import pockyapp.composeapp.generated.resources.ic_placeholder
 

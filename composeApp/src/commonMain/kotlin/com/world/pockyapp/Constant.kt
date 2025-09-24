@@ -9,7 +9,7 @@ object Constant {
     private const val PROD_ENV_HOST = "pockyappbackend.onrender.com"
 
     var SHARED_LINK = DEV_ENV
-    private var SHARED_LINK_HOST = DEV_ENV_HOST
+    private var SHARED_LINK_HOST = PROD_ENV_HOST
 
     val ws = "http://$SHARED_LINK_HOST"
 

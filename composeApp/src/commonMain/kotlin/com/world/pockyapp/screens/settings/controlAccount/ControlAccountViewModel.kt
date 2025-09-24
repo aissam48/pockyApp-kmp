@@ -1,4 +1,4 @@
-package com.world.pockyapp.screens.controlAccount
+package com.world.pockyapp.screens.settings.controlAccount
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

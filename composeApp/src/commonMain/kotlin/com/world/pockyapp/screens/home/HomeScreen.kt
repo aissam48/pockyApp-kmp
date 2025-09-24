@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.NavigationBar
@@ -86,7 +87,8 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
-            ) {
+            )
+            {
                 // Logo Section
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -171,16 +173,15 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
             backgroundColor = Color.Transparent,
             bottomBar = {
                 // Modern Bottom Navigation
-                Surface(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    shadowElevation = 1.dp,
-                    tonalElevation = 0.dp,
-                ) {
+                        .padding(horizontal = 20.dp, vertical = 16.dp)
+                        .background(color = Color.LightGray, shape = RoundedCornerShape(24.dp)),
+
+                    ) {
                     NavigationBar(
-                        modifier = Modifier.height(70.dp),
+                        modifier = Modifier.height(70.dp).align(Alignment.Center),
                         containerColor = Color.Transparent,
                         contentColor = Color.Black,
                         tonalElevation = 0.dp

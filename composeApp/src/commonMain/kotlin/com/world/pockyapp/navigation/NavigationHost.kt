@@ -7,15 +7,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.StreetModel
-import com.world.pockyapp.screens.controlZone.ControlZoneScreen
+import com.world.pockyapp.screens.settings.controlZone.ControlZoneScreen
 import com.world.pockyapp.screens.auth.login.LoginScreen
-import com.world.pockyapp.screens.blocked.BlockedScreen
+import com.world.pockyapp.screens.settings.blocked.BlockedScreen
 import com.world.pockyapp.screens.camera.CameraView
-import com.world.pockyapp.screens.change_password.ChangePasswordScreen
+import com.world.pockyapp.screens.settings.change_password.ChangePasswordScreen
 import com.world.pockyapp.screens.chat.ChatScreen
-import com.world.pockyapp.screens.controlAccount.ControlAccountScreen
-import com.world.pockyapp.screens.edit_location.EditLocationScreen
-import com.world.pockyapp.screens.edit_profile.EditProfileScreen
+import com.world.pockyapp.screens.followers.FollowersListScreen
+import com.world.pockyapp.screens.settings.controlAccount.ControlAccountScreen
+import com.world.pockyapp.screens.settings.edit_location.EditLocationScreen
+import com.world.pockyapp.screens.settings.edit_profile.EditProfileScreen
 import com.world.pockyapp.screens.friend_request.FriendRequestsScreen
 import com.world.pockyapp.screens.google_maps.GoogleMapsScreen
 import com.world.pockyapp.screens.google_maps.MapComponentScreen
@@ -116,6 +117,10 @@ fun NavigationHost(navController: NavHostController) {
 
         composable(route = "${NavRoutes.MOMENTS.route}") { backStackEntry ->
             MomentsScreen(navController)
+        }
+
+        composable(route = NavRoutes.FOLLOWERS.route) { backStackEntry ->
+            FollowersListScreen(navController)
         }
 
         composable(route = "${NavRoutes.MOMENTS_BY_LOCATION.route}/{moments}/{index}/{myID}") { backStackEntry ->

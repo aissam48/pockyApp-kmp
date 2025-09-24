@@ -4,12 +4,13 @@ package com.world.pockyapp.di
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.screens.auth.login.LoginScreenViewModel
 import com.world.pockyapp.screens.auth.register.RegisterScreenViewModel
-import com.world.pockyapp.screens.blocked.BlockedViewModel
-import com.world.pockyapp.screens.change_password.ChangePasswordViewModel
+import com.world.pockyapp.screens.settings.blocked.BlockedViewModel
+import com.world.pockyapp.screens.settings.change_password.ChangePasswordViewModel
 import com.world.pockyapp.screens.chat.ChatViewModel
-import com.world.pockyapp.screens.controlAccount.ControlAccountViewModel
-import com.world.pockyapp.screens.edit_location.EditLocationViewModel
-import com.world.pockyapp.screens.edit_profile.EditProfileViewModel
+import com.world.pockyapp.screens.followers.FollowersViewModel
+import com.world.pockyapp.screens.settings.controlAccount.ControlAccountViewModel
+import com.world.pockyapp.screens.settings.edit_location.EditLocationViewModel
+import com.world.pockyapp.screens.settings.edit_profile.EditProfileViewModel
 import com.world.pockyapp.screens.friend_request.FriendRequestsViewModel
 import com.world.pockyapp.screens.google_maps.GoogleMapsViewModel
 import com.world.pockyapp.screens.home.HomeViewModel
@@ -57,8 +58,8 @@ val appModule = module {
     viewModel { HotViewModel(sdk = get()) }
     viewModel { ReportProfileViewModel(sdk = get()) }
     viewModel { GoogleMapsViewModel(sdk = get()) }
-
     viewModel { ControlAccountViewModel(sdk = get()) }
+    viewModel { FollowersViewModel(sdk = get()) }
     single { MomentPreviewViewModel(sdk = get()) }
 
 }

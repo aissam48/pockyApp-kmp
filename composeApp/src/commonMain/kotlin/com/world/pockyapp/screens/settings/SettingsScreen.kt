@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.world.pockyapp.navigation.NavRoutes
-import com.world.pockyapp.screens.controlAccount.ModernSettingsSection
+import com.world.pockyapp.screens.settings.controlAccount.ModernSettingsSection
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -173,7 +173,7 @@ fun SettingsScreen(
                         title = "Notification Controls",
                         subtitle = "Manage notification preferences",
                         onClick = {
-                            navController.navigate( "${ NavRoutes.CONTROL_ACCOUNT.route}")
+                            navController.navigate(NavRoutes.CONTROL_ACCOUNT.route)
                         },
                         showDivider = false
                     )
@@ -315,7 +315,6 @@ fun ModernHeader(
         )
     }
 }
-
 
 
 @Composable

@@ -1,4 +1,4 @@
-package com.world.pockyapp.screens.blocked
+package com.world.pockyapp.screens.settings.blocked
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

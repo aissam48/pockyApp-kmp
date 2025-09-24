@@ -1,4 +1,4 @@
-package com.world.pockyapp.screens.controlZone
+package com.world.pockyapp.screens.settings.controlZone
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween

@@ -1,12 +1,10 @@
-package com.world.pockyapp.screens.change_password
+package com.world.pockyapp.screens.settings.change_password
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
-import com.world.pockyapp.network.models.model.DataModel
 import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.ProfileModel
-import com.world.pockyapp.screens.edit_profile.EditProfileUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -1727,5 +1727,85 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     }
 
 
+    suspend fun getFriends(
+        profileId: String,
+        onSuccess: (List<ProfileModel>) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/friends") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("profileId",profileId)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<ProfileModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
+    suspend fun getFollowers(
+        followingId: String,
+        onSuccess: (List<ProfileModel>) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/followers") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("followingId",followingId)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<ProfileModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
+
+    suspend fun getFollowings(
+        followerId: String,
+        onSuccess: (List<ProfileModel>) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/followings") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("followerId",followerId)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<ProfileModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
+
 }
 

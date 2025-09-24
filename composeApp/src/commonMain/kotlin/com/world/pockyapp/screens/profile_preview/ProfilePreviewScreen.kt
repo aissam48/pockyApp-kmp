@@ -800,7 +800,24 @@ fun ProfilePreviewScreen(
 
                                             // Followers (you'll need to add this to your profile model)
                                             Column(
-                                                horizontalAlignment = Alignment.CenterHorizontally
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.clickable {
+                                                    when (profile.value.followersVisibility) {
+                                                        "EVERYONE" -> {
+                                                            navController.navigate(NavRoutes.FOLLOWERS.route)
+                                                        }
+
+                                                        "FRIENDS" -> {
+                                                            if (profile.value.friendRequest?.status == "ACCEPTED") {
+                                                                navController.navigate(NavRoutes.FOLLOWERS.route)
+                                                            }
+                                                        }
+
+                                                        "NOBODY" -> {
+
+                                                        }
+                                                    }
+                                                }
                                             ) {
                                                 Text(
                                                     text = profile.value.followers.toString(),
@@ -817,7 +834,24 @@ fun ProfilePreviewScreen(
 
                                             // Following
                                             Column(
-                                                horizontalAlignment = Alignment.CenterHorizontally
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.clickable {
+                                                    when (profile.value.followingsVisibility) {
+                                                        "EVERYONE" -> {
+                                                            //navController.navigate(NavRoutes.LIST_FOLLOWERS.route)
+                                                        }
+
+                                                        "FRIENDS" -> {
+                                                            if (profile.value.friendRequest?.status == "ACCEPTED") {
+                                                                //navController.navigate(NavRoutes.LIST_FOLLOWERS.route)
+                                                            }
+                                                        }
+
+                                                        "NOBODY" -> {
+
+                                                        }
+                                                    }
+                                                }
                                             ) {
                                                 Text(
                                                     text = profile.value.followings.toString(),
@@ -826,7 +860,7 @@ fun ProfilePreviewScreen(
                                                     fontSize = 18.sp
                                                 )
                                                 Text(
-                                                    text = "Following",
+                                                    text = "Followings",
                                                     color = Color.Gray,
                                                     fontSize = 13.sp
                                                 )
@@ -834,7 +868,24 @@ fun ProfilePreviewScreen(
 
                                             // Following
                                             Column(
-                                                horizontalAlignment = Alignment.CenterHorizontally
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.clickable {
+                                                    when (profile.value.friendsVisibility) {
+                                                        "EVERYONE" -> {
+                                                            //navController.navigate(NavRoutes.LIST_FOLLOWERS.route)
+                                                        }
+
+                                                        "FRIENDS" -> {
+                                                            if (profile.value.friendRequest?.status == "ACCEPTED") {
+                                                                //navController.navigate(NavRoutes.LIST_FOLLOWERS.route)
+                                                            }
+                                                        }
+
+                                                        "NOBODY" -> {
+
+                                                        }
+                                                    }
+                                                }
                                             ) {
                                                 Text(
                                                     text = profile.value.friendsCount.toString(),
@@ -1091,14 +1142,14 @@ fun ProfilePreviewScreen(
                                             Box(
                                                 modifier = Modifier.weight(1f).height(40.dp)
                                                     .clickable {
-                                                        if (profile.value.follower) {
+                                                        if (profile.value.following) {
                                                             viewModel.unFollow(profile.value.id)
                                                         } else {
                                                             viewModel.follow(profile.value.id)
                                                         }
                                                     }.background(
                                                         color = Color(
-                                                            when (profile.value.follower) {
+                                                            when (profile.value.following) {
                                                                 true -> 0xFFDFC46B
                                                                 false -> 0xFF000000
                                                             }
@@ -1110,7 +1161,7 @@ fun ProfilePreviewScreen(
 
                                                 Text(
                                                     modifier = Modifier.align(Alignment.Center),
-                                                    text = when (profile.value.follower) {
+                                                    text = when (profile.value.following) {
                                                         true -> "Following"
                                                         false -> "Follow"
                                                     },

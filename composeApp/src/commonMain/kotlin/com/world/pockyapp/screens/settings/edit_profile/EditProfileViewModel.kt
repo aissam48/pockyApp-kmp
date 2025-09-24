@@ -1,11 +1,10 @@
-package com.world.pockyapp.screens.edit_profile
+package com.world.pockyapp.screens.settings.edit_profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.ProfileModel
-import com.world.pockyapp.screens.auth.register.RegisterScreenViewModel.RegisterUiState
 import com.world.pockyapp.utils.Utils.isValidEmail
 import com.world.pockyapp.utils.Utils.isValidPhoneNumber
 import kotlinx.coroutines.flow.MutableStateFlow
