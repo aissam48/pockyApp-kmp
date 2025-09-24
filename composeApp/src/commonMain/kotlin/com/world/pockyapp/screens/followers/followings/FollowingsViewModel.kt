@@ -1,4 +1,4 @@
-package com.world.pockyapp.screens.followers
+package com.world.pockyapp.screens.followers.followings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,23 +10,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class FollowersViewModel(private val sdk: ApiManager) : ViewModel() {
+class FollowingsViewModel(private val sdk: ApiManager) : ViewModel() {
 
-
-
-    val allFollowers = mutableSetOf<ProfileModel>()
-    private val _followersState =
+    val allFollowings = mutableSetOf<ProfileModel>()
+    private val _followingsState =
         MutableStateFlow<ResponseState<List<ProfileModel>>>(ResponseState.Idle)
-    val followersState = _followersState.asStateFlow()
-    fun getFollowers(id: String) {
+    val followingsState = _followingsState.asStateFlow()
+    fun getFollowings(id: String) {
 
         viewModelScope.launch {
-            _followersState.value = ResponseState.Loading
-            sdk.getFollowers(id, {
-                allFollowers.addAll(it)
-                _followersState.value = ResponseState.Success(allFollowers.toList())
+            _followingsState.value = ResponseState.Loading
+            sdk.getFollowings(id, {
+                allFollowings.addAll(it)
+                _followingsState.value = ResponseState.Success(allFollowings.toList())
             }, {
-                _followersState.value = ResponseState.Error(it)
+                _followingsState.value = ResponseState.Error(it)
             })
         }
     }

@@ -804,12 +804,12 @@ fun ProfilePreviewScreen(
                                                 modifier = Modifier.clickable {
                                                     when (profile.value.followersVisibility) {
                                                         "EVERYONE" -> {
-                                                            navController.navigate(NavRoutes.FOLLOWERS.route)
+                                                            navController.navigate(NavRoutes.FOLLOWERS.route + "/${profile.value.id}")
                                                         }
 
                                                         "FRIENDS" -> {
                                                             if (profile.value.friendRequest?.status == "ACCEPTED") {
-                                                                navController.navigate(NavRoutes.FOLLOWERS.route)
+                                                                navController.navigate(NavRoutes.FOLLOWERS.route + "/${profile.value.id}")
                                                             }
                                                         }
 
@@ -838,12 +838,12 @@ fun ProfilePreviewScreen(
                                                 modifier = Modifier.clickable {
                                                     when (profile.value.followingsVisibility) {
                                                         "EVERYONE" -> {
-                                                            //navController.navigate(NavRoutes.LIST_FOLLOWERS.route)
+                                                            navController.navigate(NavRoutes.FOLLOWINGS.route + "/${profile.value.id}")
                                                         }
 
                                                         "FRIENDS" -> {
                                                             if (profile.value.friendRequest?.status == "ACCEPTED") {
-                                                                //navController.navigate(NavRoutes.LIST_FOLLOWERS.route)
+                                                                navController.navigate(NavRoutes.FOLLOWINGS.route + "/${profile.value.id}")
                                                             }
                                                         }
 
@@ -866,18 +866,18 @@ fun ProfilePreviewScreen(
                                                 )
                                             }
 
-                                            // Following
+                                            // Friends
                                             Column(
                                                 horizontalAlignment = Alignment.CenterHorizontally,
                                                 modifier = Modifier.clickable {
                                                     when (profile.value.friendsVisibility) {
                                                         "EVERYONE" -> {
-                                                            //navController.navigate(NavRoutes.LIST_FOLLOWERS.route)
+                                                            navController.navigate(NavRoutes.FRIENDS.route + "/${profile.value.id}")
                                                         }
 
                                                         "FRIENDS" -> {
                                                             if (profile.value.friendRequest?.status == "ACCEPTED") {
-                                                                //navController.navigate(NavRoutes.LIST_FOLLOWERS.route)
+                                                                navController.navigate(NavRoutes.FRIENDS.route + "/${profile.value.id}")
                                                             }
                                                         }
 

@@ -29,7 +29,7 @@ data class ProfileModel(
     val friendsCount: Int = 0,
     val postsCount: Int = 0,
     val momentsCount: Int = 0,
-    val friendsVisibility: String = "EVERYONE",
-    val followingsVisibility: String = "EVERYONE",
-    val followersVisibility: String = "EVERYONE",
+    val friendsVisibility: String = "",//"EVERYONE",
+    val followingsVisibility: String = "",//"EVERYONE",
+    val followersVisibility: String = "",//"EVERYONE",
 )

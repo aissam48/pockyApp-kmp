@@ -28,11 +28,11 @@ class HomeViewModel(private val sdk: ApiManager):ViewModel() {
     }*/
 
 
-    /*fun updateFcmToken(token: String) {
+    fun updateFcmToken(token: String) {
 
         viewModelScope.launch {
             sdk.updateFcmToken(tokenFcm = token,{},{})
         }
 
-    }*/
+    }
 }

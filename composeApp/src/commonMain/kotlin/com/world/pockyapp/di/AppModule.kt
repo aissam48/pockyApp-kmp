@@ -8,6 +8,8 @@ import com.world.pockyapp.screens.settings.blocked.BlockedViewModel
 import com.world.pockyapp.screens.settings.change_password.ChangePasswordViewModel
 import com.world.pockyapp.screens.chat.ChatViewModel
 import com.world.pockyapp.screens.followers.FollowersViewModel
+import com.world.pockyapp.screens.followers.followings.FollowingsViewModel
+import com.world.pockyapp.screens.followers.friends.FriendsViewModel
 import com.world.pockyapp.screens.settings.controlAccount.ControlAccountViewModel
 import com.world.pockyapp.screens.settings.edit_location.EditLocationViewModel
 import com.world.pockyapp.screens.settings.edit_profile.EditProfileViewModel
@@ -60,6 +62,8 @@ val appModule = module {
     viewModel { GoogleMapsViewModel(sdk = get()) }
     viewModel { ControlAccountViewModel(sdk = get()) }
     viewModel { FollowersViewModel(sdk = get()) }
+    viewModel { FollowingsViewModel(sdk = get()) }
+    viewModel { FriendsViewModel(sdk = get()) }
     single { MomentPreviewViewModel(sdk = get()) }
 
 }

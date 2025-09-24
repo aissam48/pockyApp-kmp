@@ -24,18 +24,18 @@ class MainActivity : ComponentActivity() {
 
         //WindowCompat.setDecorFitsSystemWindows(window, false) // Draw behind system bars
 
-        enableEdgeToEdge() // Add this
+        //enableEdgeToEdge() // Add this
 
         lifecycleScope.launch {
 
-            /*homeViewModel.informInHomeSharedFlow.collect {
+            homeViewModel.informInHomeSharedFlow.collect {
                 FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val token = task.result
                         homeViewModel.updateFcmToken(token)
                     }
                 }
-            }*/
+            }
         }
 
         lifecycleScope.launch {

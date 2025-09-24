@@ -443,26 +443,6 @@ fun ConversationItem(
                     )
                 }
 
-                // Friend Badge
-                if (isFriend) {
-                    Box(
-                        modifier = Modifier
-                            .size(18.dp)
-                            .background(
-                                Color(0xFFDFC46B),
-                                CircleShape
-                            )
-                            .align(Alignment.BottomEnd),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "✓",
-                            color = Color.White,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))

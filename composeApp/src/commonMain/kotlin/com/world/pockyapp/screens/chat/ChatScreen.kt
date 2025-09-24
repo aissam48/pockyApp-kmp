@@ -100,13 +100,9 @@ fun ChatScreen(
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    //viewModel.subscribeToConversation(conversationID)
-
-    /*DisposableEffect(lifecycleOwner){
+    DisposableEffect(lifecycleOwner){
 
         val observer = LifecycleEventObserver { _, event ->
-
-            println("ChatScreen event $event")
             when(event){
                 Lifecycle.Event.ON_PAUSE -> {}
                 Lifecycle.Event.ON_RESUME -> {viewModel.unSubscribeToConversation(conversationID)}
@@ -123,7 +119,7 @@ fun ChatScreen(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
-    }*/
+    }
 
     LaunchedEffect(newMessages) {
         messages.addAll(newMessages)

@@ -32,5 +32,7 @@ enum class NavRoutes(val route: String) {
     CONTROL_ZONE("control_zone"),
 
     FOLLOWERS("followers"),
+    FOLLOWINGS("followings"),
+    FRIENDS("friends"),
 
 }

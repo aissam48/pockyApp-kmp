@@ -14,6 +14,8 @@ import com.world.pockyapp.screens.camera.CameraView
 import com.world.pockyapp.screens.settings.change_password.ChangePasswordScreen
 import com.world.pockyapp.screens.chat.ChatScreen
 import com.world.pockyapp.screens.followers.FollowersListScreen
+import com.world.pockyapp.screens.followers.followings.FollowingListScreen
+import com.world.pockyapp.screens.followers.friends.FriendsScreen
 import com.world.pockyapp.screens.settings.controlAccount.ControlAccountScreen
 import com.world.pockyapp.screens.settings.edit_location.EditLocationScreen
 import com.world.pockyapp.screens.settings.edit_profile.EditProfileScreen
@@ -119,8 +121,19 @@ fun NavigationHost(navController: NavHostController) {
             MomentsScreen(navController)
         }
 
-        composable(route = NavRoutes.FOLLOWERS.route) { backStackEntry ->
-            FollowersListScreen(navController)
+        composable(route = "${NavRoutes.FOLLOWERS.route}/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+            FollowersListScreen(navController, id = id)
+        }
+
+        composable(route = "${NavRoutes.FRIENDS.route}/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+            FriendsScreen(navController, id = id)
+        }
+
+        composable(route = "${NavRoutes.FOLLOWINGS.route}/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+            FollowingListScreen(navController, id = id)
         }
 
         composable(route = "${NavRoutes.MOMENTS_BY_LOCATION.route}/{moments}/{index}/{myID}") { backStackEntry ->

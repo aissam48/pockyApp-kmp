@@ -1,4 +1,4 @@
-package com.world.pockyapp.screens.followers
+package com.world.pockyapp.screens.followers.friends
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,6 +42,8 @@ import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.followers.FollowersViewModel
+import com.world.pockyapp.screens.followers.followings.FollowingsViewModel
 import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -51,19 +53,18 @@ import pockyapp.composeapp.generated.resources.ic_placeholder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FollowersListScreen(
+fun FriendsScreen(
     navController: NavHostController,
-    viewModel: FollowersViewModel = koinViewModel(),
+    viewModel: FriendsViewModel = koinViewModel(),
     id: String
 ) {
 
-
-    val followersState = viewModel.followersState.collectAsState()
+    val friendsState = viewModel.friendsState.collectAsState()
     val profileState = viewModel.myProfileState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.getMyProfile()
-        viewModel.getFollowers(id)
+        viewModel.getFriends(id)
     }
 
     Scaffold(
@@ -98,14 +99,14 @@ fun FollowersListScreen(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = "Followers",
+                    text = "Friends",
                     color = Color.Black,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            when (val state = followersState.value) {
+            when (val state = friendsState.value) {
 
                 is ResponseState.Loading -> {
                     Card(

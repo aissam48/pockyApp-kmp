@@ -416,7 +416,10 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                 ) {
                                     // Followers
                                     Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.clickable {
+                                            navController.navigate(NavRoutes.FOLLOWERS.route + "/${profile.value.id}")
+                                        }
                                     ) {
                                         Text(
                                             text = state.profile.followers.toString(),
@@ -433,7 +436,10 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
 
                                     // Following
                                     Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.clickable {
+                                            navController.navigate(NavRoutes.FOLLOWINGS.route + "/${profile.value.id}")
+                                        }
                                     ) {
                                         Text(
                                             text = state.profile.followings.toString(),
@@ -450,7 +456,10 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
 
                                     // Friends
                                     Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.clickable {
+                                            navController.navigate(NavRoutes.FRIENDS.route + "/${profile.value.id}")
+                                        }
                                     ) {
                                         Text(
                                             text = state.profile.friendsCount.toString(),

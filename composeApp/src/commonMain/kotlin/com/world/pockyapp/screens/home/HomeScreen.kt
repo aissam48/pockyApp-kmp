@@ -76,6 +76,8 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
             .background(color = Color(0xFFFFFFFF))
     ) {
         // Modern Header
+
+        Spacer(modifier = Modifier.height(40.dp))
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = Color.White,
