@@ -81,9 +81,6 @@ fun DiscoverScreen(
             .background(Color(0xFFFFFFFF))
             .padding(horizontal = 0.dp)
     ) {
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-        }
 
         // Friends Stories Section
         item {
@@ -97,13 +94,13 @@ fun DiscoverScreen(
                     modifier = Modifier.padding(10.dp)
                 ) {
                     Text(
-                        text = "Friends moments",
+                        text = "Friends",
                         color = Color.Black,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
 
                     Row(
                         verticalAlignment = Alignment.Top,
@@ -206,7 +203,7 @@ fun DiscoverScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
         }
 
         // Nearby Moments Section
@@ -256,7 +253,7 @@ fun DiscoverScreen(
                             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                         ) {
                             Column(
-                                modifier = Modifier.padding(10.dp)
+                                modifier = Modifier.padding(horizontal = 10.dp)
                             ) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -264,14 +261,14 @@ fun DiscoverScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Nearby Moments",
+                                        text = "Following",
                                         color = Color.Black,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(10.dp))
+                                Spacer(modifier = Modifier.height(5.dp))
 
                                 LazyRow(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -290,7 +287,103 @@ fun DiscoverScreen(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+                }
+            }
+
+            is UiState.Error -> {
+                item {
+                    ModernErrorSection(
+                        error = (nearbyMomentsState as UiState.Error).error,
+                        onRetry = { viewModel.loadNearbyMoments() }
+                    )
+                }
+            }
+        }
+
+        // Nearby Moments Section
+        when (nearbyMomentsState) {
+            is UiState.Loading -> {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = Color(0xFFDFC46B),
+                                strokeWidth = 2.dp
+                            )
+                        }
+                    }
+                }
+            }
+
+            is UiState.Success -> {
+
+                val nearbyMoments = (nearbyMomentsState as UiState.Success<List<MomentModel>>).data
+                val friends = nearbyMoments.map { it.profile }.distinctBy { it.id }
+                val groupedFriendsMoments =
+                    mutableListOf<MutableList<MomentModel>>()
+
+                friends.forEach { friend ->
+                    val friendMoments =
+                        nearbyMoments.filter { it.profile.id == friend.id }
+                    groupedFriendsMoments.add(friendMoments.toMutableList())
+                }
+
+                if (nearbyMoments.isNotEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 10.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Nearby Moments",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(5.dp))
+
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(groupedFriendsMoments) { profileMoments ->
+                                        if (profileMoments.isNotEmpty()) {
+                                            ModernNearbyMomentItem(
+                                                profileMoments = profileMoments,
+                                                currentUserId = (profileState as? UiState.Success<ProfileModel>)?.data?.id,
+                                                navController = navController,
+                                                groupedFriendsMoments = groupedFriendsMoments
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
                 }
             }
@@ -508,7 +601,7 @@ fun ModernProfileSection(
         Text(
             text = "Your Moment",
             color = Color.Gray,
-            fontSize = 11.sp,
+            fontSize = 10.sp,
             fontWeight = FontWeight.Medium
         )
     }

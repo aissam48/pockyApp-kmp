@@ -606,6 +606,7 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
 
 
                                             }
+                                    val sdhfghjsdg = groupedByDay.values.toList()
 
                                     items(groupedByDay.values.toList()) { coupleOfMoments ->
 
@@ -614,8 +615,8 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                             when (coupleOfMoments.size) {
                                                 1 ->
                                                     Box(modifier = Modifier.clickable {
-                                                        momentsViewModel.moments =
-                                                            listOf(coupleOfMoments)
+                                                        momentsViewModel.moments = listOf(coupleOfMoments)
+                                                        momentsViewModel.moments = sdhfghjsdg
                                                         momentsViewModel.myID = profile.value.id
                                                         momentsViewModel.selectedIndex = 0
                                                         navController.navigate(NavRoutes.MOMENTS.route)

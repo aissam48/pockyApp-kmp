@@ -5,14 +5,15 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,9 +21,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -34,6 +37,7 @@ import com.world.pockyapp.screens.components.CustomDialog
 import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -41,6 +45,7 @@ import pockyapp.composeapp.generated.resources.*
 
 private const val STORY_DURATION_MS = 5000L
 private const val LONG_PRESS_THRESHOLD_MS = 200L
+private const val DOUBLE_TAP_TIMEOUT_MS = 300L
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -59,6 +64,11 @@ private fun StoriesViewer(
 
     var currentUserIndex by remember { mutableStateOf(initialUserIndex) }
     var isPagerSettled by remember { mutableStateOf(false) }
+    var isMuted by remember { mutableStateOf(false) }
+
+    // Swipe to close states
+    var dragOffset by remember { mutableStateOf(0f) }
+    var isDragging by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     // Track when pager is settled and which page is active
@@ -71,11 +81,82 @@ private fun StoriesViewer(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
+            .graphicsLayer {
+                // Apply vertical translation based on drag
+                translationY = dragOffset
+                // Fade out as user drags
+                alpha = if (isDragging) {
+                    1f - (kotlin.math.abs(dragOffset) / 1000f).coerceIn(0f, 0.7f)
+                } else 1f
+                // Scale down slightly when dragging
+                val scale = if (isDragging) {
+                    1f - (kotlin.math.abs(dragOffset) / 3000f).coerceIn(0f, 0.1f)
+                } else 1f
+                scaleX = scale
+                scaleY = scale
+            }
+            .pointerInput(Unit) {
+                var startY = 0f
+                var startX = 0f
+                var isVerticalSwipe = false
+
+                detectDragGestures(
+                    onDragStart = { offset ->
+                        startY = offset.y
+                        startX = offset.x
+                        isVerticalSwipe = false
+                        isDragging = false
+                        dragOffset = 0f
+                    },
+                    onDragEnd = {
+                        if (isDragging) {
+                            isDragging = false
+                            // If dragged more than 150dp, close the screen
+                            if (kotlin.math.abs(dragOffset) > 20.dp.toPx()) {
+                                onStoriesFinished()
+                            } else {
+                                // Snap back to original position
+                                coroutineScope.launch {
+                                    val animatable = Animatable(dragOffset)
+                                    animatable.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = spring(
+                                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                                            stiffness = Spring.StiffnessLow
+                                        )
+                                    ) {
+                                        dragOffset = value
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    onDrag = { change, dragAmount ->
+                        val currentY = change.position.y
+                        val currentX = change.position.x
+                        val deltaY = kotlin.math.abs(currentY - startY)
+                        val deltaX = kotlin.math.abs(currentX - startX)
+
+                        // Only start dragging if it's clearly a vertical swipe
+                        if (!isVerticalSwipe && !isDragging) {
+                            if (deltaY > 30 && deltaY > deltaX * 1.5) {
+                                isVerticalSwipe = true
+                                isDragging = true
+                            }
+                        }
+
+                        // Only apply drag if it's a vertical swipe
+                        if (isDragging && isVerticalSwipe) {
+                            dragOffset += dragAmount.y * 0.8f // Add some resistance
+                        }
+                    }
+                )
+            }
     ) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
-            userScrollEnabled = true
+            userScrollEnabled = !isDragging // Disable horizontal scrolling while dragging vertically
         ) { userIndex ->
             val momentsOfUser = moments[userIndex]
 
@@ -83,6 +164,9 @@ private fun StoriesViewer(
                 userStories = momentsOfUser,
                 isActive = userIndex == currentUserIndex && isPagerSettled,
                 isPagerSettled = isPagerSettled,
+                isMuted = isMuted,
+                isDragging = isDragging,
+                onMuteToggle = { isMuted = !isMuted },
                 onNavigateToNextUser = {
                     if (currentUserIndex < moments.size - 1) {
                         coroutineScope.launch {
@@ -107,6 +191,20 @@ private fun StoriesViewer(
             )
         }
 
+        // Show drag indicator when dragging
+        if (isDragging) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 8.dp)
+                    .width(40.dp)
+                    .height(4.dp)
+                    .background(
+                        Color.White.copy(alpha = 0.6f),
+                        RoundedCornerShape(2.dp)
+                    )
+            )
+        }
     }
 }
 
@@ -115,6 +213,9 @@ private fun StoryUserPage(
     userStories: List<MomentModel>,
     isActive: Boolean,
     isPagerSettled: Boolean,
+    isMuted: Boolean,
+    isDragging: Boolean,
+    onMuteToggle: () -> Unit,
     onNavigateToNextUser: () -> Unit,
     onNavigateToPreviousUser: () -> Unit,
     onExit: () -> Unit,
@@ -145,7 +246,9 @@ private fun StoryUserPage(
             story = currentStory,
             storyIndex = currentStoryIndex,
             totalStories = userStories.size,
-            shouldStartTimer = isPagerSettled,
+            shouldStartTimer = isPagerSettled && !isDragging,
+            isMuted = isMuted,
+            onMuteToggle = onMuteToggle,
             onStoryComplete = {
                 if (currentStoryIndex < userStories.size - 1) {
                     currentStoryIndex++
@@ -205,6 +308,8 @@ private fun StoryPage(
     storyIndex: Int,
     totalStories: Int,
     shouldStartTimer: Boolean,
+    isMuted: Boolean,
+    onMuteToggle: () -> Unit,
     onStoryComplete: () -> Unit,
     onTapLeft: () -> Unit,
     onTapRight: () -> Unit,
@@ -221,12 +326,16 @@ private fun StoryPage(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var isPressed by remember { mutableStateOf(false) }
 
+    // Zoom and pan states
+    var scale by remember { mutableStateOf(1f) }
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
+
     // Progress animation
     val progress = remember { Animatable(0f) }
-
     val coroutineScope = rememberCoroutineScope()
 
-    // Handle story progression - only start when shouldStartTimer is true
+    // Handle story progression - only start when shouldStartTimer is true and not dragging
     LaunchedEffect(storyIndex, shouldStartTimer) {
         println("Always reset progress for new story")
         progress.snapTo(0f) // Always reset progress for new story
@@ -246,7 +355,7 @@ private fun StoryPage(
         }
     }
 
-    // Resume animation when user stops pressing and timer should be active
+    // Resume animation when user stops pressing and timer should be active and not dragging
     LaunchedEffect(isPressed, shouldStartTimer) {
         if (!isPressed && shouldStartTimer) {
             val remainingTime = (STORY_DURATION_MS * (1f - progress.value)).toLong()
@@ -288,11 +397,35 @@ private fun StoryPage(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Story background image
+        // Story background image with zoom and pan
         AsyncImage(
             model = getUrl(story.momentID),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer(
+                    scaleX = scale,
+                    scaleY = scale,
+                    translationX = offsetX,
+                    translationY = offsetY
+                )
+                .pointerInput(Unit) {
+                    detectTransformGestures { _, pan, zoom, _ ->
+                        if (shouldStartTimer) {
+                            isPressed = true
+                            scale = (scale * zoom).coerceIn(1f, 3f)
+                            if (scale > 1f) {
+                                val maxX = (size.width * (scale - 1)) / 2
+                                val maxY = (size.height * (scale - 1)) / 2
+                                offsetX = (offsetX + pan.x).coerceIn(-maxX, maxX)
+                                offsetY = (offsetY + pan.y).coerceIn(-maxY, maxY)
+                            } else {
+                                offsetX = 0f
+                                offsetY = 0f
+                            }
+                        }
+                    }
+                },
             contentScale = ContentScale.Crop,
             placeholder = painterResource(Res.drawable.ic_placeholder),
             error = painterResource(Res.drawable.ic_placeholder)
@@ -386,8 +519,10 @@ private fun StoryPage(
         // Story header with user info
         StoryHeader(
             story = story,
+            isMuted = isMuted,
             onProfileTap = onProfileTap,
             onBackTap = onExit,
+            onMuteToggle = onMuteToggle,
             modifier = Modifier.padding(16.dp)
         )
 
@@ -407,6 +542,23 @@ private fun StoryPage(
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
         )
+
+        // Paused indicator
+        if (isPressed && shouldStartTimer) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Paused",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
     }
 }
 
@@ -442,8 +594,10 @@ private fun StoryProgressIndicators(
 @Composable
 private fun StoryHeader(
     story: MomentModel,
+    isMuted: Boolean,
     onProfileTap: () -> Unit,
     onBackTap: () -> Unit,
+    onMuteToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -470,6 +624,7 @@ private fun StoryHeader(
         // User profile info
         Row(
             modifier = Modifier
+                .weight(1f)
                 .clip(RoundedCornerShape(16.dp))
                 .clickable { onProfileTap() }
                 .padding(4.dp),
@@ -503,6 +658,7 @@ private fun StoryHeader(
                 )
             }
         }
+
     }
 }
 
@@ -591,7 +747,6 @@ private fun StoryActions(
 
         // Delete button (only for own stories)
         if (myID == story.ownerID) {
-
             Box(
                 modifier = Modifier
                     .size(44.dp)
@@ -613,7 +768,6 @@ private fun StoryActions(
     }
 }
 
-// Main screen composable
 @Composable
 fun MomentsScreen(
     navController: NavHostController,

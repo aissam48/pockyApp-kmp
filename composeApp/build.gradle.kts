@@ -204,5 +204,8 @@ dependencies {
     commonMainApi("dev.icerock.moko:socket-io:0.5.0")
 
     api("com.google.firebase:firebase-messaging:23.4.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0") // Use the latest version
+
 }
 
