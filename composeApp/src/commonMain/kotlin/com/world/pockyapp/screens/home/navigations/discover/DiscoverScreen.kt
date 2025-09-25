@@ -97,13 +97,13 @@ fun DiscoverScreen(
                     modifier = Modifier.padding(10.dp)
                 ) {
                     Text(
-                        text = "Moments",
+                        text = "Friends moments",
                         color = Color.Black,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
+                        fontSize = 16.sp
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     Row(
                         verticalAlignment = Alignment.Top,
@@ -125,7 +125,8 @@ fun DiscoverScreen(
                             }
 
                             is UiState.Success -> {
-                                val myDailyMoments = (myDailyMomentsState as UiState.Success<List<MomentModel>>).data
+                                val myDailyMoments =
+                                    (myDailyMomentsState as UiState.Success<List<MomentModel>>).data
                                 ModernProfileSection(
                                     myDailyMomentsRandom = myDailyMoments,
                                     navController = navController,
@@ -161,7 +162,8 @@ fun DiscoverScreen(
                             }
 
                             is UiState.Success -> {
-                                val friendsMoments = (friendsMomentsState as UiState.Success<List<MomentModel>>).data
+                                val friendsMoments =
+                                    (friendsMomentsState as UiState.Success<List<MomentModel>>).data
                                 val friends = friendsMoments.map { it.profile }.distinctBy { it.id }
                                 val groupedFriendsMoments =
                                     mutableListOf<MutableList<MomentModel>>()
@@ -265,11 +267,11 @@ fun DiscoverScreen(
                                         text = "Nearby Moments",
                                         color = Color.Black,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 18.sp
+                                        fontSize = 15.sp
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(10.dp))
 
                                 LazyRow(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -280,7 +282,7 @@ fun DiscoverScreen(
                                                 profileMoments = profileMoments,
                                                 currentUserId = (profileState as? UiState.Success<ProfileModel>)?.data?.id,
                                                 navController = navController,
-                                                groupedFriendsMoments= groupedFriendsMoments
+                                                groupedFriendsMoments = groupedFriendsMoments
                                             )
                                         }
                                     }
@@ -333,10 +335,10 @@ fun DiscoverScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Nearby Posts",
+                                text = "Posts",
                                 color = Color.Black,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
+                                fontSize = 16.sp
                             )
                         }
                     }
@@ -469,14 +471,13 @@ fun ModernProfileSection(
                 .padding(2.dp),
         ) {
             AsyncImage(
-                model = if (myDailyMoments.isEmpty()){
-                    if (profileState is UiState.Success){
+                model = if (myDailyMoments.isEmpty()) {
+                    if (profileState is UiState.Success) {
                         getUrl(profileState.data.photoID)
                     } else {
                         getUrl("")
                     }
-                }
-                else {
+                } else {
                     getUrl(myDailyMoments[0].momentID)
                 },
                 contentScale = ContentScale.Crop,
@@ -667,20 +668,18 @@ fun ModernPostItem(
 ) {
     Card(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
+            .fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+    )
+    {
+        Column() {
             // Profile Header
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 10.dp)
                     .clickable { onProfileClick(post.profile.id) }
             ) {
                 AsyncImage(
@@ -725,8 +724,8 @@ fun ModernPostItem(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp),
-                shape = RoundedCornerShape(12.dp),
+                    .height(600.dp),
+                shape = RoundedCornerShape(0.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.LightGray),
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
@@ -740,16 +739,17 @@ fun ModernPostItem(
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // Like Section
             Row(
+                modifier = Modifier.padding(horizontal = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val isLiked = post.likes.contains(currentUserId)
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(25.dp)
                         .background(
                             if (isLiked) Color(0xFFE91E63).copy(alpha = 0.1f) else Color.Gray.copy(
                                 alpha = 0.1f
@@ -766,7 +766,7 @@ fun ModernPostItem(
                             painterResource(Res.drawable.ic_unlike_black)
                         },
                         contentDescription = if (isLiked) "Unlike" else "Like",
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
 
@@ -775,10 +775,12 @@ fun ModernPostItem(
                 Text(
                     text = "${post.likes.size} likes",
                     color = Color.Black,
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
         }
     }
+
+    Spacer(modifier = Modifier.height(25.dp))
 }
