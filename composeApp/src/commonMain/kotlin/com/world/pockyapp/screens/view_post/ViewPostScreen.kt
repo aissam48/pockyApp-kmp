@@ -217,7 +217,8 @@ fun ViewPostScreen(
                     // Like Button
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                    )
+                    {
                         Box(
                             modifier = Modifier
                                 .size(48.dp)

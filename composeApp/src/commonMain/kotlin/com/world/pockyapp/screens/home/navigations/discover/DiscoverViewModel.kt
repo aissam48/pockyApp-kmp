@@ -7,6 +7,7 @@ import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -219,6 +220,37 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
                 _nearbyPostsState.value = UiState.Success(updatedPosts)
             } catch (e: Exception) {
                 _likeActionState.value = UiState.Error(
+                    error = ErrorModel(
+                        message = "Network error. Please try again later.",
+                        code = 500
+                    )
+                )
+            }
+        }
+    }
+
+    private var isFollowingsMomentsLoadingFirstTime = true
+    private val _followingsMomentsState = MutableStateFlow<ResponseState<List<MomentModel>>>(ResponseState.Idle)
+    val followingsMomentsState = _followingsMomentsState.asStateFlow()
+
+    fun loadFollowingsMoments() {
+        viewModelScope.launch {
+            if (isFollowingsMomentsLoadingFirstTime) {
+                _followingsMomentsState.value = ResponseState.Loading
+            }
+            try {
+                sdk.getFollowingsMoments(
+                    onSuccess = { moments ->
+                        isFollowingsMomentsLoadingFirstTime = false
+                        _followingsMomentsState.value = ResponseState.Success(moments)
+                    },
+                    onFailure = { error ->
+                        isFollowingsMomentsLoadingFirstTime = true
+                        _followingsMomentsState.value = ResponseState.Error(error)
+                    }
+                )
+            } catch (e: Exception) {
+                _followingsMomentsState.value = ResponseState.Error(
                     error = ErrorModel(
                         message = "Network error. Please try again later.",
                         code = 500

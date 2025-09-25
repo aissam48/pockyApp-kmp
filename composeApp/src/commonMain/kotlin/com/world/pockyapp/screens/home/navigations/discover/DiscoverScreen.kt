@@ -48,6 +48,7 @@ import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
+import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import com.world.pockyapp.utils.Utils.formatCreatedAt
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -67,6 +68,7 @@ fun DiscoverScreen(
     val friendsMomentsState by viewModel.friendsMomentsState.collectAsState()
     val nearbyMomentsState by viewModel.nearbyMomentsState.collectAsState()
     val nearbyPostsState by viewModel.nearbyPostsState.collectAsState()
+    val followingsMomentsState by viewModel.followingsMomentsState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.getProfile()
@@ -74,6 +76,7 @@ fun DiscoverScreen(
         viewModel.loadFriendsMoments()
         viewModel.loadNearbyMoments()
         viewModel.loadNearbyPosts()
+        viewModel.loadFollowingsMoments()
     }
 
     LazyColumn(
@@ -208,8 +211,8 @@ fun DiscoverScreen(
         }
 
         // Nearby Moments Section
-        when (nearbyMomentsState) {
-            is UiState.Loading -> {
+        when (followingsMomentsState) {
+            is ResponseState.Loading -> {
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -232,20 +235,21 @@ fun DiscoverScreen(
                 }
             }
 
-            is UiState.Success -> {
+            is ResponseState.Success -> {
 
-                val nearbyMoments = (nearbyMomentsState as UiState.Success<List<MomentModel>>).data
-                val friends = nearbyMoments.map { it.profile }.distinctBy { it.id }
+                val friendsMoments =
+                    (followingsMomentsState as ResponseState.Success<List<MomentModel>>).data
+                val friends = friendsMoments.map { it.profile }.distinctBy { it.id }
                 val groupedFriendsMoments =
                     mutableListOf<MutableList<MomentModel>>()
 
                 friends.forEach { friend ->
                     val friendMoments =
-                        nearbyMoments.filter { it.profile.id == friend.id }
+                        friendsMoments.filter { it.profile.id == friend.id }
                     groupedFriendsMoments.add(friendMoments.toMutableList())
                 }
 
-                if (nearbyMoments.isNotEmpty()) {
+                if (friendsMoments.isNotEmpty()) {
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -293,7 +297,7 @@ fun DiscoverScreen(
                 }
             }
 
-            is UiState.Error -> {
+            is ResponseState.Error -> {
                 item {
                     ModernErrorSection(
                         error = (nearbyMomentsState as UiState.Error).error,
@@ -301,6 +305,8 @@ fun DiscoverScreen(
                     )
                 }
             }
+
+            else -> {}
         }
 
         // Nearby Moments Section
@@ -731,7 +737,7 @@ fun ModernNearbyMomentItem(
     ) {
         Box {
             AsyncImage(
-                model = getUrl(profileMoments[0].profile.photoID),
+                model = getUrl(profileMoments[0].momentID),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
                 contentDescription = null,

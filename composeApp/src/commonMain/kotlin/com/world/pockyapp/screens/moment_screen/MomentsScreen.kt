@@ -112,7 +112,7 @@ private fun StoriesViewer(
                         if (isDragging) {
                             isDragging = false
                             // If dragged more than 150dp, close the screen
-                            if (kotlin.math.abs(dragOffset) > 20.dp.toPx()) {
+                            if (kotlin.math.abs(dragOffset) > 50.dp.toPx()) {
                                 onStoriesFinished()
                             } else {
                                 // Snap back to original position
@@ -191,20 +191,6 @@ private fun StoriesViewer(
             )
         }
 
-        // Show drag indicator when dragging
-        if (isDragging) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 8.dp)
-                    .width(40.dp)
-                    .height(4.dp)
-                    .background(
-                        Color.White.copy(alpha = 0.6f),
-                        RoundedCornerShape(2.dp)
-                    )
-            )
-        }
     }
 }
 
@@ -543,22 +529,6 @@ private fun StoryPage(
                 .padding(16.dp)
         )
 
-        // Paused indicator
-        if (isPressed && shouldStartTimer) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = "Paused",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        }
     }
 }
 

@@ -16,14 +16,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,21 +32,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.world.pockyapp.screens.google_maps.MapComponentScreen
 import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.screens.camera.CameraView
 import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverScreen
 import com.world.pockyapp.screens.home.navigations.hot.HotScreen
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -58,7 +51,8 @@ import pockyapp.composeapp.generated.resources.ic_discover_black
 import pockyapp.composeapp.generated.resources.ic_hot_black
 import pockyapp.composeapp.generated.resources.ic_profile_black
 import pockyapp.composeapp.generated.resources.ic_search_black
-import pockyapp.composeapp.generated.resources.icon_world
+import pockyapp.composeapp.generated.resources.icon_camera
+import pockyapp.composeapp.generated.resources.icon_videos
 import pockyapp.composeapp.generated.resources.nearvibe_logo
 
 @Composable
@@ -77,98 +71,105 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
     ) {
         // Modern Header
 
-        Spacer(modifier = Modifier.height(40.dp))
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = Color.White,
             shadowElevation = 0.dp
         )
         {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            )
-            {
-                // Logo Section
+
+            if (selected != 2){
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(
-                                color = Color(0xFFDFC46B).copy(alpha = 0.1f),
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(Res.drawable.nearvibe_logo),
-                            contentDescription = "logo"
-                        )
-                    }
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                )
+                {
+                    // Logo Section
 
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Text(
-                        text = "NearVibe",
-                        fontFamily = FontFamily.Default,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1A1A),
-                        fontSize = 24.sp,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
                     )
-                }
-
-                // Action Icons
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Search Button
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(
-                                color = Color(0xFFF8F9FA),
-                                shape = CircleShape
+                    {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(
+                                    color = Color(0xFFDFC46B).copy(alpha = 0.1f),
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(Res.drawable.nearvibe_logo),
+                                contentDescription = "logo"
                             )
-                            .clickable {
-                                navController.navigate(NavRoutes.SEARCH.route)
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(Res.drawable.ic_search_black),
-                            modifier = Modifier.size(20.dp),
-                            contentDescription = "Search",
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Text(
+                            text = "NearVibe",
+                            fontFamily = FontFamily.Default,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1A1A1A),
+                            fontSize = 24.sp,
                         )
                     }
 
-                    // Profile Button
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(
-                                color = Color(0xFFDFC46B),
-                                shape = CircleShape
+                    // Action Icons
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    )
+                    {
+                        // Search Button
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(
+                                    color = Color(0xFFF8F9FA),
+                                    shape = CircleShape
+                                )
+                                .clickable {
+                                    navController.navigate(NavRoutes.SEARCH.route)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(Res.drawable.ic_search_black),
+                                modifier = Modifier.size(20.dp),
+                                contentDescription = "Search",
                             )
-                            .clickable {
-                                navController.navigate(NavRoutes.MY_PROFILE.route)
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(Res.drawable.ic_profile_black),
-                            modifier = Modifier.size(20.dp),
-                            contentDescription = "Profile",
-                        )
+                        }
+
+                        // Profile Button
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(
+                                    color = Color(0xFFDFC46B),
+                                    shape = CircleShape
+                                )
+                                .clickable {
+                                    navController.navigate(NavRoutes.MY_PROFILE.route)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(Res.drawable.ic_profile_black),
+                                modifier = Modifier.size(20.dp),
+                                contentDescription = "Profile",
+                            )
+                        }
                     }
                 }
             }
+
+
         }
 
         Scaffold(
@@ -275,7 +276,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        painter = painterResource(Res.drawable.icon_world),
+                                        painter = painterResource(Res.drawable.icon_camera),
                                         contentDescription = "Map",
                                         modifier = Modifier.size(24.dp),
                                         tint = if (selected == 2) Color.White else Color.Gray
@@ -287,7 +288,8 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                             )
                         )
 
-                        // Chat
+
+                        // Videos
                         NavigationBarItem(
                             selected = selected == 3,
                             onClick = {
@@ -308,10 +310,43 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
+                                        painter = painterResource(Res.drawable.icon_videos),
+                                        contentDescription = "Map",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = if (selected == 3) Color.White else Color.Gray
+                                    )
+                                }
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = Color.Transparent
+                            )
+                        )
+
+                        // Chat
+                        NavigationBarItem(
+                            selected = selected == 4,
+                            onClick = {
+                                selected = 4
+                                viewModel.selectedScreen = 4
+                            },
+                            icon = {
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .background(
+                                            color = if (selected == 4)
+                                                Color(0xFFDFC46B)
+                                            else
+                                                Color.Transparent,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
                                         painter = painterResource(Res.drawable.ic_chat_black),
                                         contentDescription = "Chat",
                                         modifier = Modifier.size(24.dp),
-                                        tint = if (selected == 3) Color.White else Color.Gray
+                                        tint = if (selected == 4) Color.White else Color.Gray
                                     )
                                 }
                             },
@@ -330,8 +365,9 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                 when (selected) {
                     0 -> DiscoverScreen(navController)
                     1 -> HotScreen(navController)
-                    2 -> MapComponentScreen(navController)
-                    3 -> ChatScreen(navController)
+                    2 -> {CameraView(navController)}
+                    3 -> {}
+                    4 -> ChatScreen(navController)
                 }
             }
         }
