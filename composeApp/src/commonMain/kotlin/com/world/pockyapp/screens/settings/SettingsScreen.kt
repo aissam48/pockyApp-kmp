@@ -1,9 +1,11 @@
 package com.world.pockyapp.screens.settings
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -20,8 +22,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.screens.components.ModernHeader
 import com.world.pockyapp.screens.settings.controlAccount.ModernSettingsSection
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
+import pockyapp.composeapp.generated.resources.Res
+import pockyapp.composeapp.generated.resources.ic_back_black
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,7 +106,6 @@ fun SettingsScreen(
                 ModernHeader(
                     title = "Settings",
                     onBackClick = { navController.popBackStack() },
-                    textColor = textPrimary
                 )
             }
 
@@ -281,40 +286,7 @@ fun SettingsScreen(
     }
 }
 
-@Composable
-fun ModernHeader(
-    title: String,
-    onBackClick: () -> Unit,
-    textColor: Color
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(
-            onClick = onBackClick,
-            modifier = Modifier.size(40.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back",
-                tint = textColor,
-                modifier = Modifier.size(24.dp)
-            )
-        }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            text = title,
-            color = textColor,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
 
 
 @Composable

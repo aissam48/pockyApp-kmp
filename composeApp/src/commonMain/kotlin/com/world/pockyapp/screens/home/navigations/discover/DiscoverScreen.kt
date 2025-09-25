@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
+import com.world.pockyapp.ItemMapView
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.MomentModel
@@ -368,7 +369,8 @@ fun DiscoverScreen(
 
                                 LazyRow(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
+                                )
+                                {
                                     items(groupedFriendsMoments) { profileMoments ->
                                         if (profileMoments.isNotEmpty()) {
                                             ModernNearbyMomentItem(
@@ -396,6 +398,27 @@ fun DiscoverScreen(
                     )
                 }
             }
+        }
+
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Global",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            ItemMapView(navController)
         }
 
         // Nearby Posts Section

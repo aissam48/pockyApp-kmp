@@ -41,6 +41,7 @@ import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.components.ModernHeader
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -86,33 +87,9 @@ fun BlockedScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            Color(0xFFF8F9FA),
-                            CircleShape
-                        )
-                        .clickable {
-                            navController.popBackStack()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.ic_back_black),
-                        contentDescription = "Back",
-                        modifier = Modifier.size(20.dp)
-                    )
+                ModernHeader("Blocked Users") {
+                    navController.popBackStack()
                 }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "Blocked Users",
-                    color = Color.Black,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))

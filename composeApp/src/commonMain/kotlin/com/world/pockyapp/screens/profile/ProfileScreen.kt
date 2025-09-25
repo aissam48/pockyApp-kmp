@@ -60,6 +60,7 @@ import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.components.ModernHeader
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -210,19 +211,14 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                     .padding(horizontal = 16.dp)
             ) {
                 item {
-                    Spacer(modifier = Modifier.height(20.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Image(
-                            modifier = Modifier.size(23.dp).clickable {
-                                navController.popBackStack()
-                            },
-                            painter = painterResource(Res.drawable.ic_back_black),
-                            contentDescription = null
-                        )
+                        ModernHeader(""){
+                            navController.popBackStack()
+                        }
 
                         Spacer(modifier = Modifier.weight(1f))
 
@@ -616,7 +612,6 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                                 1 ->
                                                     Box(modifier = Modifier.clickable {
                                                         momentsViewModel.moments = listOf(coupleOfMoments)
-                                                        momentsViewModel.moments = sdhfghjsdg
                                                         momentsViewModel.myID = profile.value.id
                                                         momentsViewModel.selectedIndex = 0
                                                         navController.navigate(NavRoutes.MOMENTS.route)

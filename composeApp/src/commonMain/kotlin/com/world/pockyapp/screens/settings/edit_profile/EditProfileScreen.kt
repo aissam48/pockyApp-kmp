@@ -52,6 +52,7 @@ import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.screens.components.CustomDialogSuccess
+import com.world.pockyapp.screens.components.ModernHeader
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -138,24 +139,9 @@ fun EditProfileScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clickable {
-                                navController.popBackStack()
-                            },
-                        painter = painterResource(Res.drawable.ic_back_black),
-                        contentDescription = "Back"
-                    )
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Text(
-                        text = "Edit Profile",
-                        color = Color.Black,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    ModernHeader("Edit Profile"){
+                        navController.popBackStack()
+                    }
                 }
                 Spacer(modifier = Modifier.height(32.dp))
             }

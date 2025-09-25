@@ -61,6 +61,7 @@ import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.components.ModernHeader
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.profile.CardMomentProfile
 import com.world.pockyapp.screens.profile.ImagePost
@@ -291,20 +292,14 @@ fun ProfilePreviewScreen(
             ) {
                 // back button and more button
                 item {
-                    Spacer(modifier = Modifier.height(20.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Image(
-                            modifier = Modifier.size(23.dp).clickable {
-                                navController.popBackStack()
-                            },
-                            painter = painterResource(Res.drawable.ic_back_black),
-                            contentDescription = null
-                        )
-
+                        ModernHeader(""){
+                            navController.popBackStack()
+                        }
                         Spacer(modifier = Modifier.weight(1f))
 
                         Image(

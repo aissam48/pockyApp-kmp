@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.network.models.model.ResponseMessageModel
-import com.world.pockyapp.screens.settings.ModernHeader
+import com.world.pockyapp.screens.components.ModernHeader
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -72,11 +72,9 @@ fun ControlAccountScreen(
             contentPadding = PaddingValues(horizontal = 10.dp)
         ) {
             item {
-                ModernHeader(
-                    title = "Your Network Visibility",
-                    onBackClick = { navController.popBackStack() },
-                    textColor = textPrimary
-                )
+                ModernHeader("Your Network Visibility"){
+                    navController.popBackStack()
+                }
             }
 
             item {

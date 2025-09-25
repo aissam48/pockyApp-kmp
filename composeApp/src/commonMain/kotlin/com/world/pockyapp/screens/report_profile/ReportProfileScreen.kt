@@ -49,6 +49,7 @@ import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.components.CustomDialogSuccess
+import com.world.pockyapp.screens.components.ModernHeader
 import com.world.pockyapp.screens.profile_preview.ProfilePreviewUiState
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -122,33 +123,9 @@ fun ReportProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            Color(0xFFF8F9FA),
-                            CircleShape
-                        )
-                        .clickable {
-                            navController.popBackStack()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.ic_back_black),
-                        contentDescription = "Back",
-                        modifier = Modifier.size(20.dp)
-                    )
+                ModernHeader("Report User"){
+                    navController.popBackStack()
                 }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "Report User",
-                    color = Color.Black,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
             }
 
             Spacer(modifier = Modifier.height(32.dp))

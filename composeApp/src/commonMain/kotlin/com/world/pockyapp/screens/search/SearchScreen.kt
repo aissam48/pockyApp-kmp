@@ -53,6 +53,7 @@ import com.world.pockyapp.Constant
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.components.ModernHeader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -82,29 +83,13 @@ fun SearchScreen(navController: NavHostController, viewModel: SearchViewModel = 
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable {
-                            navController.popBackStack()
-                        },
-                    painter = painterResource(Res.drawable.ic_back_black),
-                    contentDescription = "Back"
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "Search",
-                    color = Color.Black,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                ModernHeader("Search"){
+                    navController.popBackStack()
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
