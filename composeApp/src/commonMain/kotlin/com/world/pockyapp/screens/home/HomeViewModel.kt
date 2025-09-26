@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val sdk: ApiManager):ViewModel() {
-    var selectedScreen by mutableStateOf(0)
+    var selectedScreen by mutableStateOf(1)
 
     private val _informInHomeSharedFlow = MutableSharedFlow<Boolean>()
     val informInHomeSharedFlow = _informInHomeSharedFlow.asSharedFlow()
