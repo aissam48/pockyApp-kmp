@@ -24,6 +24,7 @@ import com.world.pockyapp.screens.friend_request.FriendRequestsScreen
 import com.world.pockyapp.screens.google_maps.GoogleMapsScreen
 import com.world.pockyapp.screens.google_maps.MapComponentScreen
 import com.world.pockyapp.screens.home.HomeScreen
+import com.world.pockyapp.screens.home.navigations.shots.ShotsScreen
 import com.world.pockyapp.screens.moment_by_locationscreen.MomentsByLocationScreen
 import com.world.pockyapp.screens.moment_preview.MomentPreview
 import com.world.pockyapp.screens.moment_screen.MomentsScreen
@@ -188,6 +189,10 @@ fun NavigationHost(navController: NavHostController) {
 
         composable(route = NavRoutes.CREATE_SHOT.route) { navBackStackEntry ->
             CreateShotScreen(navController)
+        }
+
+        composable(route = NavRoutes.SHOTS.route) { navBackStackEntry ->
+            ShotsScreen(navController)
         }
     }
 }

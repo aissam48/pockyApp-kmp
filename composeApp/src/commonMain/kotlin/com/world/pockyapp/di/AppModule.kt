@@ -20,6 +20,7 @@ import com.world.pockyapp.screens.home.HomeViewModel
 import com.world.pockyapp.screens.home.navigations.conversations.ConversationsViewModel
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverViewModel
 import com.world.pockyapp.screens.home.navigations.hot.HotViewModel
+import com.world.pockyapp.screens.home.navigations.shots.ShotsViewModel
 import com.world.pockyapp.screens.moment_preview.MomentPreviewViewModel
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.profile.ProfileViewModel
@@ -66,7 +67,9 @@ val appModule = module {
     viewModel { FollowingsViewModel(sdk = get()) }
     viewModel { FriendsViewModel(sdk = get()) }
     single { MomentPreviewViewModel(sdk = get()) }
-    viewModel { CreateShotViewModel(sdk = get()) }
+    single { CreateShotViewModel(sdk = get()) }
+
+    single { ShotsViewModel(sdk = get()) }
 
 }
 
@@ -78,6 +81,9 @@ object ViewModelProvider {
         return KoinPlatform.getKoin().get()
     }
     fun getProfileViewModel(): ProfileViewModel {
+        return KoinPlatform.getKoin().get()
+    }
+    fun getCreateShotViewModel(): CreateShotViewModel {
         return KoinPlatform.getKoin().get()
     }
 

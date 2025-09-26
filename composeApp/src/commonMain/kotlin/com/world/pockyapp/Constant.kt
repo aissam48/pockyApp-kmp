@@ -2,10 +2,10 @@ package com.world.pockyapp
 
 object Constant {
 //172.20.10.12
-    private const val DEV_ENV = "http://192.168.11.251:443/api/v1"
+    private const val DEV_ENV = "http://192.168.100.178:443/api/v1"
     private const val PROD_ENV = "https://pockyappbackend.onrender.com/api/v1"
 
-    private const val DEV_ENV_HOST = "192.168.11.251:443"
+    private const val DEV_ENV_HOST = "192.168.100.178:443"
     private const val PROD_ENV_HOST = "pockyappbackend.onrender.com"
 
     var SHARED_LINK = DEV_ENV

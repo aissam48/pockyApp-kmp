@@ -1,10 +1,3 @@
-//
-//  CreateShotScreen.swift
-//  iosApp
-//
-//  Created by Aissam EL BOUDI on 26/9/2025.
-//  Copyright © 2025 orgName. All rights reserved.
-//
 import SwiftUI
 import AVKit
 import AVFoundation

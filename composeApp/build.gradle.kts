@@ -90,6 +90,8 @@ kotlin {
             implementation("androidx.media3:media3-exoplayer:1.1.1")
             implementation("androidx.media3:media3-ui:1.1.1")
 
+            implementation("com.google.mlkit:face-detection:16.1.7")
+
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -167,7 +169,6 @@ kotlin {
             // Optional - Location permissions for mobile
             implementation(libs.compass.permissions.mobile)
 
-
         }
     }
 }
@@ -210,8 +211,6 @@ dependencies {
     api("com.google.firebase:firebase-messaging:23.4.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0") // Use the latest version
-
-
 
 }
 

@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.screens.camera.CameraView
+import com.world.pockyapp.screens.home.navigations.shots.ShotsScreen
 import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverScreen
 import com.world.pockyapp.screens.home.navigations.hot.HotScreen
@@ -78,7 +79,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
         )
         {
 
-            if (selected != 2){
+            if (selected != 2 && selected != 3) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -365,8 +366,8 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                 when (selected) {
                     0 -> DiscoverScreen(navController)
                     1 -> HotScreen(navController)
-                    2 -> {CameraView(navController)}
-                    3 -> {}
+                    2 -> CameraView(navController)
+                    3 -> ShotsScreen(navController)
                     4 -> ChatScreen(navController)
                 }
             }

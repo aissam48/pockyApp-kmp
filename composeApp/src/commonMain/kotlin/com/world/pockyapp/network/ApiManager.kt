@@ -17,6 +17,7 @@ import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.network.models.model.ResponseMessageModel
+import com.world.pockyapp.network.models.model.ShotModel
 import com.world.pockyapp.network.models.model.StreetModel
 import com.world.pockyapp.network.models.requests.ChangePasswordRequestModel
 import com.world.pockyapp.network.models.requests.LocationRequestModel
@@ -84,10 +85,7 @@ import kotlin.collections.contains
 
 
 class ApiManager(val dataStore: DataStore<Preferences>) {
-
     private val baseUrl = Constant.SHARED_LINK
-
-
     private val client = if (getPlatform().name.contains("Android")) {
         HttpClient(CIO) {
 
@@ -1874,6 +1872,30 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             val errorMessage: ErrorModel =
                 response.body()
             onFailure(errorMessage)
+        }
+    }
+
+    suspend fun getShots(
+        onSuccess: (List<ShotModel>) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/shots") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<ShotModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
         }
     }
 

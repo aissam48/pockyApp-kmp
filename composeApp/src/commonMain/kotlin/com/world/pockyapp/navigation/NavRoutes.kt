@@ -36,4 +36,6 @@ enum class NavRoutes(val route: String) {
     FRIENDS("friends"),
     CREATE_SHOT("create_shot"),
 
+    SHOTS("shots"),
+
 }
