@@ -502,58 +502,7 @@ fun DiscoverScreen(
     }
 }
 
-@Composable
-fun ModernErrorSection(
-    error: ErrorModel,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF5F5)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "⚠️",
-                fontSize = 32.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Something went wrong",
-                color = Color(0xFFE53E3E),
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
-            Text(
-                text = error.message,
-                color = Color(0xFFE53E3E),
-                fontSize = 14.sp
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Box(
-                modifier = Modifier
-                    .background(
-                        Color(0xFFE53E3E),
-                        RoundedCornerShape(8.dp)
-                    )
-                    .clickable(onClick = onRetry)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    text = "Retry",
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
-                )
-            }
-        }
-    }
-}
+
 
 @Composable
 fun ModernProfileSection(
@@ -905,4 +854,58 @@ fun ModernPostItem(
     }
 
     Spacer(modifier = Modifier.height(25.dp))
+}
+
+
+@Composable
+fun ModernErrorSection(
+    error: ErrorModel,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF5F5)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "⚠️",
+                fontSize = 32.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Something went wrong",
+                color = Color(0xFFE53E3E),
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+            Text(
+                text = error.message,
+                color = Color(0xFFE53E3E),
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Box(
+                modifier = Modifier
+                    .background(
+                        Color(0xFFE53E3E),
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clickable(onClick = onRetry)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = "Retry",
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp
+                )
+            }
+        }
+    }
 }

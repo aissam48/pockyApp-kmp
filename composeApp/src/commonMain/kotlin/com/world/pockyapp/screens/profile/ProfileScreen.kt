@@ -61,6 +61,7 @@ import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.components.ModernHeader
+import com.world.pockyapp.screens.home.HomeViewModel
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -98,6 +99,8 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
     val profile = remember { mutableStateOf(ProfileModel()) }
 
     val myMomentsState by viewModel.myMomentsState.collectAsState()
+
+    val homeViewModel: HomeViewModel = koinViewModel()
 
 
     LaunchedEffect(Unit) {
@@ -139,8 +142,12 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                navController.navigate(NavRoutes.CAMERA.route)
-                                scope.launch { scaffoldState.bottomSheetState.collapse() }
+                                homeViewModel.selectedScreen = 2
+                                //navController.navigate(NavRoutes.CAMERA.route)
+                                navController.popBackStack()
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.collapse()
+                                }
                             },
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFDFC46B)),
                     ) {
