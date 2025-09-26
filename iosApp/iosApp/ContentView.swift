@@ -379,6 +379,9 @@ struct ComposeView: UIViewControllerRepresentable {
                         }
                     )
                 )
+            },
+            createShotUIViewController: {
+                UIHostingController(rootView: CreateShotScreen())
             }
 
         )

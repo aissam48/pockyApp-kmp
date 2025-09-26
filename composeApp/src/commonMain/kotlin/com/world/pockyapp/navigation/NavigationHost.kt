@@ -13,6 +13,7 @@ import com.world.pockyapp.screens.settings.blocked.BlockedScreen
 import com.world.pockyapp.screens.camera.CameraView
 import com.world.pockyapp.screens.settings.change_password.ChangePasswordScreen
 import com.world.pockyapp.screens.chat.ChatScreen
+import com.world.pockyapp.screens.createShot.CreateShotScreen
 import com.world.pockyapp.screens.followers.FollowersListScreen
 import com.world.pockyapp.screens.followers.followings.FollowingListScreen
 import com.world.pockyapp.screens.followers.friends.FriendsScreen
@@ -183,6 +184,10 @@ fun NavigationHost(navController: NavHostController) {
             val profileID = navBackStackEntry.arguments?.getString("profileID") ?: ""
             val chatRequestID = navBackStackEntry.arguments?.getString("chatRequestID") ?: ""
             ChatScreen(navController, conversationID = conversationID, profileID = profileID, chatRequestID = chatRequestID)
+        }
+
+        composable(route = NavRoutes.CREATE_SHOT.route) { navBackStackEntry ->
+            CreateShotScreen(navController)
         }
     }
 }

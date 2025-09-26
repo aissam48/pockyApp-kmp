@@ -1208,12 +1208,13 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         onFailure: (ErrorModel) -> Unit
     ) {
         try {
-            val response: HttpResponse = client.delete("$baseUrl/operations/cancel-friend-request") {
-                val token = getToken()
-                contentType(ContentType.Application.Json)
-                parameter("requestId", requestID)
-                headers { append(HttpHeaders.Authorization, "Bearer $token") }
-            }
+            val response: HttpResponse =
+                client.delete("$baseUrl/operations/cancel-friend-request") {
+                    val token = getToken()
+                    contentType(ContentType.Application.Json)
+                    parameter("requestId", requestID)
+                    headers { append(HttpHeaders.Authorization, "Bearer $token") }
+                }
 
             if (response.status.isSuccess()) {
                 val responseBody: ResponseMessageModel = response.body()
@@ -1736,7 +1737,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             val response: HttpResponse = client.get("$baseUrl/operations/friends") {
                 val token = getToken()
                 contentType(ContentType.Application.Json)
-                parameter("profileId",profileId)
+                parameter("profileId", profileId)
                 headers { append(HttpHeaders.Authorization, "Bearer $token") }
             }
 
@@ -1762,7 +1763,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             val response: HttpResponse = client.get("$baseUrl/operations/followers") {
                 val token = getToken()
                 contentType(ContentType.Application.Json)
-                parameter("followingId",followingId)
+                parameter("followingId", followingId)
                 headers { append(HttpHeaders.Authorization, "Bearer $token") }
             }
 
@@ -1789,7 +1790,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             val response: HttpResponse = client.get("$baseUrl/operations/followings") {
                 val token = getToken()
                 contentType(ContentType.Application.Json)
-                parameter("followerId",followerId)
+                parameter("followerId", followerId)
                 headers { append(HttpHeaders.Authorization, "Bearer $token") }
             }
 
@@ -1828,6 +1829,51 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             }
         } catch (e: Exception) {
 
+        }
+    }
+
+    suspend fun shareShot(
+        byteArray: ByteArray,
+        isNearby: Boolean,
+        geoLocationModel: GeoLocationModel,
+        extension: String,
+        onSuccess: (ResponseMessageModel) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+
+        val response: HttpResponse = client.submitFormWithBinaryData(
+            url = "$baseUrl/operations/share-shot",
+            formData {
+                append("file", byteArray, Headers.build {
+                    println("Original size ${byteArray.size} bytes")
+                    append(HttpHeaders.ContentType, "video/*")
+                    append(HttpHeaders.ContentDisposition, "filename=file")
+                })
+                append("isNearby", isNearby)
+                append("latitude", geoLocationModel.latitude)
+                append("longitude", geoLocationModel.longitude)
+                append("country", geoLocationModel.country)
+                append("street", geoLocationModel.street)
+                append("postalCode", geoLocationModel.postalCode)
+                append("name", geoLocationModel.name)
+            }) {
+            val token = getToken()
+            println("token-----> $token")
+            headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            onUpload { bytesSentTotal, contentLength ->
+                println("Sent $bytesSentTotal bytes from $contentLength")
+            }
+        }
+
+        if (response.status.isSuccess()) {
+            val responseBody: ResponseMessageModel =
+                response.body()
+            println("success-----> ${response.bodyAsText()}")
+            onSuccess(responseBody)
+        } else {
+            val errorMessage: ErrorModel =
+                response.body()
+            onFailure(errorMessage)
         }
     }
 

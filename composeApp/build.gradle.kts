@@ -86,6 +86,10 @@ kotlin {
             implementation(libs.maps.compose.utils)
             implementation(libs.play.services.maps)
 
+            implementation("androidx.activity:activity-compose:1.8.0")
+            implementation("androidx.media3:media3-exoplayer:1.1.1")
+            implementation("androidx.media3:media3-ui:1.1.1")
+
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -206,6 +210,8 @@ dependencies {
     api("com.google.firebase:firebase-messaging:23.4.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0") // Use the latest version
+
+
 
 }
 

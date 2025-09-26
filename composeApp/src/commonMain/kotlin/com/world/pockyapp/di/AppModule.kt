@@ -7,6 +7,7 @@ import com.world.pockyapp.screens.auth.register.RegisterScreenViewModel
 import com.world.pockyapp.screens.settings.blocked.BlockedViewModel
 import com.world.pockyapp.screens.settings.change_password.ChangePasswordViewModel
 import com.world.pockyapp.screens.chat.ChatViewModel
+import com.world.pockyapp.screens.createShot.CreateShotViewModel
 import com.world.pockyapp.screens.followers.FollowersViewModel
 import com.world.pockyapp.screens.followers.followings.FollowingsViewModel
 import com.world.pockyapp.screens.followers.friends.FriendsViewModel
@@ -65,6 +66,7 @@ val appModule = module {
     viewModel { FollowingsViewModel(sdk = get()) }
     viewModel { FriendsViewModel(sdk = get()) }
     single { MomentPreviewViewModel(sdk = get()) }
+    viewModel { CreateShotViewModel(sdk = get()) }
 
 }
 

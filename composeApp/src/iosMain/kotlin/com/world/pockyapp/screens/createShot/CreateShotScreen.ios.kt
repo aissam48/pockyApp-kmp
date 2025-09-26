@@ -1,4 +1,4 @@
-package com.world.pockyapp.screens.google_maps
+package com.world.pockyapp.screens.createShot
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -8,14 +8,15 @@ import androidx.compose.ui.viewinterop.UIKitInteropInteractionMode
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitViewController
 import androidx.navigation.NavHostController
+import com.world.pockyapp.createShotViewController
 import com.world.pockyapp.mapViewController
-import kotlinx.cinterop.ExperimentalForeignApi
+import kotlin.native.ref.createCleaner
 
-@OptIn(ExperimentalForeignApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-actual fun MapComponentScreen(navController: NavHostController) {
+actual fun CreateShotScreen(navController: NavHostController) {
     UIKitViewController(
-        factory = mapViewController,
+        factory = createShotViewController,
         modifier = Modifier.fillMaxSize(),
         properties = UIKitInteropProperties(interactionMode = UIKitInteropInteractionMode.NonCooperative)
     )

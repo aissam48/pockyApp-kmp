@@ -143,7 +143,6 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                             .fillMaxWidth()
                             .clickable {
                                 homeViewModel.selectedScreen = 2
-                                //navController.navigate(NavRoutes.CAMERA.route)
                                 navController.popBackStack()
                                 scope.launch {
                                     scaffoldState.bottomSheetState.collapse()
@@ -206,7 +205,41 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                             )
                         }
                     }
+                    Spacer(modifier = Modifier.height(12.dp))
 
+                    // Share Moment Action
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                navController.navigate(NavRoutes.CREATE_SHOT.route)
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.collapse()
+                                }
+                            },
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFDFC46B)),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(20.dp),
+                                painter = painterResource(Res.drawable.is_add_story_black),
+                                contentDescription = null,
+                                tint = Color.Black
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                fontWeight = FontWeight.SemiBold,
+                                text = "Share Shot",
+                                color = Color.Black,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.height(20.dp))
                 }
             }
