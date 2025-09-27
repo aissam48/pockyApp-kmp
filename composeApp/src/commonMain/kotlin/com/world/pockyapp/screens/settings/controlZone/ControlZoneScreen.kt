@@ -51,11 +51,7 @@ fun ControlZoneScreen(
     Scaffold(
         containerColor = backgroundColor,
         topBar = {
-            ControlZoneTopBar(
-                title = "Control Zone",
-                onBackClick = { navController.popBackStack() },
-                textColor = textPrimary
-            )
+
         }
     ) { paddingValues ->
         LazyColumn(

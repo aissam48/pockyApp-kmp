@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.world.pockyapp.navigation.NavRoutes
 import org.koin.compose.viewmodel.koinViewModel
 
 data class Challenge(
@@ -195,7 +196,9 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .clickable { /* Handle post challenge */ },
+                        .clickable {
+                            navController.navigate(NavRoutes.CREATE_CHALLENGE.route)
+                        },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.Black),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)

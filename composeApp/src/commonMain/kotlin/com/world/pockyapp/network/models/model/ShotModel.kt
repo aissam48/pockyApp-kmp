@@ -6,6 +6,8 @@ import kotlinx.serialization.Serializable
 data class ShotModel(
     val id: String = "",
     val ownerID: String = "",
+
+    val url: String = "",
     val mimetype: String = "",
     val createdAt: String = "",
     val profile: ProfileModel = ProfileModel(),

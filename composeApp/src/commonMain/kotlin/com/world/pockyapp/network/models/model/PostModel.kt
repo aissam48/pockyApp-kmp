@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class PostModel(
     val postID: String = "",
     val ownerID: String = "",
+    val url: String = "",
     val mimetype: String = "",
     val createdAt: String = "",
     val profile: ProfileModel = ProfileModel(),

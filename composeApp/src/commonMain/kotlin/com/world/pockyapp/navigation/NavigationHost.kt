@@ -11,6 +11,7 @@ import com.world.pockyapp.screens.settings.controlZone.ControlZoneScreen
 import com.world.pockyapp.screens.auth.login.LoginScreen
 import com.world.pockyapp.screens.settings.blocked.BlockedScreen
 import com.world.pockyapp.screens.camera.CameraView
+import com.world.pockyapp.screens.challenges.create.CreateChallengeScreen
 import com.world.pockyapp.screens.settings.change_password.ChangePasswordScreen
 import com.world.pockyapp.screens.chat.ChatScreen
 import com.world.pockyapp.screens.createShot.CreateShotScreen
@@ -44,8 +45,12 @@ fun NavigationHost(navController: NavHostController) {
 
     NavHost(
         navController = navController,
-        startDestination = NavRoutes.SHOTS.route,
+        startDestination = NavRoutes.SPLASH.route,
     ) {
+
+        composable(NavRoutes.CREATE_CHALLENGE.route) {
+            CreateChallengeScreen(navController)
+        }
 
         composable(NavRoutes.CONTROL_ZONE.route) {
             ControlZoneScreen(navController)

@@ -38,4 +38,6 @@ enum class NavRoutes(val route: String) {
 
     SHOTS("shots"),
 
+    CREATE_CHALLENGE("create_challenge")
+
 }
