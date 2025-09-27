@@ -2,33 +2,50 @@ package com.world.pockyapp.screens.home.navigations.shots
 
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.material3.Text
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.ui.PlayerView
+import coil3.compose.AsyncImage
 import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.network.models.model.ShotModel
 import com.world.pockyapp.screens.settings.controlAccount.ResponseState
+import org.jetbrains.compose.resources.painterResource
 import org.koin.androidx.compose.koinViewModel
 import kotlinx.coroutines.launch
+import pockyapp.composeapp.generated.resources.Res
+import pockyapp.composeapp.generated.resources.ic_placeholder
+import pockyapp.composeapp.generated.resources.icon_comment
+import pockyapp.composeapp.generated.resources.icon_like
+import pockyapp.composeapp.generated.resources.icon_share
+import pockyapp.composeapp.generated.resources.icon_unlike
+import kotlin.random.Random
 
 data class VideoPlayerItem(
     val player: ExoPlayer,
@@ -88,14 +105,17 @@ actual fun Player() {
                 isLoading = false
                 println("SUCCESS: Total items now: ${items.size}")
             }
+
             is ResponseState.Loading -> {
                 debugInfo = "LOADING..."
                 isLoading = true
             }
+
             is ResponseState.Error -> {
                 debugInfo = "ERROR: ${state.error.message}"
                 isLoading = false
             }
+
             else -> {
                 debugInfo = "IDLE"
             }
@@ -110,11 +130,20 @@ actual fun Player() {
                 .background(Color.Black),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = debugInfo,
-                color = White,
-                fontSize = 16.sp
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                CircularProgressIndicator(
+                    color = Color(0xFFDFC46B),
+                    strokeWidth = 3.dp
+                )
+                Text(
+                    text = debugInfo,
+                    color = Color.White,
+                    fontSize = 16.sp
+                )
+            }
         }
         return
     }
@@ -163,8 +192,8 @@ actual fun Player() {
 
             // Assign available players to pages that need them
             pagesNeedingPlayers.zip(availablePlayers).forEach { (page, playerItem) ->
-                //val videoUrl = getUrl(items[page].id)
-                val videoUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+                val videoUrl =
+                    "https://nearvibe.fra1.digitaloceanspaces.com/95836975-a6a4-4b1a-8481-a41e87e4326c"
 
                 println("🔄 Assigning player to page $page: $videoUrl")
 
@@ -264,8 +293,6 @@ actual fun Player() {
         }
     }
 
-    debugInfo = "Players: ${pageToPlayerMap.size}/5 | Page: ${pagerState.currentPage}/${items.size - 1}"
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -276,9 +303,11 @@ actual fun Player() {
             modifier = Modifier.fillMaxSize()
         ) { page ->
             val playerItem = pageToPlayerMap[page]
+            val shot = items.getOrNull(page)
 
-            if (playerItem != null) {
-                Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                // Video Player
+                if (playerItem != null) {
                     AndroidView(
                         factory = { ctx ->
                             PlayerView(ctx).apply {
@@ -303,38 +332,290 @@ actual fun Player() {
                         ) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(50.dp),
-                                color = White,
+                                color = Color(0xFFDFC46B),
                                 strokeWidth = 3.dp
                             )
                         }
                     }
+                } else {
+                    // No player assigned to this page
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = Color(0xFFDFC46B),
+                            strokeWidth = 3.dp
+                        )
+                    }
                 }
-            } else {
-                // No player assigned to this page
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Loading...",
-                        color = White,
-                        fontSize = 16.sp
+
+                // Social UI Overlay
+                if (shot != null) {
+                    SocialOverlay(
+                        shot = shot,
+                        modifier = Modifier.fillMaxSize(),
+                        onLikeClick = { /* Handle like */ },
+                        onCommentClick = { /* Handle comment */ },
+                        onShareClick = { /* Handle share */ },
+                        onFollowClick = { /* Handle follow */ },
+                        onProfileClick = { /* Handle profile click */ }
                     )
                 }
             }
         }
+    }
+}
 
-        // Debug overlay
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
+@Composable
+fun SocialOverlay(
+    shot: ShotModel,
+    modifier: Modifier = Modifier,
+    onLikeClick: () -> Unit,
+    onCommentClick: () -> Unit,
+    onShareClick: () -> Unit,
+    onFollowClick: () -> Unit,
+    onProfileClick: () -> Unit
+) {
+    // Generate random engagement numbers for demo
+    val likes = remember { Random.nextInt(100, 50000) }
+    val comments = remember { Random.nextInt(10, 1000) }
+    val views = remember { Random.nextInt(1000, 100000) }
+    val isLiked = remember { mutableStateOf(false) }
+    val isFollowing = remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        // Right side action buttons
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Profile Picture with Follow Button
+            Box {
+                AsyncImage(
+                    model = getUrl(shot.profile?.photoID ?: ""),
+                    contentDescription = "Profile",
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.White, CircleShape)
+                        .clickable { onProfileClick() },
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                    error = painterResource(Res.drawable.ic_placeholder)
+                )
+
+            }
+
+            // Like Button
+            SocialActionButton(
+                painter = if (isLiked.value) painterResource(Res.drawable.icon_like) else painterResource(
+                    Res.drawable.icon_unlike
+                ),
+                count = if (isLiked.value) likes + 1 else likes,
+                tint = if (isLiked.value) Color.Red else Color.White,
+                onClick = {
+                    isLiked.value = !isLiked.value
+                    onLikeClick()
+                }
+            )
+
+            // Comment Button
+            SocialActionButton(
+                painter = painterResource(Res.drawable.icon_comment),
+                count = comments,
+                tint = Color.White,
+                onClick = onCommentClick
+            )
+
+            // Share Button
+            SocialActionButton(
+                painter = painterResource(Res.drawable.icon_share),
+                count = null,
+                tint = Color.White,
+                onClick = onShareClick
+            )
+
+            // Views indicator
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Views",
+                    tint = Color.White,
+                    modifier = Modifier.size(32.dp)
+                )
+                Text(
+                    text = formatCount(views),
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        // Bottom content info
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+                .fillMaxWidth(0.7f)
+        ) {
+            // Username
             Text(
-                text = debugInfo,
-                color = White,
-                fontSize = 12.sp,
-                modifier = Modifier.background(Color.Black.copy(alpha = 0.7f))
+                text = "Aissam elboudi",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Caption/Description
+            Text(
+                text = "Amazing video! Check this out 🔥",
+                color = Color.White,
+                fontSize = 14.sp,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Hashtags
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                listOf("#fyp", "#viral", "#trending").forEach { hashtag ->
+                    Text(
+                        text = hashtag,
+                        color = Color(0xFFDFC46B),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .background(
+                                Color.Black.copy(alpha = 0.3f),
+                                RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Music/Audio info
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .background(
+                        Color.Black.copy(alpha = 0.4f),
+                        RoundedCornerShape(20.dp)
+                    )
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Face,
+                    contentDescription = "Music",
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    text = "Original Audio",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        // Top gradient overlay for better text readability
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .align(Alignment.TopCenter)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Black.copy(alpha = 0.6f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+
+        // Bottom gradient overlay
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .align(Alignment.BottomCenter)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.8f)
+                        )
+                    )
+                )
+        )
+    }
+}
+
+@Composable
+fun SocialActionButton(
+    painter: Painter,
+    count: Int?,
+    tint: Color,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(
+                    Color.Black.copy(alpha = 0.3f),
+                    CircleShape
+                )
+                .clickable { onClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painter,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(22.dp)
             )
         }
+
+        if (count != null) {
+            Text(
+                text = formatCount(count),
+                color = Color.White,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+fun formatCount(count: Int): String {
+    return when {
+        count >= 1_000_000 -> "${(count / 1_000_000f).let { "%.1f".format(it) }}M"
+        count >= 1_000 -> "${(count / 1_000f).let { "%.1f".format(it) }}K"
+        else -> count.toString()
     }
 }

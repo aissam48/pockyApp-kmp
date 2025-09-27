@@ -44,7 +44,7 @@ fun NavigationHost(navController: NavHostController) {
 
     NavHost(
         navController = navController,
-        startDestination = NavRoutes.SPLASH.route,
+        startDestination = NavRoutes.SHOTS.route,
     ) {
 
         composable(NavRoutes.CONTROL_ZONE.route) {
