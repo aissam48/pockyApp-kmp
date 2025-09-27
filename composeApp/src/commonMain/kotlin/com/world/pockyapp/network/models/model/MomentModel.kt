@@ -4,8 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MomentModel(
-    val momentID: String = "",
+    val id: String = "",
     val ownerID: String = "",
+    val mediaUrl: String = "",
     val mimetype: String = "",
     val createdAt: String = "",
     val profile: ProfileModel = ProfileModel(),

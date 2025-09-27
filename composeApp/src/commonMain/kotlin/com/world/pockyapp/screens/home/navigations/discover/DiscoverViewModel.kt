@@ -200,7 +200,7 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
                 val currentPosts =
                     (_nearbyPostsState.value as? UiState.Success)?.data ?: return@launch
                 val updatedPosts = currentPosts.map { post ->
-                    if (post.postID == postId) {
+                    if (post.id == postId) {
                         val updatedLikes = post.likes.toMutableList()
                         val isLiked = if (updatedLikes.contains(userId)) {
                             updatedLikes.remove(userId)

@@ -16,7 +16,6 @@ import cocoapods.GoogleMaps.GMSCameraPosition
 import cocoapods.GoogleMaps.GMSCameraUpdate
 import cocoapods.GoogleMaps.GMSMapView
 import cocoapods.GoogleMaps.GMSMarker
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.screens.home.navigations.discover.UiState
 import platform.CoreLocation.CLLocationCoordinate2D
 import kotlinx.cinterop.ExperimentalForeignApi

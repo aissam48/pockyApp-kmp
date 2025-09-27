@@ -22,10 +22,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,17 +37,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.world.pockyapp.navigation.NavRoutes
+import coil3.compose.AsyncImage
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
+import pockyapp.composeapp.generated.resources.Res
+import pockyapp.composeapp.generated.resources.ic_placeholder
 
 data class Challenge(
     val id: String,
@@ -64,16 +67,56 @@ data class Challenge(
 )
 
 @Composable
-fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinViewModel()) {
+fun ChallengesScreen(navController: NavHostController, viewModel: HotViewModel = koinViewModel()) {
     val screenSize = remember { mutableStateOf(Pair(-1, -1)) }
 
     // Sample data - replace with your actual data
     val challenges = remember {
         listOf(
-            Challenge("1", "Run 1km in 4 minutes", "Challenge yourself to complete a 1km run in under 4 minutes", "Fitness", 45, "2d left", "Hard", "🏆 100 coins", "@speedrunner"),
-            Challenge("2", "Push a car 50 meters", "Physical strength challenge - push a standard car for 50 meters", "Strength", 23, "5h left", "Extreme", "🎁 Prize pack", "@strongman"),
-            Challenge("3", "Solve 100 math problems", "Speed math challenge - solve 100 arithmetic problems in 10 minutes", "Mental", 78, "1d left", "Medium", "🧠 Brain trophy", "@mathwiz"),
-            Challenge("4", "Eat 20 hot wings", "Spicy food challenge - finish 20 hot wings in 15 minutes", "Food", 12, "3h left", "Spicy", "🌶️ Fire medal", "@spicylover")
+            Challenge(
+                "1",
+                "Run 1km in 4 minutes",
+                "Challenge yourself to complete a 1km run in under 4 minutes",
+                "Fitness",
+                45,
+                "2d left",
+                "Hard",
+                "🏆 100 coins",
+                "@speedrunner"
+            ),
+            Challenge(
+                "2",
+                "Push a car 50 meters",
+                "Physical strength challenge - push a standard car for 50 meters",
+                "Strength",
+                23,
+                "5h left",
+                "Extreme",
+                "🎁 Prize pack",
+                "@strongman"
+            ),
+            Challenge(
+                "3",
+                "Solve 100 math problems",
+                "Speed math challenge - solve 100 arithmetic problems in 10 minutes",
+                "Mental",
+                78,
+                "1d left",
+                "Medium",
+                "🧠 Brain trophy",
+                "@mathwiz"
+            ),
+            Challenge(
+                "4",
+                "Eat 20 hot wings",
+                "Spicy food challenge - finish 20 hot wings in 15 minutes",
+                "Food",
+                12,
+                "3h left",
+                "Spicy",
+                "🌶️ Fire medal",
+                "@spicylover"
+            )
         )
     }
 
@@ -120,7 +163,11 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
                             .offset(x = (-4).dp, y = 4.dp)
                             .rotate(-2f),
                         shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFF6B6B).copy(alpha = 0.3f))
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFFF6B6B).copy(
+                                alpha = 0.3f
+                            )
+                        )
                     ) {}
 
                     // Main hero card
@@ -150,7 +197,7 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Text(
-                                    text = "🔥 Hot Challenges",
+                                    text = "Challenges",
                                     color = Color.White,
                                     fontSize = 32.sp,
                                     fontWeight = FontWeight.Bold
@@ -170,7 +217,7 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
-                                    Badge(
+                                    /*Badge(
                                         containerColor = Color.White.copy(alpha = 0.2f),
                                         contentColor = Color.White
                                     ) {
@@ -182,7 +229,7 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
                                         contentColor = Color.White
                                     ) {
                                         Text("158 Players", fontSize = 12.sp)
-                                    }
+                                    }*/
                                 }
                             }
                         }
@@ -196,9 +243,7 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .clickable {
-                            navController.navigate(NavRoutes.CREATE_CHALLENGE.route)
-                        },
+                        .clickable { /* Handle post challenge */ },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.Black),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -283,7 +328,7 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
             // Challenges Grid
             item {
                 Text(
-                    text = "🔥 Trending Challenges",
+                    text = "Challenges",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
@@ -291,25 +336,12 @@ fun HotScreen(navController: NavHostController, viewModel: HotViewModel = koinVi
                 )
             }
 
-            items(challenges.chunked(2)) { challengePair ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    challengePair.forEach { challenge ->
-                        ChallengeCard(
-                            challenge = challenge,
-                            modifier = Modifier.weight(1f),
-                            onClick = { /* Handle challenge click */ }
-                        )
-                    }
-                    // If odd number of challenges, add spacer
-                    if (challengePair.size == 1) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
+            items(challenges) { challenge ->
+                ChallengeCard(
+                    challenge = challenge,
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    onClick = { /* Handle challenge click */ }
+                )
             }
 
             // Bottom spacing
@@ -338,21 +370,43 @@ fun ChallengeCard(
 ) {
     Card(
         modifier = modifier
+            .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
-            // Difficulty badge
+            // Header row
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                verticalAlignment = Alignment.Top
             ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = challenge.title,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = challenge.description,
+                        fontSize = 13.sp,
+                        color = Color.Gray,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                // Difficulty badge
                 Badge(
                     containerColor = when (challenge.difficulty) {
                         "Easy" -> Color(0xFF4CAF50)
@@ -365,43 +419,22 @@ fun ChallengeCard(
                     Text(
                         text = challenge.difficulty,
                         fontSize = 10.sp,
-                        color = Color.White
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium
                     )
                 }
-
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = "Like",
-                    tint = Color.Gray,
-                    modifier = Modifier.size(16.dp)
-                )
             }
 
-            // Challenge title
-            Text(
-                text = challenge.title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Challenge description
-            Text(
-                text = challenge.description,
-                fontSize = 12.sp,
-                color = Color.Gray,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            // Stats row
+            // Bottom row
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+                verticalAlignment = Alignment.CenterVertically
+            )
+            {
+                // Participants
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -410,48 +443,52 @@ fun ChallengeCard(
                         imageVector = Icons.Default.Person,
                         contentDescription = "Participants",
                         tint = Color(0xFFDFC46B),
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = "${challenge.participants}",
+                        text = "${challenge.participants} Accepted this challenge",
                         fontSize = 12.sp,
                         color = Color.Gray
                     )
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        //imageVector = Icons.Default.Timer,
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Time",
-                        tint = Color(0xFFFF6B6B),
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Text(
-                        text = challenge.timeLeft,
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
-                }
+                // Time left
+                Text(
+                    text = challenge.timeLeft,
+                    fontSize = 12.sp,
+                    color = Color.Gray
+                )
             }
 
-            // Prize
-            Text(
-                text = challenge.prize,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFFDFC46B)
-            )
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Author
-            Text(
-                text = "by ${challenge.author}",
-                fontSize = 10.sp,
-                color = Color.Gray
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                AsyncImage(
+                    model = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .clickable {
+
+                        },
+                    contentDescription = null,
+                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                    error = painterResource(Res.drawable.ic_placeholder),
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "fullname",
+                    color = Color.Black,
+                    fontSize = 14.sp
+                )
+            }
         }
     }
 }

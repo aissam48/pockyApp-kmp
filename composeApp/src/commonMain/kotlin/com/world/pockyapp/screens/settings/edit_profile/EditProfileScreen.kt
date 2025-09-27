@@ -50,13 +50,11 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.screens.components.CustomDialogSuccess
 import com.world.pockyapp.screens.components.ModernHeader
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.ic_back_black
 import pockyapp.composeapp.generated.resources.ic_edit_black
 import pockyapp.composeapp.generated.resources.ic_placeholder
 
@@ -195,9 +193,9 @@ fun EditProfileScreen(
                                         )
                                     }
 
-                                    profile?.photoID != null -> {
+                                    profile?.photoUrl != null -> {
                                         AsyncImage(
-                                            model = getUrl(profile?.photoID),
+                                            model = profile?.photoUrl,
                                             contentDescription = "Current Photo",
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier

@@ -13,5 +13,5 @@ object Constant {
 
     val ws = "https://$SHARED_LINK_HOST"
 
-    fun getUrl(id:String?):String = "$SHARED_LINK/stream/media/$id"
+    //fun getUrl(id:String?):String = "$SHARED_LINK/stream/media/$id"
 }

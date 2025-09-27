@@ -1,6 +1,5 @@
 package com.world.pockyapp.screens.friend_request
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,14 +38,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.FriendRequestModel
 import com.world.pockyapp.screens.components.ModernHeader
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.ic_back_black
 import pockyapp.composeapp.generated.resources.ic_placeholder
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -295,7 +292,7 @@ fun FriendRequestItem(
                         )
                 ) {
                     AsyncImage(
-                        model = getUrl(request.profile.photoID),
+                        model = request.profile.photoUrl,
                         contentDescription = "Profile Photo",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier

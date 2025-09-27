@@ -13,7 +13,7 @@ data class ProfileModel(
     var country: String = "",
     var city: String = "",
     var description: String = "",
-    val photoID: String = "",
+    val photoUrl: String = "",
     val isPhoneNumberVerified: Boolean = false,
     val isEmailVerified: Boolean = false,
     val moments: List<MomentModel> = emptyList(),

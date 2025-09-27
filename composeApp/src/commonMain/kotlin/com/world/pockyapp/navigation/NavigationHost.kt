@@ -26,7 +26,6 @@ import com.world.pockyapp.screens.google_maps.GoogleMapsScreen
 import com.world.pockyapp.screens.google_maps.MapComponentScreen
 import com.world.pockyapp.screens.home.HomeScreen
 import com.world.pockyapp.screens.home.navigations.shots.ShotsScreen
-import com.world.pockyapp.screens.moment_by_locationscreen.MomentsByLocationScreen
 import com.world.pockyapp.screens.moment_preview.MomentPreview
 import com.world.pockyapp.screens.moment_screen.MomentsScreen
 import com.world.pockyapp.screens.post_preview.PostPreview
@@ -141,19 +140,6 @@ fun NavigationHost(navController: NavHostController) {
         composable(route = "${NavRoutes.FOLLOWINGS.route}/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: ""
             FollowingListScreen(navController, id = id)
-        }
-
-        composable(route = "${NavRoutes.MOMENTS_BY_LOCATION.route}/{moments}/{index}/{myID}") { backStackEntry ->
-            val index = backStackEntry.arguments?.getString("index")
-            val myID = backStackEntry.arguments?.getString("myID")
-            println("---------------- $index")
-            val modulesJson = backStackEntry.arguments?.getString("moments")?.replace("%", "/")
-            val moments = modulesJson?.let {
-                Json.decodeFromString<List<StreetModel>>(it)
-            } ?: emptyList()
-
-
-            MomentsByLocationScreen(navController, moments, index, myID)
         }
 
         composable(route = "${NavRoutes.SHOW_MOMENTS.route}/{moments}") { backStackEntry ->

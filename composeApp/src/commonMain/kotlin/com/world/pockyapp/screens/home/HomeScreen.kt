@@ -43,7 +43,7 @@ import com.world.pockyapp.screens.camera.CameraView
 import com.world.pockyapp.screens.home.navigations.shots.ShotsScreen
 import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverScreen
-import com.world.pockyapp.screens.home.navigations.hot.HotScreen
+import com.world.pockyapp.screens.home.navigations.hot.ChallengesScreen
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -365,7 +365,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
             ) {
                 when (selected) {
                     0 -> DiscoverScreen(navController)
-                    1 -> HotScreen(navController)
+                    1 -> ChallengesScreen(navController)
                     2 -> CameraView(navController)
                     3 -> ShotsScreen(navController)
                     4 -> ChatScreen(navController)

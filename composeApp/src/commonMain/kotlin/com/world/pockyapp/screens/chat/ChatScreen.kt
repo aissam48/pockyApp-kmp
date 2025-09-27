@@ -60,7 +60,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.MessageModel
 import com.world.pockyapp.screens.components.CustomDialog
@@ -249,7 +248,7 @@ fun ChatScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 AsyncImage(
-                                    model = getUrl(profile?.photoID),
+                                    model = profile?.photoUrl,
                                     contentDescription = "Profile Photo",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier

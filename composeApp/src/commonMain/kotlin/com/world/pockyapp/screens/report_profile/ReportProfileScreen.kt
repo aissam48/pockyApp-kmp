@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.components.CustomDialogSuccess
 import com.world.pockyapp.screens.components.ModernHeader
@@ -54,7 +53,6 @@ import com.world.pockyapp.screens.profile_preview.ProfilePreviewUiState
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.ic_back_black
 import pockyapp.composeapp.generated.resources.ic_placeholder
 import pockyapp.composeapp.generated.resources.ic_report_black
 
@@ -169,7 +167,7 @@ fun ReportProfileScreen(
                                     )
                             ) {
                                 AsyncImage(
-                                    model = getUrl(profile.value.photoID),
+                                    model = profile.value.photoUrl,
                                     contentDescription = "Profile Photo",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier

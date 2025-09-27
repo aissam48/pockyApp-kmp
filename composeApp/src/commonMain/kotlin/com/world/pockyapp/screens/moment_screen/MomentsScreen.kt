@@ -25,22 +25,18 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.screens.components.CustomDialog
 import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
-import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.*
 
 private const val STORY_DURATION_MS = 5000L
@@ -224,7 +220,7 @@ private fun StoryUserPage(
         // Mark story as viewed only when page is settled
         LaunchedEffect(currentStoryIndex, isPagerSettled) {
             if (isPagerSettled) {
-                viewModel.viewMoment(currentStory.momentID, currentStory.ownerID)
+                viewModel.viewMoment(currentStory.id, currentStory.ownerID)
             }
         }
 
@@ -276,7 +272,7 @@ private fun StoryUserPage(
         ) {
             if (userStories.isNotEmpty() && currentStoryIndex < userStories.size) {
                 AsyncImage(
-                    model = getUrl(userStories[currentStoryIndex].momentID),
+                    model = userStories[currentStoryIndex].mediaUrl,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
@@ -376,7 +372,7 @@ private fun StoryPage(
             },
             onDelete = {
                 showDeleteDialog = false
-                viewModel.deleteMoment(story.momentID)
+                viewModel.deleteMoment(story.id)
                 onStoryComplete()
             }
         )
@@ -385,7 +381,7 @@ private fun StoryPage(
     Box(modifier = Modifier.fillMaxSize()) {
         // Story background image with zoom and pan
         AsyncImage(
-            model = getUrl(story.momentID),
+            model = story.mediaUrl,
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
@@ -518,9 +514,9 @@ private fun StoryPage(
             myID = myID,
             onLikeToggle = { isLiked ->
                 if (isLiked) {
-                    viewModel.like(story.momentID)
+                    viewModel.like(story.id)
                 } else {
-                    viewModel.unLike(story.momentID)
+                    viewModel.unLike(story.id)
                 }
             },
             onDeleteClick = { showDeleteDialog = true },
@@ -601,7 +597,7 @@ private fun StoryHeader(
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
-                model = getUrl(story.profile.photoID),
+                model = story.profile.photoUrl,
                 contentDescription = "Profile",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

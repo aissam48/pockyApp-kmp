@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.components.ModernHeader
@@ -206,7 +205,7 @@ private fun FollowerCard(
             // Profile image with online indicator
             Box {
                 AsyncImage(
-                    model = getUrl(follower.photoID),
+                    model = follower.photoUrl,
                     contentDescription = "Profile",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

@@ -33,7 +33,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.network.models.model.ShotModel
 import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import org.jetbrains.compose.resources.painterResource
@@ -192,8 +191,8 @@ actual fun Player() {
 
             // Assign available players to pages that need them
             pagesNeedingPlayers.zip(availablePlayers).forEach { (page, playerItem) ->
-                val videoUrl =
-                    "https://nearvibe.fra1.digitaloceanspaces.com/95836975-a6a4-4b1a-8481-a41e87e4326c"
+                val videoUrl = "https://nearvibe.fra1.digitaloceanspaces.com/e0295157-9e49-4d3d-9716-505b20e1c02f"
+                //val videoUrl = playerItem.videoUrl
 
                 println("🔄 Assigning player to page $page: $videoUrl")
 
@@ -396,7 +395,7 @@ fun SocialOverlay(
             // Profile Picture with Follow Button
             Box {
                 AsyncImage(
-                    model = getUrl(shot.profile?.photoID ?: ""),
+                    model = shot.profile.photoUrl,
                     contentDescription = "Profile",
                     modifier = Modifier
                         .size(56.dp)

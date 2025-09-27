@@ -57,7 +57,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.ProfileModel
@@ -297,7 +296,7 @@ fun ProfilePreviewScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        ModernHeader(""){
+                        ModernHeader("") {
                             navController.popBackStack()
                         }
                         Spacer(modifier = Modifier.weight(1f))
@@ -340,7 +339,7 @@ fun ProfilePreviewScreen(
                                     )
                                     {
                                         AsyncImage(
-                                            model = getUrl(myProfile.value.photoID),
+                                            model = myProfile.value.photoUrl,
                                             contentDescription = "",
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier
@@ -352,7 +351,7 @@ fun ProfilePreviewScreen(
                                         )
 
                                         AsyncImage(
-                                            model = getUrl(profile.value.photoID),
+                                            model = profile.value.photoUrl,
                                             contentDescription = "",
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier
@@ -497,7 +496,7 @@ fun ProfilePreviewScreen(
                                     )
                                     {
                                         AsyncImage(
-                                            model = getUrl(myProfile.value.photoID),
+                                            model = myProfile.value.photoUrl,
                                             contentDescription = "",
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier
@@ -509,7 +508,7 @@ fun ProfilePreviewScreen(
                                         )
 
                                         AsyncImage(
-                                            model = getUrl(profile.value.photoID),
+                                            model = profile.value.photoUrl,
                                             contentDescription = "",
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier
@@ -700,7 +699,7 @@ fun ProfilePreviewScreen(
                                             )
                                             {
                                                 AsyncImage(
-                                                    model = getUrl(profile.value.photoID),
+                                                    model = profile.value.photoUrl,
                                                     contentDescription = "",
                                                     contentScale = ContentScale.Crop,
                                                     modifier = Modifier
@@ -1611,11 +1610,11 @@ fun ProfilePreviewScreen(
                                                 .background(Color.White)
                                                 .shadow(2.dp, RoundedCornerShape(12.dp))
                                                 .clickable {
-                                                    navController.navigate(NavRoutes.POST.route + "/${postModel.postID}" + "/${myProfile.value.id}")
+                                                    navController.navigate(NavRoutes.POST.route + "/${postModel.id}" + "/${myProfile.value.id}")
                                                 }
                                         ) {
-                                            ImagePost(screenSize.value.first, postModel.postID) {
-                                                navController.navigate(NavRoutes.POST.route + "/${postModel.postID}" + "/${myProfile.value.id}")
+                                            ImagePost(screenSize.value.first, postModel.mediaUrl) {
+                                                navController.navigate(NavRoutes.POST.route + "/${postModel.id}" + "/${myProfile.value.id}")
                                             }
                                         }
                                     }
@@ -1753,7 +1752,7 @@ fun CardMoment(
                 .width(90.dp)
         ) {
             AsyncImage(
-                model = getUrl(moment.momentID),
+                model = moment.mediaUrl,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()

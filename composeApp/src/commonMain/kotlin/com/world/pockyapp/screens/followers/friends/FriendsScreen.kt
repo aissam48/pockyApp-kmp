@@ -1,6 +1,5 @@
 package com.world.pockyapp.screens.followers.friends
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,17 +38,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.components.ModernHeader
-import com.world.pockyapp.screens.followers.FollowersViewModel
-import com.world.pockyapp.screens.followers.followings.FollowingsViewModel
 import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.ic_back_black
 import pockyapp.composeapp.generated.resources.ic_placeholder
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -207,7 +202,7 @@ private fun FollowerCard(
             // Profile image with online indicator
             Box {
                 AsyncImage(
-                    model = getUrl(follower.photoID),
+                    model = follower.photoUrl,
                     contentDescription = "Profile",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

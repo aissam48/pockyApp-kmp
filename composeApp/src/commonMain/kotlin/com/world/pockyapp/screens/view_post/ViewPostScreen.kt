@@ -47,7 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.screens.components.CustomDialog
 import org.jetbrains.compose.resources.painterResource
@@ -121,7 +120,7 @@ fun ViewPostScreen(
             is PostResultState.Success -> {
                 // Full screen image
                 AsyncImage(
-                    model = getUrl(postID),
+                    model = state.post.mediaUrl,
                     contentDescription = "Post Image",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop

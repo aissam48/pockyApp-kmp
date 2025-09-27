@@ -56,7 +56,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.ProfileModel
@@ -256,7 +255,7 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        ModernHeader(""){
+                        ModernHeader("") {
                             navController.popBackStack()
                         }
 
@@ -342,7 +341,7 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                             .padding(4.dp),
                                     ) {
                                         AsyncImage(
-                                            model = getUrl(state.profile.photoID),
+                                            model = state.profile.photoUrl,
                                             contentDescription = "",
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier
@@ -651,7 +650,8 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                             when (coupleOfMoments.size) {
                                                 1 ->
                                                     Box(modifier = Modifier.clickable {
-                                                        momentsViewModel.moments = listOf(coupleOfMoments)
+                                                        momentsViewModel.moments =
+                                                            listOf(coupleOfMoments)
                                                         momentsViewModel.myID = profile.value.id
                                                         momentsViewModel.selectedIndex = 0
                                                         navController.navigate(NavRoutes.MOMENTS.route)
@@ -891,11 +891,11 @@ fun ProfileScreen(navController: NavHostController, viewModel: ProfileViewModel 
                                                 .background(Color.White)
                                                 .shadow(2.dp, RoundedCornerShape(12.dp))
                                                 .clickable {
-                                                    navController.navigate(NavRoutes.POST.route + "/${postModel.postID}" + "/${profile.value.id}")
+                                                    navController.navigate(NavRoutes.POST.route + "/${postModel.id}" + "/${profile.value.id}")
                                                 }
                                         ) {
-                                            ImagePost(screenSize.value.first, postModel.postID) {
-                                                navController.navigate(NavRoutes.POST.route + "/${postModel.postID}" + "/${profile.value.id}")
+                                            ImagePost(screenSize.value.first, postModel.mediaUrl) {
+                                                navController.navigate(NavRoutes.POST.route + "/${postModel.id}" + "/${profile.value.id}")
                                             }
                                         }
                                     }
@@ -1031,7 +1031,7 @@ fun CardMomentProfile(
                 .width(90.dp)
         ) {
             AsyncImage(
-                model = getUrl(moment.momentID),
+                model = moment.mediaUrl,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize(),

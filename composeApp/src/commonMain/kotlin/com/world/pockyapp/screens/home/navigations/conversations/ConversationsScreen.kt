@@ -23,7 +23,6 @@ import androidx.compose.material.Text
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,21 +39,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ChatRequestModel
 import com.world.pockyapp.network.models.model.ConversationModel
-import com.world.pockyapp.screens.home.navigations.conversations.UIState
 import com.world.pockyapp.utils.Utils.formatCreatedAt
 import kotlinx.coroutines.delay
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
-import kotlinx.datetime.format.byUnicodePattern
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.compose_multiplatform
 import pockyapp.composeapp.generated.resources.ic_placeholder
 
 @OptIn(FormatStringsInDatetimeFormats::class, ExperimentalMaterial3Api::class)
@@ -367,7 +360,7 @@ fun ChatRequestItem(
                 )
         ) {
             AsyncImage(
-                model = getUrl(request.sendProfile.photoID),
+                model = request.sendProfile.photoUrl,
                 contentDescription = "Profile Photo",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -432,7 +425,7 @@ fun ConversationItem(
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
-                        model = getUrl(conversation.profile.photoID),
+                        model = conversation.profile.photoUrl,
                         contentDescription = "Profile Photo",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier

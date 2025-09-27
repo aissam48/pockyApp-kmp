@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.ItemMapView
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ErrorModel
@@ -465,13 +464,13 @@ fun DiscoverScreen(
                         }
                     }
 
-                    items(posts, key = { it.postID }) { post ->
+                    items(posts, key = { it.id }) { post ->
                         ModernPostItem(
                             post = post,
                             currentUserId = (profileState as? UiState.Success<ProfileModel>)?.data?.id,
                             onLikeClick = { clickedPost ->
                                 (profileState as? UiState.Success<ProfileModel>)?.data?.id?.let { userId ->
-                                    viewModel.toggleLike(clickedPost.postID, userId)
+                                    viewModel.toggleLike(clickedPost.id, userId)
                                 }
                             },
                             onProfileClick = { userId ->
@@ -544,12 +543,12 @@ fun ModernProfileSection(
             AsyncImage(
                 model = if (myDailyMoments.isEmpty()) {
                     if (profileState is UiState.Success) {
-                        getUrl(profileState.data.photoID)
+                        profileState.data.photoUrl
                     } else {
-                        getUrl("")
+                        ""
                     }
                 } else {
-                    getUrl(myDailyMoments[0].momentID)
+                    myDailyMoments[0].mediaUrl
                 },
                 contentScale = ContentScale.Crop,
                 contentDescription = "",
@@ -624,7 +623,7 @@ fun ModernMomentItem(
                 .padding(2.dp),
         ) {
             AsyncImage(
-                model = getUrl(friendMoments[0].profile.photoID),
+                model = friendMoments[0].profile.photoUrl,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
@@ -686,7 +685,7 @@ fun ModernNearbyMomentItem(
     ) {
         Box {
             AsyncImage(
-                model = getUrl(profileMoments[0].momentID),
+                model = profileMoments[0].mediaUrl,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
                 contentDescription = null,
@@ -754,7 +753,7 @@ fun ModernPostItem(
                     .clickable { onProfileClick(post.profile.id) }
             ) {
                 AsyncImage(
-                    model = getUrl(post.profile.photoID),
+                    model = post.profile.photoUrl,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(40.dp)
@@ -801,7 +800,7 @@ fun ModernPostItem(
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 AsyncImage(
-                    model = getUrl(post.postID),
+                    model = post.mediaUrl,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = "Post Image",

@@ -38,14 +38,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.components.ModernHeader
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.ic_back_black
 import pockyapp.composeapp.generated.resources.ic_placeholder
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -286,7 +284,7 @@ fun BlockedUserItem(
                         )
                 ) {
                     AsyncImage(
-                        model = getUrl(user.photoID),
+                        model = user.photoUrl,
                         contentDescription = "Profile Photo",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier

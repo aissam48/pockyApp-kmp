@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.world.pockyapp.Constant.getUrl
 import com.world.pockyapp.network.models.model.MomentModel
 import kotlinx.coroutines.*
 import org.jetbrains.compose.resources.DrawableResource
@@ -70,7 +69,7 @@ fun StoryView(
     var isHolding by remember { mutableStateOf(false) }
 
     // Story progress timer
-    LaunchedEffect(key1 = story.momentID, key2 = isHolding) {
+    LaunchedEffect(key1 = story.id, key2 = isHolding) {
         if (!isHolding) {
             while (progress < 2f) {
                 delay(50) // Update every 50ms
@@ -106,7 +105,7 @@ fun StoryView(
     ) {
         // Story Image
         AsyncImage(
-            model = getUrl(story.momentID),
+            model = story.mediaUrl,
             contentDescription = "Story Image",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -125,7 +124,7 @@ fun StoryView(
             ) {
                 // User Avatar
                 AsyncImage(
-                    model = getUrl(story.momentID),
+                    model = story.mediaUrl,
                     contentDescription = "User Avatar",
                     modifier = Modifier
                         .size(40.dp)
@@ -165,7 +164,7 @@ fun StoriesContainer(stories: List<MomentModel>, navController: NavHostControlle
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Current Story View
-        key(stories[currentStoryIndex].momentID) {
+        key(stories[currentStoryIndex].id) {
             StoryView(
                 story = stories[currentStoryIndex],
                 onStoryCompleted = {
