@@ -1,41 +1,33 @@
 package com.world.pockyapp.screens.home.navigations.discover
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Text
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.*
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -49,12 +41,36 @@ import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import com.world.pockyapp.utils.Utils.formatCreatedAt
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_like
 import pockyapp.composeapp.generated.resources.ic_placeholder
 import pockyapp.composeapp.generated.resources.ic_unlike_black
+
+// Design System
+object DiscoverTheme {
+    val SpacingXSmall = 4.dp
+    val SpacingSmall = 8.dp
+    val SpacingMedium = 16.dp
+    val SpacingLarge = 24.dp
+    val SpacingXLarge = 32.dp
+
+    val Primary = Color(0xFF007AFF)
+    val Secondary = Color(0xFFFF3040)
+    val Surface = Color(0xFFFFFFFF)
+    val SurfaceVariant = Color(0xFFF8F9FA)
+    val OnSurface = Color(0xFF1C1C1E)
+    val OnSurfaceVariant = Color(0xFF8E8E93)
+    val Border = Color(0xFFE5E5EA)
+
+    val GradientPrimary = listOf(Color(0xFF833AB4), Color(0xFFFD1D1D), Color(0xFFFCAF45))
+    val GradientViewed = listOf(Color(0xFFE5E5EA), Color(0xFFE5E5EA))
+    val GradientBackground = Brush.verticalGradient(
+        colors = listOf(Color(0xFFFAFBFC), Color(0xFFFFFFFF))
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +85,9 @@ fun DiscoverScreen(
     val nearbyPostsState by viewModel.nearbyPostsState.collectAsState()
     val followingsMomentsState by viewModel.followingsMomentsState.collectAsState()
 
+    var selectedTab by remember { mutableStateOf(FeedTab.Following) }
+    var isRefreshing by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         viewModel.getProfile()
         viewModel.loadMyDailyMoments()
@@ -78,649 +97,912 @@ fun DiscoverScreen(
         viewModel.loadFollowingsMoments()
     }
 
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFFFF))
-            .padding(horizontal = 0.dp)
+            .background(color = Color.White)
     ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 100.dp),
+            verticalArrangement = Arrangement.spacedBy(DiscoverTheme.SpacingMedium)
+        ) {
 
-        // Friends Stories Section
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(10.dp)
-                ) {
-                    Text(
-                        text = "Friends",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+            // Stories Section
+            item {
+                AnimatedStoriesSection(
+                    myDailyMomentsState = myDailyMomentsState,
+                    friendsMomentsState = friendsMomentsState,
+                    profileState = profileState,
+                    navController = navController
+                )
+            }
+
+            // Tab Selector
+            item {
+                ModernTabSelector(
+                    selectedTab = selectedTab,
+                    onTabSelected = { selectedTab = it }
+                )
+            }
+
+            // Content based on selected tab
+            when (selectedTab) {
+                FeedTab.Following -> {
+                    followingsMomentsContent(
+                        state = followingsMomentsState,
+                        profileState = profileState,
+                        navController = navController,
+                        viewModel = viewModel
                     )
-
-                    Spacer(modifier = Modifier.height(5.dp))
-
-                    Row(
-                        verticalAlignment = Alignment.Top,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        // My Story
-                        when (myDailyMomentsState) {
-                            is UiState.Loading -> {
-                                Box(
-                                    modifier = Modifier.size(70.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(20.dp),
-                                        strokeWidth = 2.dp,
-                                        color = Color(0xFFDFC46B)
-                                    )
-                                }
-                            }
-
-                            is UiState.Success -> {
-                                val myDailyMoments =
-                                    (myDailyMomentsState as UiState.Success<List<MomentModel>>).data
-                                ModernProfileSection(
-                                    myDailyMomentsRandom = myDailyMoments,
-                                    navController = navController,
-                                    profileState = profileState
-                                )
-                            }
-
-                            is UiState.Error -> {
-                                Box(
-                                    modifier = Modifier.size(70.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("❌", fontSize = 24.sp)
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        // Friends Stories
-                        when (friendsMomentsState) {
-                            is UiState.Loading -> {
-                                Box(
-                                    modifier = Modifier.weight(1f).height(70.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(20.dp),
-                                        strokeWidth = 2.dp,
-                                        color = Color(0xFFDFC46B)
-                                    )
-                                }
-                            }
-
-                            is UiState.Success -> {
-                                val friendsMoments =
-                                    (friendsMomentsState as UiState.Success<List<MomentModel>>).data
-                                val friends = friendsMoments.map { it.profile }.distinctBy { it.id }
-                                val groupedFriendsMoments =
-                                    mutableListOf<MutableList<MomentModel>>()
-
-                                friends.forEach { friend ->
-                                    val friendMoments =
-                                        friendsMoments.filter { it.profile.id == friend.id }
-                                    groupedFriendsMoments.add(friendMoments.toMutableList())
-                                }
-
-                                LazyRow(
-                                    modifier = Modifier.weight(1f),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    items(groupedFriendsMoments) { friendMoments ->
-                                        ModernMomentItem(
-                                            friendMoments = friendMoments,
-                                            currentUserId = (profileState as? UiState.Success<ProfileModel>)?.data?.id,
-                                            navController = navController,
-                                            groupedFriendsMoments = groupedFriendsMoments
-                                        )
-                                    }
-                                }
-                            }
-
-                            is UiState.Error -> {
-                                Box(
-                                    modifier = Modifier.weight(1f).height(70.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "Unable to load stories",
-                                        color = Color.Gray,
-                                        fontSize = 12.sp
-                                    )
-                                }
-                            }
-                        }
-                    }
                 }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        // Nearby Moments Section
-        when (followingsMomentsState) {
-            is ResponseState.Loading -> {
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                color = Color(0xFFDFC46B),
-                                strokeWidth = 2.dp
-                            )
-                        }
-                    }
+                FeedTab.Nearby -> {
+                    nearbyContent(
+                        momentsState = nearbyMomentsState,
+                        postsState = nearbyPostsState,
+                        profileState = profileState,
+                        navController = navController,
+                        viewModel = viewModel
+                    )
                 }
-            }
-
-            is ResponseState.Success -> {
-
-                val friendsMoments =
-                    (followingsMomentsState as ResponseState.Success<List<MomentModel>>).data
-                val friends = friendsMoments.map { it.profile }.distinctBy { it.id }
-                val groupedFriendsMoments =
-                    mutableListOf<MutableList<MomentModel>>()
-
-                friends.forEach { friend ->
-                    val friendMoments =
-                        friendsMoments.filter { it.profile.id == friend.id }
-                    groupedFriendsMoments.add(friendMoments.toMutableList())
-                }
-
-                if (friendsMoments.isNotEmpty()) {
+                FeedTab.Global -> {
                     item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 10.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "Following",
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 15.sp
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(5.dp))
-
-                                LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    items(groupedFriendsMoments) { profileMoments ->
-                                        if (profileMoments.isNotEmpty()) {
-                                            ModernNearbyMomentItem(
-                                                profileMoments = profileMoments,
-                                                currentUserId = (profileState as? UiState.Success<ProfileModel>)?.data?.id,
-                                                navController = navController,
-                                                groupedFriendsMoments = groupedFriendsMoments
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(10.dp))
+                        GlobalMapSection(navController = navController)
                     }
-                }
-            }
-
-            is ResponseState.Error -> {
-                item {
-                    ModernErrorSection(
-                        error = (nearbyMomentsState as UiState.Error).error,
-                        onRetry = { viewModel.loadNearbyMoments() }
-                    )
-                }
-            }
-
-            else -> {}
-        }
-
-        // Nearby Moments Section
-        when (nearbyMomentsState) {
-            is UiState.Loading -> {
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                color = Color(0xFFDFC46B),
-                                strokeWidth = 2.dp
-                            )
-                        }
-                    }
-                }
-            }
-
-            is UiState.Success -> {
-
-                val nearbyMoments = (nearbyMomentsState as UiState.Success<List<MomentModel>>).data
-                val friends = nearbyMoments.map { it.profile }.distinctBy { it.id }
-                val groupedFriendsMoments =
-                    mutableListOf<MutableList<MomentModel>>()
-
-                friends.forEach { friend ->
-                    val friendMoments =
-                        nearbyMoments.filter { it.profile.id == friend.id }
-                    groupedFriendsMoments.add(friendMoments.toMutableList())
-                }
-
-                if (nearbyMoments.isNotEmpty()) {
-                    item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 10.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "Nearby Moments",
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 15.sp
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(5.dp))
-
-                                LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                )
-                                {
-                                    items(groupedFriendsMoments) { profileMoments ->
-                                        if (profileMoments.isNotEmpty()) {
-                                            ModernNearbyMomentItem(
-                                                profileMoments = profileMoments,
-                                                currentUserId = (profileState as? UiState.Success<ProfileModel>)?.data?.id,
-                                                navController = navController,
-                                                groupedFriendsMoments = groupedFriendsMoments
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(10.dp))
-                    }
-                }
-            }
-
-            is UiState.Error -> {
-                item {
-                    ModernErrorSection(
-                        error = (nearbyMomentsState as UiState.Error).error,
-                        onRetry = { viewModel.loadNearbyMoments() }
-                    )
                 }
             }
         }
 
-        item {
+        // Floating Action Button
+        FloatingActionButton(
+            onClick = { /* Handle create post */ },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(DiscoverTheme.SpacingMedium),
+            containerColor = DiscoverTheme.Primary,
+            contentColor = Color.White
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Create post"
+            )
+        }
+    }
+}
+
+enum class FeedTab(val title: String, val icon: ImageVector) {
+    Following("Following", Icons.Outlined.Notifications),
+    Nearby("Nearby", Icons.Outlined.LocationOn),
+    Global("Global", Icons.Outlined.MoreVert)
+}
+
+@Composable
+fun AnimatedStoriesSection(
+    myDailyMomentsState: UiState<List<MomentModel>>,
+    friendsMomentsState: UiState<List<MomentModel>>,
+    profileState: UiState<ProfileModel>,
+    navController: NavHostController
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = DiscoverTheme.SpacingMedium),
+        colors = CardDefaults.cardColors(containerColor = DiscoverTheme.Surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier
+        ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Global",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    text = "Friends",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = DiscoverTheme.OnSurface
                 )
             }
 
-            Spacer(modifier = Modifier.height(5.dp))
+            Spacer(modifier = Modifier.height(DiscoverTheme.SpacingSmall))
 
-            ItemMapView(navController)
-        }
-
-        // Nearby Posts Section
-        when (nearbyPostsState) {
-            is UiState.Loading -> {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(DiscoverTheme.SpacingMedium)
+            ) {
+                // My Story
                 item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = Color(0xFFDFC46B),
-                            strokeWidth = 2.dp
-                        )
+                    when (myDailyMomentsState) {
+                        is UiState.Loading -> StoryItemSkeleton()
+                        is UiState.Success -> {
+                            MyStoryItem(
+                                myDailyMoments = myDailyMomentsState.data,
+                                profileState = profileState,
+                                navController = navController
+                            )
+                        }
+                        is UiState.Error -> StoryErrorItem()
                     }
                 }
-            }
 
-            is UiState.Success -> {
-                val posts = (nearbyPostsState as UiState.Success<List<PostModel>>).data
-                if (posts.isNotEmpty()) {
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Posts",
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
+                // Friends Stories
+                when (friendsMomentsState) {
+                    is UiState.Loading -> {
+                        items(5) { StoryItemSkeleton() }
+                    }
+                    is UiState.Success -> {
+                        val friendsMoments = friendsMomentsState.data
+                        val groupedMoments = friendsMoments
+                            .groupBy { it.profile.id }
+                            .map { it.value }
+
+                        items(groupedMoments) { friendMoments ->
+                            AnimatedStoryItem(
+                                moments = friendMoments,
+                                onClick = {
+                                    // Navigate to moments
+                                }
                             )
                         }
                     }
-
-                    items(posts, key = { it.id }) { post ->
-                        ModernPostItem(
-                            post = post,
-                            currentUserId = (profileState as? UiState.Success<ProfileModel>)?.data?.id,
-                            onLikeClick = { clickedPost ->
-                                (profileState as? UiState.Success<ProfileModel>)?.data?.id?.let { userId ->
-                                    viewModel.toggleLike(clickedPost.id, userId)
-                                }
-                            },
-                            onProfileClick = { userId ->
-                                if (userId == (profileState as? UiState.Success<ProfileModel>)?.data?.id) {
-                                    navController.navigate(NavRoutes.MY_PROFILE.route)
-                                } else {
-                                    navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/$userId")
-                                }
-                            }
-                        )
+                    is UiState.Error -> {
+                        item { StoryErrorItem() }
                     }
                 }
             }
+        }
+    }
+}
 
-            is UiState.Error -> {
-                item {
-                    ModernErrorSection(
-                        error = (nearbyPostsState as UiState.Error).error,
-                        onRetry = { viewModel.loadNearbyPosts() }
+@Composable
+fun MyStoryItem(
+    myDailyMoments: List<MomentModel>,
+    profileState: UiState<ProfileModel>,
+    navController: NavHostController
+) {
+    val momentsViewModel: MomentsViewModel = koinViewModel()
+    val hasUnviewed = myDailyMoments.any { !it.viewed }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(70.dp)
+    ) {
+        Box {
+            StoryRing(
+                hasUnviewed = hasUnviewed,
+                size = 70.dp,
+                onClick = {
+                    if (myDailyMoments.isEmpty()) {
+                        navController.navigate(NavRoutes.MY_PROFILE.route)
+                    } else {
+                        momentsViewModel.myID = myDailyMoments[0].profile.id
+                        momentsViewModel.selectedIndex = 0
+                        momentsViewModel.moments = mutableListOf(myDailyMoments)
+                        navController.navigate(NavRoutes.MOMENTS.route)
+                    }
+                }
+            ) {
+                AsyncImage(
+                    model = if (myDailyMoments.isEmpty()) {
+                        (profileState as? UiState.Success)?.data?.photoUrl
+                    } else {
+                        myDailyMoments[0].mediaUrl
+                    },
+                    contentScale = ContentScale.Crop,
+                    contentDescription = "My story",
+                    modifier = Modifier.fillMaxSize(),
+                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                    error = painterResource(Res.drawable.ic_placeholder)
+                )
+            }
+
+            // Add button for empty state
+            if (myDailyMoments.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .background(DiscoverTheme.Primary, CircleShape)
+                        .align(Alignment.BottomEnd),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add story",
+                        tint = Color.White,
+                        modifier = Modifier.size(12.dp)
                     )
                 }
             }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(100.dp))
-        }
-    }
-}
-
-
-
-@Composable
-fun ModernProfileSection(
-    myDailyMomentsRandom: List<MomentModel>,
-    navController: NavHostController,
-    profileState: UiState<ProfileModel>
-) {
-
-    val myDailyMoments = myDailyMomentsRandom.sortedBy { it.createdAt }
-    val momentsViewModel: MomentsViewModel = koinViewModel()
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        val checkIfSeeAllMoments = myDailyMoments.find { !it.viewed }
-        Box(
-            modifier = Modifier
-                .size(70.dp)
-                .border(
-                    width = 3.dp,
-                    brush = Brush.linearGradient(
-                        colors = if (checkIfSeeAllMoments != null) {
-                            listOf(
-                                Color(0xFFE91E63),
-                                Color(0xFFFF9800),
-                                Color(0xFFFFEB3B)
-                            )
-                        } else {
-                            listOf(
-                                Color.Gray.copy(alpha = 0.3f),
-                                Color.Gray.copy(alpha = 0.3f)
-                            )
-                        }
-                    ),
-                    shape = CircleShape
-                )
-                .padding(2.dp),
-        ) {
-            AsyncImage(
-                model = if (myDailyMoments.isEmpty()) {
-                    if (profileState is UiState.Success) {
-                        profileState.data.photoUrl
-                    } else {
-                        ""
-                    }
-                } else {
-                    myDailyMoments[0].mediaUrl
-                },
-                contentScale = ContentScale.Crop,
-                contentDescription = "",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(CircleShape)
-                    .clickable {
-                        if (myDailyMoments.isEmpty()) {
-                            navController.navigate(NavRoutes.MY_PROFILE.route)
-                        } else {
-                            momentsViewModel.myID = myDailyMoments[0].profile.id
-                            momentsViewModel.selectedIndex = 0
-                            momentsViewModel.moments = mutableListOf(myDailyMoments)
-
-                            navController.navigate(
-                                NavRoutes.MOMENTS.route
-                            )
-                        }
-                    },
-                placeholder = painterResource(Res.drawable.ic_placeholder),
-                error = painterResource(Res.drawable.ic_placeholder),
-            )
-        }
-
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(DiscoverTheme.SpacingXSmall))
 
         Text(
             text = "Your Moment",
-            color = Color.Gray,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Medium
+            fontSize = 12.sp,
+            color = DiscoverTheme.OnSurfaceVariant,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
 
 @Composable
-fun ModernMomentItem(
-    friendMoments: MutableList<MomentModel>,
-    currentUserId: String?,
-    navController: NavHostController,
-    modifier: Modifier = Modifier,
-    groupedFriendsMoments: MutableList<MutableList<MomentModel>>
+fun AnimatedStoryItem(
+    moments: List<MomentModel>,
+    onClick: () -> Unit
 ) {
+    val hasUnviewed = moments.any { !it.viewed }
+    var isPressed by remember { mutableStateOf(false) }
 
-    val momentsViewModel: MomentsViewModel = koinViewModel()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.9f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+    )
+
     Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        val checkIfSeeAllMoments = friendMoments.find { !it.viewed }
-        Box(
-            modifier = Modifier
-                .size(60.dp)
-                .border(
-                    width = 2.5.dp,
-                    brush = Brush.linearGradient(
-                        colors = if (checkIfSeeAllMoments != null) {
-                            listOf(
-                                Color(0xFFE91E63),
-                                Color(0xFFFF9800),
-                                Color(0xFFFFEB3B)
-                            )
-                        } else {
-                            listOf(
-                                Color.Gray.copy(alpha = 0.3f),
-                                Color.Gray.copy(alpha = 0.3f)
-                            )
-                        }
-                    ),
-                    shape = CircleShape
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .width(70.dp)
+            .scale(scale)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        isPressed = true
+                        tryAwaitRelease()
+                        isPressed = false
+                    },
+                    onTap = { onClick() }
                 )
-                .padding(2.dp),
+            }
+    ) {
+        StoryRing(
+            hasUnviewed = hasUnviewed,
+            size = 70.dp,
+            onClick = onClick
         ) {
             AsyncImage(
-                model = friendMoments[0].profile.photoUrl,
+                model = moments.first().profile.photoUrl,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(CircleShape)
-                    .clickable {
-
-                        momentsViewModel.moments = groupedFriendsMoments
-                        momentsViewModel.myID = currentUserId
-                        momentsViewModel.selectedIndex =
-                            groupedFriendsMoments.indexOf(friendMoments)
-                        navController.navigate(
-                            NavRoutes.MOMENTS.route
-                        )
-                    },
-                contentDescription = null,
+                contentDescription = "${moments.first().profile.firstName}'s story",
+                modifier = Modifier.fillMaxSize(),
                 placeholder = painterResource(Res.drawable.ic_placeholder),
-                error = painterResource(Res.drawable.ic_placeholder),
+                error = painterResource(Res.drawable.ic_placeholder)
             )
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(DiscoverTheme.SpacingXSmall))
 
         Text(
-            text = friendMoments[0].profile.firstName,
-            color = Color.Gray,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium,
-            maxLines = 1
+            text = moments.first().profile.firstName,
+            fontSize = 12.sp,
+            color = DiscoverTheme.OnSurfaceVariant,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
 
 @Composable
-fun ModernNearbyMomentItem(
-    profileMoments: MutableList<MomentModel>,
-    currentUserId: String?,
-    navController: NavHostController,
-    modifier: Modifier = Modifier,
-    groupedFriendsMoments: MutableList<MutableList<MomentModel>>
+fun StoryRing(
+    hasUnviewed: Boolean,
+    size: Dp,
+    onClick: () -> Unit,
+    content: @Composable BoxScope.() -> Unit
 ) {
-    val momentsViewModel: MomentsViewModel = koinViewModel()
-    val checkIfSeeAllMoments = profileMoments.find { !it.viewed }
+    Box(
+        modifier = Modifier
+            .size(size)
+            .background(
+                brush = Brush.sweepGradient(
+                    colors = if (hasUnviewed) DiscoverTheme.GradientPrimary else DiscoverTheme.GradientViewed
+                ),
+                shape = CircleShape
+            )
+            .padding(3.dp)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(DiscoverTheme.Surface, CircleShape)
+                .clip(CircleShape),
+            content = content
+        )
+    }
+}
+
+@Composable
+fun ModernTabSelector(
+    selectedTab: FeedTab,
+    onTabSelected: (FeedTab) -> Unit
+) {
     Card(
-        modifier = modifier
-            .width(110.dp)
-            .height(150.dp)
-            .clickable {
-                momentsViewModel.moments = groupedFriendsMoments
-                momentsViewModel.myID = currentUserId
-                momentsViewModel.selectedIndex =
-                    groupedFriendsMoments.indexOf(profileMoments)
-                navController.navigate(
-                    NavRoutes.MOMENTS.route
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = DiscoverTheme.SpacingMedium),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = DiscoverTheme.SurfaceVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(4.dp)
+        ) {
+            FeedTab.values().forEach { tab ->
+                val isSelected = selectedTab == tab
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(
+                            color = if (isSelected) DiscoverTheme.Surface else Color.Transparent,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .clickable { onTabSelected(tab) }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(DiscoverTheme.SpacingXSmall)
+                    ) {
+                        Icon(
+                            imageVector = tab.icon,
+                            contentDescription = tab.title,
+                            tint = if (isSelected) DiscoverTheme.Primary else DiscoverTheme.OnSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+
+                        Text(
+                            text = tab.title,
+                            fontSize = 14.sp,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (isSelected) DiscoverTheme.Primary else DiscoverTheme.OnSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun LazyListScope.followingsMomentsContent(
+    state: ResponseState<List<MomentModel>>,
+    profileState: UiState<ProfileModel>,
+    navController: NavHostController,
+    viewModel: DiscoverViewModel
+) {
+    when (state) {
+        is ResponseState.Loading -> {
+            item { LoadingSection() }
+        }
+        is ResponseState.Success -> {
+            val moments = state.data
+            if (moments.isNotEmpty()) {
+                item {
+                    MomentsGrid(
+                        title = "Following",
+                        moments = moments,
+                        profileState = profileState,
+                        navController = navController
+                    )
+                }
+            }
+        }
+        is ResponseState.Error -> {
+            item {
+                ErrorSection(
+                    error = state.error,
+                    onRetry = { viewModel.loadFollowingsMoments() }
                 )
-            },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.LightGray),
+            }
+        }
+        else -> {}
+    }
+}
+
+fun LazyListScope.nearbyContent(
+    momentsState: UiState<List<MomentModel>>,
+    postsState: UiState<List<PostModel>>,
+    profileState: UiState<ProfileModel>,
+    navController: NavHostController,
+    viewModel: DiscoverViewModel
+) {
+    // Nearby Moments
+    when (momentsState) {
+        is UiState.Success -> {
+            val moments = momentsState.data
+            if (moments.isNotEmpty()) {
+                item {
+                    MomentsGrid(
+                        title = "Nearby Moments",
+                        moments = moments,
+                        profileState = profileState,
+                        navController = navController
+                    )
+                }
+            }
+        }
+        is UiState.Loading -> {
+            item { LoadingSection() }
+        }
+        is UiState.Error -> {
+            item {
+                ErrorSection(
+                    error = momentsState.error,
+                    onRetry = { viewModel.loadNearbyMoments() }
+                )
+            }
+        }
+    }
+
+    // Nearby Posts
+    when (postsState) {
+        is UiState.Success -> {
+            val posts = postsState.data
+            if (posts.isNotEmpty()) {
+                item {
+                    SectionHeader(title = "Nearby Posts")
+                }
+                items(posts, key = { it.id }) { post ->
+                    ModernPostCard(
+                        post = post,
+                        currentUserId = (profileState as? UiState.Success)?.data?.id,
+                        onLikeClick = { clickedPost ->
+                            (profileState as? UiState.Success)?.data?.id?.let { userId ->
+                                viewModel.toggleLike(clickedPost.id, userId)
+                            }
+                        },
+                        onProfileClick = { userId ->
+                            if (userId == (profileState as? UiState.Success)?.data?.id) {
+                                navController.navigate(NavRoutes.MY_PROFILE.route)
+                            } else {
+                                navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/$userId")
+                            }
+                        }
+                    )
+                }
+            }
+        }
+        is UiState.Loading -> {
+            item { LoadingSection() }
+        }
+        is UiState.Error -> {
+            item {
+                ErrorSection(
+                    error = postsState.error,
+                    onRetry = { viewModel.loadNearbyPosts() }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MomentsGrid(
+    title: String,
+    moments: List<MomentModel>,
+    profileState: UiState<ProfileModel>,
+    navController: NavHostController
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = DiscoverTheme.SpacingMedium),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = DiscoverTheme.Surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(DiscoverTheme.SpacingMedium)
+        ) {
+            Text(
+                text = title,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = DiscoverTheme.OnSurface
+            )
+
+            Spacer(modifier = Modifier.height(DiscoverTheme.SpacingSmall))
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(DiscoverTheme.SpacingSmall)
+            ) {
+                val groupedMoments = moments.groupBy { it.profile.id }.map { it.value }
+                items(groupedMoments) { profileMoments ->
+                    MomentCard(
+                        moments = profileMoments,
+                        onClick = {
+                            // Navigate to moments viewer
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MomentCard(
+    moments: List<MomentModel>,
+    onClick: () -> Unit
+) {
+    val hasUnviewed = moments.any { !it.viewed }
+
+    Card(
+        modifier = Modifier
+            .width(120.dp)
+            .height(160.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Box {
             AsyncImage(
-                model = profileMoments[0].mediaUrl,
+                model = moments.first().mediaUrl,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                contentDescription = null,
+                contentDescription = "${moments.first().profile.firstName}'s moment",
                 placeholder = painterResource(Res.drawable.ic_placeholder),
-                error = painterResource(Res.drawable.ic_placeholder),
+                error = painterResource(Res.drawable.ic_placeholder)
             )
 
-            if (checkIfSeeAllMoments != null) {
-                Box(
-                    modifier = Modifier
-                        .padding(6.dp)
-                        .size(8.dp)
-                        .background(Color(0xFFE91E63), CircleShape)
-                        .align(Alignment.TopEnd)
-                )
-            }
-
+            // Gradient overlay
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                Color.Black.copy(alpha = 0.7f)
-                            )
+                                Color.Black.copy(alpha = 0.6f)
+                            ),
+                            startY = 100f
                         )
                     )
-                    .align(Alignment.BottomCenter)
-                    .padding(8.dp)
+            )
+
+            // Unviewed indicator
+            if (hasUnviewed) {
+                Box(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(8.dp)
+                        .background(DiscoverTheme.Secondary, CircleShape)
+                        .align(Alignment.TopEnd)
+                )
+            }
+
+            // Profile info
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(12.dp)
             ) {
                 Text(
-                    text = profileMoments[0].profile.firstName,
+                    text = moments.first().profile.firstName,
                     color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = formatCreatedAt(moments.first().createdAt),
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 12.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ModernPostCard(
+    post: PostModel,
+    currentUserId: String?,
+    onLikeClick: (PostModel) -> Unit,
+    onProfileClick: (String) -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    val isLiked = post.likes.contains(currentUserId)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = DiscoverTheme.SpacingMedium),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = DiscoverTheme.Surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column {
+            // Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(DiscoverTheme.SpacingMedium)
+                    .clickable { onProfileClick(post.profile.id) },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AsyncImage(
+                    model = post.profile.photoUrl,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape),
+                    contentDescription = "Profile",
+                    placeholder = painterResource(Res.drawable.ic_placeholder),
+                    error = painterResource(Res.drawable.ic_placeholder)
+                )
+
+                Spacer(modifier = Modifier.width(DiscoverTheme.SpacingSmall))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "${post.profile.firstName} ${post.profile.lastName}",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = DiscoverTheme.OnSurface
+                    )
+                    Text(
+                        text = "${post.geoLocation.country}, ${post.geoLocation.street}",
+                        fontSize = 13.sp,
+                        color = DiscoverTheme.OnSurfaceVariant
+                    )
+                }
+
+                Text(
+                    text = formatCreatedAt(post.createdAt),
                     fontSize = 12.sp,
+                    color = DiscoverTheme.OnSurfaceVariant
+                )
+            }
+
+            // Image
+            AsyncImage(
+                model = post.mediaUrl,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                contentDescription = "Post image",
+                placeholder = painterResource(Res.drawable.ic_placeholder),
+                error = painterResource(Res.drawable.ic_placeholder)
+            )
+
+            // Actions
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(DiscoverTheme.SpacingMedium),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AnimatedLikeButton(
+                    isLiked = isLiked,
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onLikeClick(post)
+                    }
+                )
+
+                Spacer(modifier = Modifier.width(DiscoverTheme.SpacingSmall))
+
+                Text(
+                    text = "${post.likes.size} likes",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = DiscoverTheme.OnSurface
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                IconButton(onClick = { /* Share */ }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Share,
+                        contentDescription = "Share",
+                        tint = DiscoverTheme.OnSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AnimatedLikeButton(
+    isLiked: Boolean,
+    onClick: () -> Unit
+) {
+    val scale by animateFloatAsState(
+        targetValue = if (isLiked) 1.2f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessHigh
+        )
+    )
+
+    val rotation by animateFloatAsState(
+        targetValue = if (isLiked) 360f else 0f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+    )
+
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .background(
+                color = if (isLiked) DiscoverTheme.Secondary.copy(alpha = 0.1f) else Color.Transparent,
+                shape = CircleShape
+            )
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { onClick() }
+            .scale(scale)
+            .rotate(rotation),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+            contentDescription = if (isLiked) "Unlike" else "Like",
+            tint = if (isLiked) DiscoverTheme.Secondary else DiscoverTheme.OnSurfaceVariant,
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+@Composable
+fun GlobalMapSection(navController: NavHostController) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = DiscoverTheme.SpacingMedium),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = DiscoverTheme.Surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(DiscoverTheme.SpacingMedium)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Global Explorer",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = DiscoverTheme.OnSurface
+                    )
+                    Text(
+                        text = "Discover moments worldwide",
+                        fontSize = 14.sp,
+                        color = DiscoverTheme.OnSurfaceVariant
+                    )
+                }
+
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "Global",
+                    tint = DiscoverTheme.Primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(DiscoverTheme.SpacingMedium))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+                    .clip(RoundedCornerShape(16.dp))
+            ) {
+                ItemMapView(navController)
+            }
+        }
+    }
+}
+
+@Composable
+fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        color = DiscoverTheme.OnSurface,
+        modifier = Modifier.padding(horizontal = DiscoverTheme.SpacingMedium)
+    )
+}
+
+@Composable
+fun LoadingSection() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = DiscoverTheme.SpacingMedium),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = DiscoverTheme.Surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(DiscoverTheme.SpacingSmall)
+            ) {
+                CircularProgressIndicator(
+                    color = DiscoverTheme.Primary,
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = "Loading...",
+                    fontSize = 14.sp,
+                    color = DiscoverTheme.OnSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ErrorSection(
+    error: ErrorModel,
+    onRetry: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = DiscoverTheme.SpacingMedium),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF5F5)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(DiscoverTheme.SpacingLarge),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(DiscoverTheme.SpacingSmall)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Error",
+                tint = DiscoverTheme.Secondary,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Text(
+                text = "Something went wrong",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = DiscoverTheme.Secondary,
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                text = error.message,
+                fontSize = 14.sp,
+                color = DiscoverTheme.OnSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+
+            Button(
+                onClick = onRetry,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = DiscoverTheme.Secondary,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Retry",
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -729,182 +1011,92 @@ fun ModernNearbyMomentItem(
 }
 
 @Composable
-fun ModernPostItem(
-    post: PostModel,
-    currentUserId: String?,
-    onLikeClick: (PostModel) -> Unit,
-    onProfileClick: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    )
-    {
-        Column() {
-            // Profile Header
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp)
-                    .clickable { onProfileClick(post.profile.id) }
-            ) {
-                AsyncImage(
-                    model = post.profile.photoUrl,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape),
-                    contentDescription = "Profile Photo",
-                    placeholder = painterResource(Res.drawable.ic_placeholder),
-                    error = painterResource(Res.drawable.ic_placeholder),
+fun StoryItemSkeleton() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(70.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(70.dp)
+                .background(
+                    brush = shimmerBrush(),
+                    shape = CircleShape
                 )
+        )
 
-                Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.height(DiscoverTheme.SpacingXSmall))
 
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = "${post.profile.firstName} ${post.profile.lastName}",
-                        color = Color.Black,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        text = "${post.geoLocation.country}, ${post.geoLocation.street}",
-                        color = Color.Gray,
-                        fontSize = 13.sp
-                    )
-                }
-
-                Text(
-                    text = formatCreatedAt(post.createdAt),
-                    color = Color.Gray,
-                    fontSize = 12.sp
+        Box(
+            modifier = Modifier
+                .width(50.dp)
+                .height(12.dp)
+                .background(
+                    brush = shimmerBrush(),
+                    shape = RoundedCornerShape(6.dp)
                 )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Post Image
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(600.dp),
-                shape = RoundedCornerShape(0.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.LightGray),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                AsyncImage(
-                    model = post.mediaUrl,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                    contentDescription = "Post Image",
-                    placeholder = painterResource(Res.drawable.ic_placeholder),
-                    error = painterResource(Res.drawable.ic_placeholder),
-                )
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Like Section
-            Row(
-                modifier = Modifier.padding(horizontal = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val isLiked = post.likes.contains(currentUserId)
-                Box(
-                    modifier = Modifier
-                        .size(25.dp)
-                        .background(
-                            if (isLiked) Color(0xFFE91E63).copy(alpha = 0.1f) else Color.Gray.copy(
-                                alpha = 0.1f
-                            ),
-                            CircleShape
-                        )
-                        .clickable { onLikeClick(post) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = if (isLiked) {
-                            painterResource(Res.drawable.ic_like)
-                        } else {
-                            painterResource(Res.drawable.ic_unlike_black)
-                        },
-                        contentDescription = if (isLiked) "Unlike" else "Like",
-                        modifier = Modifier.size(15.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Text(
-                    text = "${post.likes.size} likes",
-                    color = Color.Black,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        }
+        )
     }
-
-    Spacer(modifier = Modifier.height(25.dp))
 }
 
+@Composable
+fun StoryErrorItem() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(70.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(70.dp)
+                .background(
+                    DiscoverTheme.Border,
+                    CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Error",
+                tint = DiscoverTheme.OnSurfaceVariant,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(DiscoverTheme.SpacingXSmall))
+
+        Text(
+            text = "Error",
+            fontSize = 12.sp,
+            color = DiscoverTheme.OnSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
 
 @Composable
-fun ModernErrorSection(
-    error: ErrorModel,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF5F5)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "⚠️",
-                fontSize = 32.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Something went wrong",
-                color = Color(0xFFE53E3E),
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
-            Text(
-                text = error.message,
-                color = Color(0xFFE53E3E),
-                fontSize = 14.sp
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Box(
-                modifier = Modifier
-                    .background(
-                        Color(0xFFE53E3E),
-                        RoundedCornerShape(8.dp)
-                    )
-                    .clickable(onClick = onRetry)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    text = "Retry",
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
-                )
-            }
-        }
-    }
+fun shimmerBrush(): Brush {
+    val shimmerColors = listOf(
+        DiscoverTheme.Border.copy(alpha = 0.6f),
+        DiscoverTheme.Border.copy(alpha = 0.2f),
+        DiscoverTheme.Border.copy(alpha = 0.6f)
+    )
+
+    val transition = rememberInfiniteTransition()
+    val translateAnim = transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 1200,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Restart
+        )
+    )
+
+    return Brush.linearGradient(
+        colors = shimmerColors,
+        start = Offset.Zero,
+        end = Offset(x = translateAnim.value, y = translateAnim.value)
+    )
 }
