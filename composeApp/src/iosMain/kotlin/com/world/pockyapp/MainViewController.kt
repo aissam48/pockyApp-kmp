@@ -9,7 +9,8 @@ import platform.UIKit.UIViewController
 fun MainViewController(
     mapUIViewController: () -> UIViewController,
     cameraUIViewController: (onMediaCaptured: (ByteArray, String) -> Unit) -> UIViewController,
-    createShotUIViewController: () -> UIViewController
+    createShotUIViewController: () -> UIViewController,
+    shotsPlayerUIViewController: () -> UIViewController,
 ) = ComposeUIViewController(
     configure = {
         startKoin {
@@ -19,6 +20,7 @@ fun MainViewController(
     mapViewController = mapUIViewController
     cameraViewController = cameraUIViewController
     createShotViewController = createShotUIViewController
+    shotsPlayerViewController = shotsPlayerUIViewController
 
 
     App()
@@ -27,4 +29,5 @@ fun MainViewController(
 lateinit var mapViewController: () -> UIViewController
 
 lateinit var createShotViewController: () -> UIViewController
+lateinit var shotsPlayerViewController: () -> UIViewController
 lateinit var cameraViewController: ((ByteArray, String) -> Unit) -> UIViewController

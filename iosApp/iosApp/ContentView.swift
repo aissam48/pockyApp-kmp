@@ -382,6 +382,10 @@ struct ComposeView: UIViewControllerRepresentable {
             },
             createShotUIViewController: {
                 UIHostingController(rootView: CreateShotScreen())
+            },
+            
+            shotsPlayerUIViewController: {
+                UIHostingController(rootView: PlayerView())
             }
 
         )

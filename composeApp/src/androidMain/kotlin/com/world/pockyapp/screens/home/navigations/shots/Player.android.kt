@@ -38,6 +38,7 @@ import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import org.jetbrains.compose.resources.painterResource
 import org.koin.androidx.compose.koinViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_placeholder
 import pockyapp.composeapp.generated.resources.icon_comment
@@ -50,8 +51,21 @@ data class VideoPlayerItem(
     val player: ExoPlayer,
     var pageIndex: Int,
     var isReady: Boolean = false,
-    var videoUrl: String = ""
+    var isPlaying: Boolean = false,
+    var isBuffering: Boolean = false,
+    var videoUrl: String = "",
+    var hasError: Boolean = false
 )
+
+// Player states for better UI feedback
+enum class PlayerState {
+    IDLE,
+    LOADING,
+    READY,
+    PLAYING,
+    BUFFERING,
+    ERROR
+}
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -60,19 +74,23 @@ actual fun Player() {
     var items by remember { mutableStateOf<List<ShotModel>>(emptyList()) }
     var debugInfo by remember { mutableStateOf("Loading...") }
     var isLoading by remember { mutableStateOf(false) }
+    var playerStates by remember { mutableStateOf<Map<Int, PlayerState>>(emptyMap()) }
 
     val shotsState = viewModel.getShotsState.collectAsState()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    // LIMITED PLAYER POOL - Only 5 players maximum (like TikTok)
+    // Optimized player pool with better configuration
     val playerPool = remember {
-        Array(5) { index ->
+        Array(5) { index -> // Keep 5 players as requested
+
+
             VideoPlayerItem(
                 player = ExoPlayer.Builder(context)
                     .setLoadControl(
                         DefaultLoadControl.Builder()
-                            .setBufferDurationsMs(500, 3000, 200, 500)
+                            // Optimized buffer settings for faster startup and less memory usage
+                            .setBufferDurationsMs(250, 2000, 100, 250)
                             .build()
                     )
                     .build()
@@ -81,12 +99,12 @@ actual fun Player() {
                         volume = 1f
                         playWhenReady = false
                     },
-                pageIndex = -1 // Not assigned yet
+                pageIndex = -1
             )
         }
     }
 
-    // Map page index to player from the pool
+    // Optimized player mapping with state tracking
     var pageToPlayerMap by remember { mutableStateOf<Map<Int, VideoPlayerItem>>(emptyMap()) }
 
     // Load initial data
@@ -95,14 +113,19 @@ actual fun Player() {
         viewModel.getShots()
     }
 
-    // Handle API response
+    // Handle API response with error handling
     LaunchedEffect(shotsState.value) {
         when (val state = shotsState.value) {
             is ResponseState.Success -> {
-                debugInfo = "SUCCESS: Got ${state.data.size} videos"
-                items = items + state.data
-                isLoading = false
-                println("SUCCESS: Total items now: ${items.size}")
+                if (state.data.isNotEmpty()) {
+                    debugInfo = "SUCCESS: Got ${state.data.size} videos"
+                    items = items + state.data
+                    isLoading = false
+                    println("SUCCESS: Total items now: ${items.size}")
+                } else {
+                    debugInfo = "No more videos available"
+                    isLoading = false
+                }
             }
 
             is ResponseState.Loading -> {
@@ -111,8 +134,9 @@ actual fun Player() {
             }
 
             is ResponseState.Error -> {
-                debugInfo = "ERROR: ${state.error.message}"
+                debugInfo = "ERROR: ${state.error.message ?: "Unknown error"}"
                 isLoading = false
+                println("API Error: ${state.error}")
             }
 
             else -> {
@@ -121,8 +145,8 @@ actual fun Player() {
         }
     }
 
-    // Show debug info if no items
-    if (items.isEmpty()) {
+    // Show loading screen only when no items are available
+    if (items.isEmpty() && isLoading) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -134,8 +158,8 @@ actual fun Player() {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 CircularProgressIndicator(
-                    color = Color(0xFFDFC46B),
-                    strokeWidth = 3.dp
+                    color = Color.LightGray,
+                    strokeWidth = 1.dp
                 )
                 Text(
                     text = debugInfo,
@@ -147,103 +171,181 @@ actual fun Player() {
         return
     }
 
+    // Show error state when no items and error occurred
+    if (items.isEmpty() && !isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = debugInfo,
+                    color = Color.Red,
+                    fontSize = 16.sp
+                )
+                Button(
+                    onClick = { viewModel.getShots() },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDFC46B))
+                ) {
+                    Text("Retry", color = Color.Black)
+                }
+            }
+        }
+        return
+    }
+
     val pagerState = rememberPagerState(pageCount = { items.size })
 
-    // Load more videos when approaching end
+    // Optimized pagination loading
     LaunchedEffect(pagerState.currentPage, items.size) {
-        if (pagerState.currentPage >= items.size - 3 && !isLoading) {
+        if (items.size > 0 && pagerState.currentPage >= items.size - 2 && !isLoading) {
             viewModel.getShots()
         }
     }
 
-    // Smart player assignment and recycling
+    // Enhanced player assignment with better error handling and state management
     fun assignPlayersToPages(centerPage: Int) {
         coroutineScope.launch {
-            // Pages we want to have players for (current ±2)
-            val targetPages = listOf(
-                centerPage - 2,
-                centerPage - 1,
-                centerPage,
-                centerPage + 1,
-                centerPage + 2
-            ).filter { it in 0 until items.size }
+            try {
+                // Only load current and adjacent pages for better performance
+                val targetPages = listOf(
+                    centerPage - 1,
+                    centerPage,
+                    centerPage + 1
+                ).filter { it in 0 until items.size }
 
-            println("🎯 Target pages: $targetPages for center: $centerPage")
+                println("🎯 Target pages: $targetPages for center: $centerPage")
 
-            val newMapping = mutableMapOf<Int, VideoPlayerItem>()
+                val newMapping = mutableMapOf<Int, VideoPlayerItem>()
+                val newStates = playerStates.toMutableMap()
 
-            // First, keep existing players that are still needed
-            targetPages.forEach { page ->
-                val existingPlayer = pageToPlayerMap[page]
-                if (existingPlayer != null) {
-                    newMapping[page] = existingPlayer
-                    println("♻️ Keeping existing player for page $page")
+                // Keep existing players that are still needed
+                targetPages.forEach { page ->
+                    val existingPlayer = pageToPlayerMap[page]
+                    if (existingPlayer != null && !existingPlayer.hasError) {
+                        newMapping[page] = existingPlayer
+                        println("♻️ Keeping existing player for page $page")
+                    }
                 }
-            }
 
-            // Find pages that need new players
-            val pagesNeedingPlayers = targetPages.filter { !newMapping.containsKey(it) }
+                // Find pages that need new players
+                val pagesNeedingPlayers = targetPages.filter { !newMapping.containsKey(it) }
 
-            // Find available players (not currently assigned to target pages)
-            val availablePlayers = playerPool.filter { playerItem ->
-                !newMapping.values.contains(playerItem)
-            }
+                // Find available players
+                val availablePlayers = playerPool.filter { playerItem ->
+                    !newMapping.values.contains(playerItem)
+                }
 
-            // Assign available players to pages that need them
-            pagesNeedingPlayers.zip(availablePlayers).forEach { (page, playerItem) ->
-                val videoUrl = "https://nearvibe.fra1.digitaloceanspaces.com/e0295157-9e49-4d3d-9716-505b20e1c02f"
-                //val videoUrl = playerItem.videoUrl
+                // Assign available players with better error handling
+                pagesNeedingPlayers.zip(availablePlayers).forEach { (page, playerItem) ->
+                    val shot = items.getOrNull(page)
+                    if (shot == null) {
+                        println("⚠️ No shot data for page $page")
+                        return@forEach
+                    }
 
-                println("🔄 Assigning player to page $page: $videoUrl")
+                    // Use actual video URL from shot data if available
+                    val videoUrl = shot.mediaUrl
+                        ?: "https://nearvibe.fra1.digitaloceanspaces.com/e0295157-9e49-4d3d-9716-505b20e1c02f"
 
-                try {
-                    // Stop and clear previous media
-                    playerItem.player.stop()
-                    playerItem.player.clearMediaItems()
+                    println("🔄 Assigning player to page $page: $videoUrl")
+                    newStates[page] = PlayerState.LOADING
 
-                    // Set new media
-                    val mediaItem = MediaItem.fromUri(videoUrl)
-                    playerItem.player.setMediaItem(mediaItem)
-                    playerItem.player.prepare()
+                    try {
+                        // Reset player state
+                        playerItem.player.stop()
+                        playerItem.player.clearMediaItems()
+                        playerItem.hasError = false
+                        playerItem.isReady = false
+                        playerItem.isPlaying = false
+                        playerItem.isBuffering = false
 
-                    // Update player item
-                    playerItem.pageIndex = page
-                    playerItem.isReady = false
-                    playerItem.videoUrl = videoUrl
+                        // Set new media with validation
+                        if (videoUrl.isNotBlank()) {
+                            val mediaItem = MediaItem.fromUri(videoUrl)
+                            playerItem.player.setMediaItem(mediaItem)
+                            playerItem.player.prepare()
 
-                    // Add ready listener
-                    val listener = object : Player.Listener {
-                        override fun onPlaybackStateChanged(playbackState: Int) {
-                            if (playbackState == Player.STATE_READY) {
-                                playerItem.isReady = true
-                                playerItem.player.removeListener(this)
-                                println("✅ Player ready for page $page")
+                            // Update player item
+                            playerItem.pageIndex = page
+                            playerItem.videoUrl = videoUrl
 
-                                // Auto-play if this is the current page
-                                if (page == centerPage) {
-                                    playerItem.player.playWhenReady = true
-                                    println("▶️ Auto-playing current page $page")
+                            // Enhanced player listener with better state tracking
+                            val listener = object : Player.Listener {
+                                override fun onPlaybackStateChanged(playbackState: Int) {
+                                    when (playbackState) {
+                                        Player.STATE_READY -> {
+                                            playerItem.isReady = true
+                                            playerItem.isBuffering = false
+                                            newStates[page] = PlayerState.READY
+                                            playerItem.player.removeListener(this)
+                                            println("✅ Player ready for page $page")
+
+                                            // Auto-play if this is the current page
+                                            if (page == centerPage) {
+                                                playerItem.player.playWhenReady = true
+                                                playerItem.isPlaying = true
+                                                newStates[page] = PlayerState.PLAYING
+                                                println("▶️ Auto-playing current page $page")
+                                            }
+                                        }
+
+                                        Player.STATE_BUFFERING -> {
+                                            playerItem.isBuffering = true
+                                            newStates[page] = PlayerState.BUFFERING
+                                        }
+
+                                        Player.STATE_ENDED -> {
+                                            playerItem.isPlaying = false
+                                        }
+                                    }
+                                    // Update states
+                                    playerStates = newStates
+                                }
+
+                                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                                    playerItem.isPlaying = isPlaying
+                                    newStates[page] =
+                                        if (isPlaying) PlayerState.PLAYING else PlayerState.READY
+                                    playerStates = newStates
+                                }
+
+                                override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                                    playerItem.hasError = true
+                                    newStates[page] = PlayerState.ERROR
+                                    playerStates = newStates
+                                    println("❌ Player error for page $page: ${error.message}")
+                                    playerItem.player.removeListener(this)
                                 }
                             }
+                            playerItem.player.addListener(listener)
+
+                            newMapping[page] = playerItem
+                        } else {
+                            newStates[page] = PlayerState.ERROR
+                            println("❌ Empty video URL for page $page")
                         }
 
-                        override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
-                            println("❌ Player error for page $page: ${error.message}")
-                        }
+                    } catch (e: Exception) {
+                        newStates[page] = PlayerState.ERROR
+                        println("❌ Failed to assign player to page $page: ${e.message}")
                     }
-                    playerItem.player.addListener(listener)
-
-                    newMapping[page] = playerItem
-
-                } catch (e: Exception) {
-                    println("❌ Failed to assign player to page $page: ${e.message}")
                 }
+
+                // Update mappings
+                pageToPlayerMap = newMapping
+                playerStates = newStates
+
+                println("📊 Player assignments: ${newMapping.keys.sorted()}")
+
+            } catch (e: Exception) {
+                println("❌ Error in assignPlayersToPages: ${e.message}")
             }
-
-            // Update the mapping
-            pageToPlayerMap = newMapping
-
-            println("📊 Player assignments: ${newMapping.keys.sorted()}")
         }
     }
 
@@ -254,36 +356,54 @@ actual fun Player() {
         }
     }
 
-    // Handle page changes
+    // Optimized page change handling
     LaunchedEffect(pagerState.currentPage) {
         val currentPage = pagerState.currentPage
         println("📄 Page changed to: $currentPage")
 
-        // Stop all players
-        playerPool.forEach { playerItem ->
-            playerItem.player.playWhenReady = false
-        }
-
-        // Play current page if ready
-        pageToPlayerMap[currentPage]?.let { playerItem ->
-            if (playerItem.isReady) {
-                playerItem.player.playWhenReady = true
-                println("▶️ Playing page $currentPage (ready)")
-            } else {
-                println("⏳ Page $currentPage not ready yet")
+        try {
+            // Stop all players first
+            playerPool.forEach { playerItem ->
+                if (playerItem.isPlaying) {
+                    playerItem.player.playWhenReady = false
+                    playerItem.isPlaying = false
+                }
             }
-        }
 
-        // Reassign players for new position
-        assignPlayersToPages(currentPage)
+            // Small delay to ensure smooth transition
+            delay(100)
+
+            // Play current page if ready
+            pageToPlayerMap[currentPage]?.let { playerItem ->
+                if (playerItem.isReady && !playerItem.hasError) {
+                    playerItem.player.playWhenReady = true
+                    playerItem.isPlaying = true
+                    val newStates = playerStates.toMutableMap()
+                    newStates[currentPage] = PlayerState.PLAYING
+                    playerStates = newStates
+                    println("▶️ Playing page $currentPage (ready)")
+                } else if (playerItem.hasError) {
+                    println("⚠️ Page $currentPage has error, skipping play")
+                } else {
+                    println("⏳ Page $currentPage not ready yet")
+                }
+            }
+
+            // Reassign players for new position
+            assignPlayersToPages(currentPage)
+
+        } catch (e: Exception) {
+            println("❌ Error handling page change: ${e.message}")
+        }
     }
 
-    // Cleanup
+    // Enhanced cleanup with error handling
     DisposableEffect(Unit) {
         onDispose {
             playerPool.forEach { playerItem ->
                 try {
                     playerItem.player.stop()
+                    playerItem.player.clearMediaItems()
                     playerItem.player.release()
                 } catch (e: Exception) {
                     println("Error releasing player: ${e.message}")
@@ -303,10 +423,11 @@ actual fun Player() {
         ) { page ->
             val playerItem = pageToPlayerMap[page]
             val shot = items.getOrNull(page)
+            val pageState = playerStates[page] ?: PlayerState.IDLE
 
             Box(modifier = Modifier.fillMaxSize()) {
-                // Video Player
-                if (playerItem != null) {
+                // Video Player with enhanced error handling
+                if (playerItem != null && !playerItem.hasError) {
                     AndroidView(
                         factory = { ctx ->
                             PlayerView(ctx).apply {
@@ -322,35 +443,85 @@ actual fun Player() {
                         },
                         modifier = Modifier.fillMaxSize()
                     )
+                }
 
-                    // Show loading if not ready
-                    if (!playerItem.isReady) {
+                // Enhanced loading/error states - only show when actually needed
+                when (pageState) {
+                    PlayerState.LOADING -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(50.dp),
-                                color = Color(0xFFDFC46B),
-                                strokeWidth = 3.dp
+                                color = Color.LightGray,
+                                strokeWidth = 1.dp
                             )
                         }
                     }
-                } else {
-                    // No player assigned to this page
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = Color(0xFFDFC46B),
-                            strokeWidth = 3.dp
-                        )
+
+                    PlayerState.ERROR -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Error",
+                                    tint = Color.Red,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Text(
+                                    text = "Video unavailable",
+                                    color = Color.White,
+                                    fontSize = 16.sp
+                                )
+                                Button(
+                                    onClick = { assignPlayersToPages(pagerState.currentPage) },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(
+                                            0xFFDFC46B
+                                        )
+                                    )
+                                ) {
+                                    Text("Retry", color = Color.Black)
+                                }
+                            }
+                        }
+                    }
+
+                    PlayerState.IDLE -> {
+                        // Show minimal loading for idle state
+                        if (playerItem == null) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    color = Color.LightGray,
+                                    strokeWidth = 1.dp
+                                )
+                            }
+                        }
+                    }
+
+                    PlayerState.READY, PlayerState.PLAYING -> {
+                        // No loading indicator when playing or ready
+                    }
+
+                    PlayerState.BUFFERING -> {
+
                     }
                 }
 
-                // Social UI Overlay
-                if (shot != null) {
+                // Social UI Overlay - only show when video is ready or playing
+                if (shot != null && (pageState == PlayerState.READY || pageState == PlayerState.PLAYING)) {
                     SocialOverlay(
                         shot = shot,
                         modifier = Modifier.fillMaxSize(),
@@ -366,6 +537,7 @@ actual fun Player() {
     }
 }
 
+// Rest of the code remains the same...
 @Composable
 fun SocialOverlay(
     shot: ShotModel,
@@ -406,7 +578,6 @@ fun SocialOverlay(
                     placeholder = painterResource(Res.drawable.ic_placeholder),
                     error = painterResource(Res.drawable.ic_placeholder)
                 )
-
             }
 
             // Like Button
@@ -488,8 +659,7 @@ fun SocialOverlay(
             // Hashtags
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             ) {
                 listOf("#fyp", "#viral", "#trending").forEach { hashtag ->
                     Text(

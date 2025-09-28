@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.network.models.model.ShotModel
+import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -79,5 +81,19 @@ class MomentsViewModel(private val sdk: ApiManager) :
     var moments: List<List<MomentModel>> = emptyList()
     var selectedIndex: Int? = null
     var myID: String? = null
+
+    private val _getShotsState = MutableStateFlow<ResponseState<List<ShotModel>>>(ResponseState.Idle)
+    val getShotsState = _getShotsState.asStateFlow()
+
+    fun getShots(){
+        viewModelScope.launch {
+            _getShotsState.value = ResponseState.Loading
+            sdk.getShots({
+                _getShotsState.value = ResponseState.Success(it)
+            },{
+                _getShotsState.value = ResponseState.Error(it)
+            })
+        }
+    }
 }
 

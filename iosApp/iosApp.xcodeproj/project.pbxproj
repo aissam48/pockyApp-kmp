@@ -12,6 +12,7 @@
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		4706780FBE00827AACB9946B /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B33085DC1D8CBF852F1E60C /* Pods_iosApp.framework */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
+		904F55E42E88862400F47645 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 904F55E32E88861200F47645 /* PlayerView.swift */; };
 		905D5E632D1570AD00CF55BB /* FirebaseInAppMessaging-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = 905D5E622D1570AD00CF55BB /* FirebaseInAppMessaging-Beta */; };
 		905D5E652D1570AD00CF55BB /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 905D5E642D1570AD00CF55BB /* FirebaseMessaging */; };
 		906381E22E80616A00F7935E /* CloudMessagingIosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 906381E12E80616A00F7935E /* CloudMessagingIosApp.swift */; };
@@ -28,6 +29,7 @@
 		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7DD28888A2866085B2D0B38B /* Pods-iosApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.release.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.release.xcconfig"; sourceTree = "<group>"; };
+		904F55E32E88861200F47645 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		906381E12E80616A00F7935E /* CloudMessagingIosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudMessagingIosApp.swift; sourceTree = "<group>"; };
 		906381E32E8062F200F7935E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		90D497642E862F92007D147F /* CreateShotScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateShotScreen.swift; sourceTree = "<group>"; };
@@ -79,6 +81,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				904F55E32E88861200F47645 /* PlayerView.swift */,
 				90D497642E862F92007D147F /* CreateShotScreen.swift */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF82242A565900829871 /* ContentView.swift */,
@@ -280,6 +283,7 @@
 				906381E22E80616A00F7935E /* CloudMessagingIosApp.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
+				904F55E42E88862400F47645 /* PlayerView.swift in Sources */,
 				90D497652E862FA8007D147F /* CreateShotScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -422,7 +426,7 @@
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)\n$(SRCROOT)/../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
 				INFOPLIST_FILE = iosApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -450,7 +454,7 @@
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)\n$(SRCROOT)/../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
 				INFOPLIST_FILE = iosApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
