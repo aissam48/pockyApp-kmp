@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -59,34 +60,27 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.network.models.model.ChallengeModel
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverTheme
+import com.world.pockyapp.screens.settings.controlAccount.ResponseState
+import com.world.pockyapp.utils.Utils.formatCreatedAt
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_placeholder
 
-data class Challenge(
-    val id: String,
-    val title: String,
-    val description: String,
-    val category: String,
-    val participants: Int,
-    val timeLeft: String,
-    val difficulty: String,
-    val prize: String,
-    val author: String
-)
-
 @Composable
-fun ChallengesScreen(navController: NavHostController, viewModel: ChallengesViewModel = koinViewModel()) {
+fun ChallengesScreen(
+    navController: NavHostController,
+    viewModel: ChallengesViewModel = koinViewModel()
+) {
     val screenSize = remember { mutableStateOf(Pair(-1, -1)) }
     var selectedTab by remember { mutableStateOf(ChallengesScreenTab.Following) }
 
 
     val challengesState = viewModel.challengesState.collectAsState()
-    // Sample data - replace with your actual data
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         viewModel.loadChallenges()
     }
 
@@ -314,13 +308,40 @@ fun ChallengesScreen(navController: NavHostController, viewModel: ChallengesView
                 )
             }
 
-            items(challenges) { challenge ->
-                ChallengeCard(
-                    challenge = challenge,
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    onClick = { /* Handle challenge click */ }
-                )
+            when (val state = challengesState.value) {
+                is ResponseState.Loading -> {
+
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth()){
+
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
+
+                is ResponseState.Success -> {
+                    val challenges = state.data
+                    items(challenges) { challenge ->
+                        ChallengeCard(
+                            challenge = challenge,
+                            modifier = Modifier.padding(horizontal = 20.dp),
+                            onClick = {
+
+                            }
+                        )
+                    }
+                }
+
+                is ResponseState.Error -> {
+
+                }
+
+                is ResponseState.Idle -> {
+
+                }
             }
+
+
 
             // Bottom spacing
             item {
@@ -342,7 +363,7 @@ fun ChallengesScreen(navController: NavHostController, viewModel: ChallengesView
 
 @Composable
 fun ChallengeCard(
-    challenge: Challenge,
+    challenge: ChallengeModel,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
@@ -432,7 +453,7 @@ fun ChallengeCard(
 
                 // Time left
                 Text(
-                    text = challenge.timeLeft,
+                    text = formatCreatedAt(challenge.createdAt),
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
@@ -446,7 +467,7 @@ fun ChallengeCard(
             ) {
 
                 AsyncImage(
-                    model = "",
+                    model = challenge.profile.photoUrl,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(40.dp)
@@ -461,11 +482,21 @@ fun ChallengeCard(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Text(
-                    text = "fullname",
-                    color = Color.Black,
-                    fontSize = 14.sp
-                )
+                Row {
+                    Text(
+                        text = "${challenge.profile.firstName} ${challenge.profile.lastName}",
+                        color = Color.Black,
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = "@${challenge.profile.username}",
+                        color = Color.Black,
+                        fontSize = 12.sp
+                    )
+                }
+
             }
         }
     }
@@ -482,8 +513,7 @@ enum class ChallengesScreenTab(val title: String, val icon: ImageVector) {
 fun ChallengeModernTabSelector(
     selectedTab: ChallengesScreenTab,
     onTabSelected: (ChallengesScreenTab) -> Unit
-)
-{
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

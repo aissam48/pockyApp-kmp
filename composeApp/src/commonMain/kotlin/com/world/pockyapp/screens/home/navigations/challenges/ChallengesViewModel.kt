@@ -3,6 +3,7 @@ package com.world.pockyapp.screens.home.navigations.challenges
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.world.pockyapp.network.ApiManager
+import com.world.pockyapp.network.models.model.ChallengeModel
 import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.ProfileModel
 import com.world.pockyapp.network.models.model.StreetModel
@@ -17,8 +18,8 @@ class ChallengesViewModel(val sdk: ApiManager) : ViewModel() {
     private var isChallengesLoadedFirstTime = true
 
     private val _challengestState =
-        MutableStateFlow<ResponseState<List<StreetModel>>>(ResponseState.Loading)
-    val challengesState: StateFlow<ResponseState<List<StreetModel>>> = _challengestState.asStateFlow()
+        MutableStateFlow<ResponseState<List<ChallengeModel>>>(ResponseState.Loading)
+    val challengesState: StateFlow<ResponseState<List<ChallengeModel>>> = _challengestState.asStateFlow()
 
     private val _profileState = MutableStateFlow<ResponseState<ProfileModel>>(ResponseState.Loading)
     val profileState: StateFlow<ResponseState<ProfileModel>> = _profileState.asStateFlow()
@@ -52,7 +53,7 @@ class ChallengesViewModel(val sdk: ApiManager) : ViewModel() {
                     _challengestState.value = ResponseState.Loading
                 }
 
-                sdk.getStreets({ success ->
+                sdk.getChallenges({ success ->
                     isChallengesLoadedFirstTime = false
                     _challengestState.value = ResponseState.Success(success)
                 }, { error ->

@@ -14,5 +14,6 @@ data class ChallengeModel(
     val description: String = "",
     val rules: String = "",
     val category: String = "",
-    val difficulty: String = ""
+    val difficulty: String = "",
+    val participants: List<String> = emptyList<String>(),
 )

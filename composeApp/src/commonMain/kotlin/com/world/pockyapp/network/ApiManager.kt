@@ -1923,7 +1923,7 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 append("title", title)
                 append("description", description)
                 append("rules", rules)
-                append("country", category)
+                append("category", category)
                 append("difficulty", difficulty)
             }) {
             val token = getToken()
@@ -1963,6 +1963,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
                 onSuccess(responseBody)
             } else {
                 val errorMessage: ErrorModel = response.body()
+                println("error-----> $errorMessage")
+
                 onFailure(errorMessage)
             }
         } catch (e: Exception) {
