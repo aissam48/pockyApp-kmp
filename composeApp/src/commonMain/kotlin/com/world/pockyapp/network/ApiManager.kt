@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.world.pockyapp.Constant
 import com.world.pockyapp.getPlatform
+import com.world.pockyapp.network.models.model.ChallengeModel
 import com.world.pockyapp.network.models.model.ChatRequestModel
 import com.world.pockyapp.network.models.model.ConversationModel
 import com.world.pockyapp.network.models.model.DataModel
@@ -1899,6 +1900,75 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
         }
     }
 
+
+    suspend fun createChallenge(
+        byteArray: ByteArray,
+        title: String,
+        description: String,
+        rules: String,
+        category: String,
+        difficulty: String,
+        onSuccess: (ResponseMessageModel) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+
+        val response: HttpResponse = client.submitFormWithBinaryData(
+            url = "$baseUrl/operations/create-challenge",
+            formData {
+                append("file", byteArray, Headers.build {
+                    println("Original size ${byteArray.size} bytes")
+                    append(HttpHeaders.ContentType, "video/*")
+                    append(HttpHeaders.ContentDisposition, "filename=file")
+                })
+                append("title", title)
+                append("description", description)
+                append("rules", rules)
+                append("country", category)
+                append("difficulty", difficulty)
+            }) {
+            val token = getToken()
+            println("token-----> $token")
+            headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            onUpload { bytesSentTotal, contentLength ->
+                println("Sent $bytesSentTotal bytes from $contentLength")
+            }
+        }
+
+        if (response.status.isSuccess()) {
+            val responseBody: ResponseMessageModel =
+                response.body()
+            println("success-----> ${response.bodyAsText()}")
+            onSuccess(responseBody)
+        } else {
+            val errorMessage: ErrorModel =
+                response.body()
+            onFailure(errorMessage)
+        }
+    }
+
+    suspend fun getChallenges(
+        onSuccess: (List<ChallengeModel>) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ) {
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/get-challenges") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: List<ChallengeModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
 
 }
 

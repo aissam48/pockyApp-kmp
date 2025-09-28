@@ -1,4 +1,4 @@
-package com.world.pockyapp.screens.home.navigations.hot
+package com.world.pockyapp.screens.home.navigations.challenges
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,6 +24,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Face
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -33,14 +37,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +58,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
+import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.screens.home.navigations.discover.DiscoverTheme
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -67,60 +78,19 @@ data class Challenge(
 )
 
 @Composable
-fun ChallengesScreen(navController: NavHostController, viewModel: HotViewModel = koinViewModel()) {
+fun ChallengesScreen(navController: NavHostController, viewModel: ChallengesViewModel = koinViewModel()) {
     val screenSize = remember { mutableStateOf(Pair(-1, -1)) }
+    var selectedTab by remember { mutableStateOf(ChallengesScreenTab.Following) }
 
+
+    val challengesState = viewModel.challengesState.collectAsState()
     // Sample data - replace with your actual data
-    val challenges = remember {
-        listOf(
-            Challenge(
-                "1",
-                "Run 1km in 4 minutes",
-                "Challenge yourself to complete a 1km run in under 4 minutes",
-                "Fitness",
-                45,
-                "2d left",
-                "Hard",
-                "🏆 100 coins",
-                "@speedrunner"
-            ),
-            Challenge(
-                "2",
-                "Push a car 50 meters",
-                "Physical strength challenge - push a standard car for 50 meters",
-                "Strength",
-                23,
-                "5h left",
-                "Extreme",
-                "🎁 Prize pack",
-                "@strongman"
-            ),
-            Challenge(
-                "3",
-                "Solve 100 math problems",
-                "Speed math challenge - solve 100 arithmetic problems in 10 minutes",
-                "Mental",
-                78,
-                "1d left",
-                "Medium",
-                "🧠 Brain trophy",
-                "@mathwiz"
-            ),
-            Challenge(
-                "4",
-                "Eat 20 hot wings",
-                "Spicy food challenge - finish 20 hot wings in 15 minutes",
-                "Food",
-                12,
-                "3h left",
-                "Spicy",
-                "🌶️ Fire medal",
-                "@spicylover"
-            )
-        )
+
+    LaunchedEffect(Unit){
+        viewModel.loadChallenges()
     }
 
-    val categories = listOf("All", "Fitness", "Strength", "Mental", "Food", "Creative")
+    val categories = listOf("All", "Fitness", "Strength", "Mental", "Food", "Creative", "Other")
     val selectedCategory = remember { mutableStateOf("All") }
 
     Scaffold(
@@ -197,7 +167,7 @@ fun ChallengesScreen(navController: NavHostController, viewModel: HotViewModel =
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Text(
-                                    text = "Challenges",
+                                    text = "Challenge the world and have some fun ",
                                     color = Color.White,
                                     fontSize = 32.sp,
                                     fontWeight = FontWeight.Bold
@@ -243,7 +213,9 @@ fun ChallengesScreen(navController: NavHostController, viewModel: HotViewModel =
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .clickable { /* Handle post challenge */ },
+                        .clickable {
+                            navController.navigate(NavRoutes.CREATE_CHALLENGE.route)
+                        },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.Black),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -305,6 +277,12 @@ fun ChallengesScreen(navController: NavHostController, viewModel: HotViewModel =
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
+
+                    ChallengeModernTabSelector(
+                        selectedTab = selectedTab,
+                        onTabSelected = { selectedTab = it }
+                    )
+
 
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 20.dp),
@@ -488,6 +466,68 @@ fun ChallengeCard(
                     color = Color.Black,
                     fontSize = 14.sp
                 )
+            }
+        }
+    }
+}
+
+enum class ChallengesScreenTab(val title: String, val icon: ImageVector) {
+    Friends("Friends", Icons.Outlined.Face),
+    Following("Following", Icons.Outlined.Notifications),
+    Nearby("Nearby", Icons.Outlined.LocationOn),
+    Global("Global", Icons.Outlined.MoreVert)
+}
+
+@Composable
+fun ChallengeModernTabSelector(
+    selectedTab: ChallengesScreenTab,
+    onTabSelected: (ChallengesScreenTab) -> Unit
+)
+{
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = DiscoverTheme.SpacingMedium),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = DiscoverTheme.SurfaceVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(4.dp)
+        ) {
+            ChallengesScreenTab.entries.forEach { tab ->
+                val isSelected = selectedTab == tab
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(
+                            color = if (isSelected) DiscoverTheme.Surface else Color.Transparent,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .clickable { onTabSelected(tab) }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(DiscoverTheme.SpacingXSmall)
+                    ) {
+                        Icon(
+                            imageVector = tab.icon,
+                            contentDescription = tab.title,
+                            tint = if (isSelected) DiscoverTheme.Primary else DiscoverTheme.OnSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+
+                        Text(
+                            text = tab.title,
+                            fontSize = 14.sp,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (isSelected) DiscoverTheme.Primary else DiscoverTheme.OnSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }

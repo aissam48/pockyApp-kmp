@@ -8,6 +8,7 @@ import com.world.pockyapp.screens.settings.blocked.BlockedViewModel
 import com.world.pockyapp.screens.settings.change_password.ChangePasswordViewModel
 import com.world.pockyapp.screens.chat.ChatViewModel
 import com.world.pockyapp.screens.createShot.CreateShotViewModel
+import com.world.pockyapp.screens.create_challenge.CreateChallengeViewModel
 import com.world.pockyapp.screens.followers.FollowersViewModel
 import com.world.pockyapp.screens.followers.followings.FollowingsViewModel
 import com.world.pockyapp.screens.followers.friends.FriendsViewModel
@@ -17,9 +18,9 @@ import com.world.pockyapp.screens.settings.edit_profile.EditProfileViewModel
 import com.world.pockyapp.screens.friend_request.FriendRequestsViewModel
 import com.world.pockyapp.screens.google_maps.GoogleMapsViewModel
 import com.world.pockyapp.screens.home.HomeViewModel
+import com.world.pockyapp.screens.home.navigations.challenges.ChallengesViewModel
 import com.world.pockyapp.screens.home.navigations.conversations.ConversationsViewModel
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverViewModel
-import com.world.pockyapp.screens.home.navigations.hot.HotViewModel
 import com.world.pockyapp.screens.home.navigations.shots.ShotsViewModel
 import com.world.pockyapp.screens.moment_preview.MomentPreviewViewModel
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
@@ -57,9 +58,9 @@ val appModule = module {
     single { MomentsViewModel(sdk = get()) }
     viewModel { ViewPostViewModel(sdk = get()) }
     viewModel { FriendRequestsViewModel(sdk = get()) }
-    viewModel { SettingsViewModel(sdk = get(),dataStore = get()) }
+    viewModel { SettingsViewModel(sdk = get(), dataStore = get()) }
     viewModel { BlockedViewModel(sdk = get()) }
-    viewModel { HotViewModel(sdk = get()) }
+    viewModel { ChallengesViewModel(sdk = get()) }
     viewModel { ReportProfileViewModel(sdk = get()) }
     viewModel { GoogleMapsViewModel(sdk = get()) }
     viewModel { ControlAccountViewModel(sdk = get()) }
@@ -70,6 +71,7 @@ val appModule = module {
     single { CreateShotViewModel(sdk = get()) }
 
     single { ShotsViewModel(sdk = get()) }
+    single { CreateChallengeViewModel(sdk = get()) }
 
 }
 
@@ -77,12 +79,15 @@ object ViewModelProvider {
     fun getGoogleMapsViewModel(): GoogleMapsViewModel {
         return KoinPlatform.getKoin().get()
     }
+
     fun getMomentsViewModel(): MomentsViewModel {
         return KoinPlatform.getKoin().get()
     }
+
     fun getProfileViewModel(): ProfileViewModel {
         return KoinPlatform.getKoin().get()
     }
+
     fun getCreateShotViewModel(): CreateShotViewModel {
         return KoinPlatform.getKoin().get()
     }

@@ -35,12 +35,14 @@ fun ModernHeader(
     ) {
         Box(
             modifier = Modifier
-                .size(35.dp)
+                .size(40.dp)
                 .background(
-                    Color.Black.copy(alpha = 0.2f),
+                    Color(0xFFF8F9FA),
                     CircleShape
                 )
-                .clickable { onBackClick() },
+                .clickable {
+                    onBackClick()
+                },
             contentAlignment = Alignment.Center
         ) {
             Image(

@@ -92,6 +92,8 @@ actual fun CreateShotScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
+
+            print("url of video -> ${it.path}")
             videoUri.value = it
 
             // Convert URI to ByteArray

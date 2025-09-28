@@ -1,74 +1,106 @@
-package com.world.pockyapp.screens.challenges.create
+package com.world.pockyapp.screens.create_challenge
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import androidx.navigation.NavHostController
-import coil3.compose.AsyncImage
 import com.world.pockyapp.screens.components.ModernHeader
+import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.ic_placeholder
-
-data class ChallengeCategory(
-    val id: String,
-    val name: String,
-    val icon: ImageVector,
-    val color: Color
-)
-
-data class DifficultyLevel(
-    val id: String,
-    val name: String,
-    val color: Color,
-    val description: String
-)
+import pockyapp.composeapp.generated.resources.icon_play
 
 @Composable
-fun CreateChallengeScreen(navController: NavHostController) {
+actual fun CreateChallengeScreen(navController: NavHostController) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var rules by remember { mutableStateOf("") }
-    var timeLimit by remember { mutableStateOf("") }
-    var prize by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf<ChallengeCategory?>(null) }
     var selectedDifficulty by remember { mutableStateOf<DifficultyLevel?>(null) }
-    var selectedVideoUri by remember { mutableStateOf<String?>(null) }
+    var selectedVideoUri by remember { mutableStateOf<Uri?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogType by remember { mutableStateOf<DialogType>(DialogType.Success) }
+    var dialogMessage by remember { mutableStateOf("") }
+
+    val viewModel: CreateChallengeViewModel = koinViewModel()
+    val context = LocalContext.current
+    val createChallengeState = viewModel.createChallengeState.collectAsState()
+
+    // ExoPlayer setup
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build()
+    }
 
     val categories = remember {
         listOf(
-            ChallengeCategory("fitness", "Fitness", Icons.Default.MoreVert, Color(0xFF4CAF50)),
-            ChallengeCategory("strength", "Strength", Icons.Default.MoreVert, Color(0xFFFF5722)),
-            ChallengeCategory("mental", "Mental", Icons.Default.MoreVert, Color(0xFF9C27B0)),
-            ChallengeCategory("food", "Food", Icons.Default.MoreVert, Color(0xFFFF9800)),
-            ChallengeCategory("creative", "Creative", Icons.Default.MoreVert, Color(0xFF2196F3)),
-            ChallengeCategory("dance", "Dance", Icons.Default.MoreVert, Color(0xFFE91E63)),
-            ChallengeCategory("skill", "Skill", Icons.Default.MoreVert, Color(0xFF607D8B))
+            ChallengeCategory("fitness", "Fitness", Color(0xFF4CAF50)),
+            ChallengeCategory("strength", "Strength", Color(0xFF4CAF50)),
+            ChallengeCategory("mental", "Mental", Color(0xFF4CAF50)),
+            ChallengeCategory("food", "Food", Color(0xFF4CAF50)),
+            ChallengeCategory("creative", "Creative", Color(0xFF4CAF50)),
+            ChallengeCategory("dance", "Dance", Color(0xFF4CAF50)),
+            ChallengeCategory("skill", "Skill", Color(0xFF4CAF50)),
+            ChallengeCategory("other", "Other", Color(0xFF4CAF50))
         )
     }
 
@@ -82,6 +114,57 @@ fun CreateChallengeScreen(navController: NavHostController) {
         )
     }
 
+    val videoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedVideoUri = it
+            print("url of video -> ${it.path}")
+
+            // Set up ExoPlayer with the selected video
+            val mediaItem = MediaItem.fromUri(it)
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.prepare()
+
+            // Convert URI to ByteArray
+            try {
+                val inputStream = context.contentResolver.openInputStream(it)
+                viewModel.video = inputStream?.readBytes()
+                print("size of video -> ${viewModel.video?.size}")
+                inputStream?.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                dialogType = DialogType.Error
+                dialogMessage = "Failed to process video: ${e.message}"
+                showDialog = true
+            }
+        }
+    }
+
+    // Handle create challenge state changes
+    LaunchedEffect(createChallengeState.value) {
+        when (createChallengeState.value) {
+            is ResponseState.Success -> {
+                dialogType = DialogType.Success
+                dialogMessage = "Challenge created successfully!"
+                showDialog = true
+            }
+            is ResponseState.Error -> {
+                dialogType = DialogType.Error
+                dialogMessage = "Failed to create challenge. Please try again."
+                showDialog = true
+            }
+            else -> {}
+        }
+    }
+
+    // Dispose ExoPlayer when composable is removed
+    DisposableEffect(Unit) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -89,9 +172,8 @@ fun CreateChallengeScreen(navController: NavHostController) {
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         // Header
-
-        item{
-            ModernHeader(""){
+        item {
+            ModernHeader("") {
                 navController.popBackStack()
             }
         }
@@ -100,7 +182,7 @@ fun CreateChallengeScreen(navController: NavHostController) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = 10.dp)
                     .padding(top = 20.dp),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(
@@ -139,13 +221,6 @@ fun CreateChallengeScreen(navController: NavHostController) {
                                 color = Color.White.copy(alpha = 0.9f)
                             )
                         }
-
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(32.dp)
-                        )
                     }
                 }
             }
@@ -156,7 +231,7 @@ fun CreateChallengeScreen(navController: NavHostController) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 10.dp),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
@@ -164,17 +239,40 @@ fun CreateChallengeScreen(navController: NavHostController) {
                 Column(
                     modifier = Modifier.padding(20.dp)
                 ) {
-                    Text(
-                        text = "Demo Video",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Video",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+
+                        if (selectedVideoUri != null) {
+                            IconButton(
+                                onClick = {
+                                    selectedVideoUri = null
+                                    exoPlayer.stop()
+                                    exoPlayer.clearMediaItems()
+                                    viewModel.video = null
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Remove video",
+                                    tint = Color.Gray
+                                )
+                            }
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
                     if (selectedVideoUri != null) {
-                        // Video Preview
+                        // Video Preview with ExoPlayer
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -182,27 +280,30 @@ fun CreateChallengeScreen(navController: NavHostController) {
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = Color.Black)
                         ) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "Video Selected",
-                                    color = Color.White,
-                                    fontSize = 16.sp
-                                )
+                            AndroidView(
+                                factory = { context ->
+                                    PlayerView(context).apply {
+                                        player = exoPlayer
+                                        useController = true
+                                        setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING)
+                                    }
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
 
-                                // Change video button
-                                Button(
-                                    onClick = { selectedVideoUri = null },
-                                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(0xFFDFC46B)
-                                    )
-                                ) {
-                                    Text("Change", fontSize = 12.sp)
-                                }
-                            }
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Button(
+                            onClick = { videoPickerLauncher.launch("video/*") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFDFC46B).copy(alpha = 0.2f),
+                                contentColor = Color(0xFFDFC46B)
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Change Video")
                         }
                     } else {
                         // Upload Area
@@ -210,7 +311,9 @@ fun CreateChallengeScreen(navController: NavHostController) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(200.dp)
-                                .clickable { selectedVideoUri = "demo_video" },
+                                .clickable {
+                                    videoPickerLauncher.launch("video/*")
+                                },
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = Color(0xFFDFC46B).copy(alpha = 0.1f)
@@ -223,7 +326,7 @@ fun CreateChallengeScreen(navController: NavHostController) {
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.MoreVert,
+                                    painter = painterResource(Res.drawable.icon_play),
                                     contentDescription = null,
                                     tint = Color(0xFFDFC46B),
                                     modifier = Modifier.size(48.dp)
@@ -232,7 +335,7 @@ fun CreateChallengeScreen(navController: NavHostController) {
                                 Spacer(modifier = Modifier.height(12.dp))
 
                                 Text(
-                                    text = "Upload Demo Video",
+                                    text = "Upload Video",
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = Color(0xFFDFC46B)
@@ -256,7 +359,7 @@ fun CreateChallengeScreen(navController: NavHostController) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 10.dp),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -275,7 +378,10 @@ fun CreateChallengeScreen(navController: NavHostController) {
                     // Title Input
                     OutlinedTextField(
                         value = title,
-                        onValueChange = { title = it },
+                        onValueChange = {
+                            title = it
+                            viewModel.title = title
+                        },
                         label = { Text("Challenge Title") },
                         placeholder = { Text("e.g., Run 1km in 4 minutes") },
                         modifier = Modifier.fillMaxWidth(),
@@ -289,7 +395,10 @@ fun CreateChallengeScreen(navController: NavHostController) {
                     // Description Input
                     OutlinedTextField(
                         value = description,
-                        onValueChange = { description = it },
+                        onValueChange = {
+                            description = it
+                            viewModel.description = description
+                        },
                         label = { Text("Description") },
                         placeholder = { Text("Describe your challenge in detail...") },
                         modifier = Modifier.fillMaxWidth(),
@@ -305,7 +414,10 @@ fun CreateChallengeScreen(navController: NavHostController) {
                     // Rules Input
                     OutlinedTextField(
                         value = rules,
-                        onValueChange = { rules = it },
+                        onValueChange = {
+                            rules = it
+                            viewModel.rules = rules
+                        },
                         label = { Text("Rules & Requirements") },
                         placeholder = { Text("What are the rules? Any specific requirements?") },
                         modifier = Modifier.fillMaxWidth(),
@@ -317,39 +429,6 @@ fun CreateChallengeScreen(navController: NavHostController) {
                             focusedLabelColor = Color(0xFFDFC46B)
                         )
                     )
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        // Time Limit
-                        OutlinedTextField(
-                            value = timeLimit,
-                            onValueChange = { timeLimit = it },
-                            label = { Text("Time Limit") },
-                            placeholder = { Text("30 seconds") },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFFDFC46B),
-                                focusedLabelColor = Color(0xFFDFC46B)
-                            )
-                        )
-
-                        // Prize
-                        OutlinedTextField(
-                            value = prize,
-                            onValueChange = { prize = it },
-                            label = { Text("Prize") },
-                            placeholder = { Text("100 coins") },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFFDFC46B),
-                                focusedLabelColor = Color(0xFFDFC46B)
-                            )
-                        )
-                    }
                 }
             }
         }
@@ -359,7 +438,7 @@ fun CreateChallengeScreen(navController: NavHostController) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 10.dp),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -383,7 +462,10 @@ fun CreateChallengeScreen(navController: NavHostController) {
                             CategoryChip(
                                 category = category,
                                 isSelected = selectedCategory?.id == category.id,
-                                onClick = { selectedCategory = category }
+                                onClick = {
+                                    selectedCategory = category
+                                    viewModel.category = category.name
+                                }
                             )
                         }
                     }
@@ -396,7 +478,7 @@ fun CreateChallengeScreen(navController: NavHostController) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 10.dp),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -420,7 +502,10 @@ fun CreateChallengeScreen(navController: NavHostController) {
                             DifficultyOption(
                                 difficulty = difficulty,
                                 isSelected = selectedDifficulty?.id == difficulty.id,
-                                onClick = { selectedDifficulty = difficulty }
+                                onClick = {
+                                    selectedDifficulty = difficulty
+                                    viewModel.difficulty = difficulty.name
+                                }
                             )
                         }
                     }
@@ -433,17 +518,14 @@ fun CreateChallengeScreen(navController: NavHostController) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = 10.dp)
                     .clickable {
-                        if (validateForm(
-                                title,
-                                description,
-                                selectedCategory,
-                                selectedDifficulty
-                            )
-                        ) {
-                            isLoading = true
-                            // Handle challenge creation
+                        if (validateForm(title, description, selectedCategory, selectedDifficulty, selectedVideoUri)) {
+                            viewModel.createChallenge()
+                        } else {
+                            dialogType = DialogType.Error
+                            dialogMessage = "Please fill in all required fields and upload a video"
+                            showDialog = true
                         }
                     },
                 shape = RoundedCornerShape(20.dp),
@@ -465,7 +547,7 @@ fun CreateChallengeScreen(navController: NavHostController) {
                         .padding(20.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (isLoading) {
+                    if (createChallengeState.value == ResponseState.Loading) {
                         CircularProgressIndicator(
                             color = Color.White,
                             strokeWidth = 2.dp,
@@ -476,12 +558,6 @@ fun CreateChallengeScreen(navController: NavHostController) {
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Send,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
                             Text(
                                 text = "Create Challenge",
                                 fontSize = 18.sp,
@@ -496,9 +572,81 @@ fun CreateChallengeScreen(navController: NavHostController) {
 
         // Bottom spacing
         item {
-            Spacer(modifier = Modifier.height(100.dp))
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
+
+    // Dialog
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            icon = {
+                Icon(
+                    imageVector = when (dialogType) {
+                        DialogType.Success -> Icons.Default.Check
+                        DialogType.Error -> Icons.Default.Warning
+                    },
+                    contentDescription = null,
+                    tint = when (dialogType) {
+                        DialogType.Success -> Color(0xFF4CAF50)
+                        DialogType.Error -> Color(0xFFFF5722)
+                    },
+                    modifier = Modifier.size(32.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = when (dialogType) {
+                        DialogType.Success -> "Success!"
+                        DialogType.Error -> "Error"
+                    },
+                    fontWeight = FontWeight.Bold,
+                    color = when (dialogType) {
+                        DialogType.Success -> Color(0xFF4CAF50)
+                        DialogType.Error -> Color(0xFFFF5722)
+                    }
+                )
+            },
+            text = {
+                Text(
+                    text = dialogMessage,
+                    textAlign = TextAlign.Center
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        if (dialogType == DialogType.Success) {
+                            navController.popBackStack()
+                        }
+                    }
+                ) {
+                    Text(
+                        text = if (dialogType == DialogType.Success) "Continue" else "OK",
+                        color = Color(0xFFDFC46B),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = Color.White
+        )
+    }
+}
+
+private fun validateForm(
+    title: String,
+    description: String,
+    category: ChallengeCategory?,
+    difficulty: DifficultyLevel?,
+    videoUri: Uri?
+): Boolean {
+    return title.isNotBlank() &&
+            description.isNotBlank() &&
+            category != null &&
+            difficulty != null &&
+            videoUri != null
 }
 
 @Composable
@@ -526,12 +674,6 @@ fun CategoryChip(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(
-                imageVector = category.icon,
-                contentDescription = null,
-                tint = if (isSelected) Color.White else category.color,
-                modifier = Modifier.size(24.dp)
-            )
             Text(
                 text = category.name,
                 fontSize = 12.sp,
@@ -593,14 +735,20 @@ fun DifficultyOption(
     }
 }
 
-fun validateForm(
-    title: String,
-    description: String,
-    category: ChallengeCategory?,
-    difficulty: DifficultyLevel?
-): Boolean {
-    return title.isNotBlank() &&
-            description.isNotBlank() &&
-            category != null &&
-            difficulty != null
+enum class DialogType {
+    Success,
+    Error
 }
+
+data class ChallengeCategory(
+    val id: String,
+    val name: String,
+    val color: Color
+)
+
+data class DifficultyLevel(
+    val id: String,
+    val name: String,
+    val color: Color,
+    val description: String
+)

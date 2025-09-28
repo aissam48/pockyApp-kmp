@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.NavigationBar
@@ -43,7 +42,7 @@ import com.world.pockyapp.screens.camera.CameraView
 import com.world.pockyapp.screens.home.navigations.shots.ShotsScreen
 import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverScreen
-import com.world.pockyapp.screens.home.navigations.hot.ChallengesScreen
+import com.world.pockyapp.screens.home.navigations.challenges.ChallengesScreen
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res

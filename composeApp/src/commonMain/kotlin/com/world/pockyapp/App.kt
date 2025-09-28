@@ -2,6 +2,7 @@ package com.world.pockyapp
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,7 +37,16 @@ fun App() {
                     .background(Color.Black)
                     .windowInsetsPadding(WindowInsets(0.dp))
             ) {
-                NavigationHost(navController)
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+
+                    println(getPlatform().name + "    fghjkllkjhgfdfghjk")
+                    //Android 34
+                    NavigationHost(navController)
+
+                }
             }
 
             /* Box(

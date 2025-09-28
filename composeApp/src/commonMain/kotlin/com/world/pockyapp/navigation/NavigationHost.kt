@@ -6,12 +6,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.world.pockyapp.network.models.model.MomentModel
-import com.world.pockyapp.network.models.model.StreetModel
+import com.world.pockyapp.screens.create_challenge.CreateChallengeScreen
 import com.world.pockyapp.screens.settings.controlZone.ControlZoneScreen
 import com.world.pockyapp.screens.auth.login.LoginScreen
 import com.world.pockyapp.screens.settings.blocked.BlockedScreen
 import com.world.pockyapp.screens.camera.CameraView
-import com.world.pockyapp.screens.challenges.create.CreateChallengeScreen
 import com.world.pockyapp.screens.settings.change_password.ChangePasswordScreen
 import com.world.pockyapp.screens.chat.ChatScreen
 import com.world.pockyapp.screens.createShot.CreateShotScreen

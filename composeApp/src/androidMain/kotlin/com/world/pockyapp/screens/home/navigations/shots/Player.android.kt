@@ -82,7 +82,7 @@ actual fun Player() {
 
     // Optimized player pool with better configuration
     val playerPool = remember {
-        Array(5) { index -> // Keep 5 players as requested
+        Array(7) { index -> // Keep 5 players as requested
 
 
             VideoPlayerItem(
@@ -95,7 +95,7 @@ actual fun Player() {
                     )
                     .build()
                     .apply {
-                        repeatMode = Player.REPEAT_MODE_ONE
+                        repeatMode = Player.REPEAT_MODE_ALL
                         volume = 1f
                         playWhenReady = false
                     },
@@ -203,7 +203,7 @@ actual fun Player() {
 
     // Optimized pagination loading
     LaunchedEffect(pagerState.currentPage, items.size) {
-        if (items.size > 0 && pagerState.currentPage >= items.size - 2 && !isLoading) {
+        if (items.isNotEmpty() && pagerState.currentPage >= items.size - 2 && !isLoading) {
             viewModel.getShots()
         }
     }
@@ -214,9 +214,13 @@ actual fun Player() {
             try {
                 // Only load current and adjacent pages for better performance
                 val targetPages = listOf(
+                    centerPage - 3,
+                    centerPage - 2,
                     centerPage - 1,
                     centerPage,
-                    centerPage + 1
+                    centerPage + 1,
+                    centerPage + 2,
+                    centerPage + 3
                 ).filter { it in 0 until items.size }
 
                 println("🎯 Target pages: $targetPages for center: $centerPage")
@@ -251,7 +255,6 @@ actual fun Player() {
 
                     // Use actual video URL from shot data if available
                     val videoUrl = shot.mediaUrl
-                        ?: "https://nearvibe.fra1.digitaloceanspaces.com/e0295157-9e49-4d3d-9716-505b20e1c02f"
 
                     println("🔄 Assigning player to page $page: $videoUrl")
                     newStates[page] = PlayerState.LOADING
@@ -445,8 +448,25 @@ actual fun Player() {
                     )
                 }
 
+                println(pageState)
+
+                playerItem?.player?.isPlaying?.let {
+                    if (!it){
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(50.dp),
+                                color = Color.LightGray,
+                                strokeWidth = 1.dp
+                            )
+                        }
+                    }
+                }
+
                 // Enhanced loading/error states - only show when actually needed
-                when (pageState) {
+                /*when (pageState) {
                     PlayerState.LOADING -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
@@ -518,10 +538,11 @@ actual fun Player() {
                     PlayerState.BUFFERING -> {
 
                     }
-                }
+                }*/
 
                 // Social UI Overlay - only show when video is ready or playing
-                if (shot != null && (pageState == PlayerState.READY || pageState == PlayerState.PLAYING)) {
+                if (shot != null ) {
+                   // && (pageState == PlayerState.READY || pageState == PlayerState.PLAYING)) {
                     SocialOverlay(
                         shot = shot,
                         modifier = Modifier.fillMaxSize(),
