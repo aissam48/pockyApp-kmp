@@ -249,7 +249,7 @@ actual fun CameraView(navController: NavHostController) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 90.dp)
+                    .padding(horizontal = 24.dp, vertical = 20.dp)
                     .alpha(controlsPanelAlpha),
                 shape = RoundedCornerShape(32.dp),
                 color = Color.Black.copy(alpha = 0.4f),

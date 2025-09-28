@@ -53,7 +53,7 @@ import pockyapp.composeapp.generated.resources.ic_unlike_black
 object DiscoverTheme {
     val SpacingXSmall = 4.dp
     val SpacingSmall = 8.dp
-    val SpacingMedium = 16.dp
+    val SpacingMedium = 10.dp
     val SpacingLarge = 24.dp
     val SpacingXLarge = 32.dp
 
@@ -118,6 +118,10 @@ fun DiscoverScreen(
                 )
             }
 
+            item {
+                Spacer(modifier = Modifier.height(DiscoverTheme.SpacingSmall))
+            }
+
             // Tab Selector
             item {
                 ModernTabSelector(
@@ -136,6 +140,7 @@ fun DiscoverScreen(
                         viewModel = viewModel
                     )
                 }
+
                 FeedTab.Nearby -> {
                     nearbyContent(
                         momentsState = nearbyMomentsState,
@@ -145,6 +150,7 @@ fun DiscoverScreen(
                         viewModel = viewModel
                     )
                 }
+
                 FeedTab.Global -> {
                     item {
                         GlobalMapSection(navController = navController)
@@ -153,20 +159,6 @@ fun DiscoverScreen(
             }
         }
 
-        // Floating Action Button
-        FloatingActionButton(
-            onClick = { /* Handle create post */ },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(DiscoverTheme.SpacingMedium),
-            containerColor = DiscoverTheme.Primary,
-            contentColor = Color.White
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Create post"
-            )
-        }
     }
 }
 
@@ -222,6 +214,7 @@ fun AnimatedStoriesSection(
                                 navController = navController
                             )
                         }
+
                         is UiState.Error -> StoryErrorItem()
                     }
                 }
@@ -231,6 +224,7 @@ fun AnimatedStoriesSection(
                     is UiState.Loading -> {
                         items(5) { StoryItemSkeleton() }
                     }
+
                     is UiState.Success -> {
                         val friendsMoments = friendsMomentsState.data
                         val groupedMoments = friendsMoments
@@ -246,6 +240,7 @@ fun AnimatedStoriesSection(
                             )
                         }
                     }
+
                     is UiState.Error -> {
                         item { StoryErrorItem() }
                     }
@@ -480,12 +475,12 @@ fun LazyListScope.followingsMomentsContent(
         is ResponseState.Loading -> {
             item { LoadingSection() }
         }
+
         is ResponseState.Success -> {
             val moments = state.data
             if (moments.isNotEmpty()) {
                 item {
                     MomentsGrid(
-                        title = "Following",
                         moments = moments,
                         profileState = profileState,
                         navController = navController
@@ -493,6 +488,7 @@ fun LazyListScope.followingsMomentsContent(
                 }
             }
         }
+
         is ResponseState.Error -> {
             item {
                 ErrorSection(
@@ -501,6 +497,7 @@ fun LazyListScope.followingsMomentsContent(
                 )
             }
         }
+
         else -> {}
     }
 }
@@ -519,7 +516,6 @@ fun LazyListScope.nearbyContent(
             if (moments.isNotEmpty()) {
                 item {
                     MomentsGrid(
-                        title = "Nearby Moments",
                         moments = moments,
                         profileState = profileState,
                         navController = navController
@@ -527,9 +523,11 @@ fun LazyListScope.nearbyContent(
                 }
             }
         }
+
         is UiState.Loading -> {
             item { LoadingSection() }
         }
+
         is UiState.Error -> {
             item {
                 ErrorSection(
@@ -568,9 +566,11 @@ fun LazyListScope.nearbyContent(
                 }
             }
         }
+
         is UiState.Loading -> {
             item { LoadingSection() }
         }
+
         is UiState.Error -> {
             item {
                 ErrorSection(
@@ -584,7 +584,6 @@ fun LazyListScope.nearbyContent(
 
 @Composable
 fun MomentsGrid(
-    title: String,
     moments: List<MomentModel>,
     profileState: UiState<ProfileModel>,
     navController: NavHostController
@@ -593,21 +592,9 @@ fun MomentsGrid(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = DiscoverTheme.SpacingMedium),
-        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = DiscoverTheme.Surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(DiscoverTheme.SpacingMedium)
-        ) {
-            Text(
-                text = title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = DiscoverTheme.OnSurface
-            )
-
-            Spacer(modifier = Modifier.height(DiscoverTheme.SpacingSmall))
+        Column {
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(DiscoverTheme.SpacingSmall)
@@ -923,9 +910,7 @@ fun LoadingSection() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = DiscoverTheme.SpacingMedium),
-        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = DiscoverTheme.Surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Box(
             modifier = Modifier

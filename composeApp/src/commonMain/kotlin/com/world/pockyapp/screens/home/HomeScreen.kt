@@ -180,12 +180,12 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp)
-                        .background(color = Color.LightGray, shape = RoundedCornerShape(24.dp)),
+                        .background(color = Color.Black),
 
-                    ) {
+                    )
+                {
                     NavigationBar(
-                        modifier = Modifier.height(70.dp).align(Alignment.Center),
+                        modifier = Modifier.height(60.dp).align(Alignment.Center),
                         containerColor = Color.Transparent,
                         contentColor = Color.Black,
                         tonalElevation = 0.dp
@@ -200,7 +200,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                             icon = {
                                 Box(
                                     modifier = Modifier
-                                        .size(48.dp)
+                                        .size(40.dp)
                                         .background(
                                             color = if (selected == 0)
                                                 Color(0xFFDFC46B)
@@ -233,7 +233,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                             icon = {
                                 Box(
                                     modifier = Modifier
-                                        .size(48.dp)
+                                        .size(40.dp)
                                         .background(
                                             color = if (selected == 1)
                                                 Color(0xFFDFC46B)
@@ -266,7 +266,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                             icon = {
                                 Box(
                                     modifier = Modifier
-                                        .size(48.dp)
+                                        .size(40.dp)
                                         .background(
                                             color = if (selected == 2)
                                                 Color(0xFFDFC46B)
@@ -300,7 +300,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                             icon = {
                                 Box(
                                     modifier = Modifier
-                                        .size(48.dp)
+                                        .size(40.dp)
                                         .background(
                                             color = if (selected == 3)
                                                 Color(0xFFDFC46B)
@@ -333,7 +333,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
                             icon = {
                                 Box(
                                     modifier = Modifier
-                                        .size(48.dp)
+                                        .size(40.dp)
                                         .background(
                                             color = if (selected == 4)
                                                 Color(0xFFDFC46B)
@@ -361,7 +361,7 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
         ) { paddingValues ->
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxSize().padding(paddingValues)
             ) {
                 when (selected) {
                     0 -> DiscoverScreen(navController)
