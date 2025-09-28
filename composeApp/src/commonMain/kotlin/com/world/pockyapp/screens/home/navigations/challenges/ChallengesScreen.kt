@@ -326,7 +326,7 @@ fun ChallengesScreen(
                             challenge = challenge,
                             modifier = Modifier.padding(horizontal = 20.dp),
                             onClick = {
-
+                                navController.navigate(NavRoutes.CHALLENGE_DETAILS.route)
                             }
                         )
                     }

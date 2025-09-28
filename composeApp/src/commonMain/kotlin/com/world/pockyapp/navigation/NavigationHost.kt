@@ -11,6 +11,7 @@ import com.world.pockyapp.screens.settings.controlZone.ControlZoneScreen
 import com.world.pockyapp.screens.auth.login.LoginScreen
 import com.world.pockyapp.screens.settings.blocked.BlockedScreen
 import com.world.pockyapp.screens.camera.CameraView
+import com.world.pockyapp.screens.challengeDetails.ChallengeDetailsScreen
 import com.world.pockyapp.screens.settings.change_password.ChangePasswordScreen
 import com.world.pockyapp.screens.chat.ChatScreen
 import com.world.pockyapp.screens.createShot.CreateShotScreen
@@ -174,7 +175,12 @@ fun NavigationHost(navController: NavHostController) {
             val conversationID = navBackStackEntry.arguments?.getString("conversationID") ?: ""
             val profileID = navBackStackEntry.arguments?.getString("profileID") ?: ""
             val chatRequestID = navBackStackEntry.arguments?.getString("chatRequestID") ?: ""
-            ChatScreen(navController, conversationID = conversationID, profileID = profileID, chatRequestID = chatRequestID)
+            ChatScreen(
+                navController,
+                conversationID = conversationID,
+                profileID = profileID,
+                chatRequestID = chatRequestID
+            )
         }
 
         composable(route = NavRoutes.CREATE_SHOT.route) { navBackStackEntry ->
@@ -183,6 +189,10 @@ fun NavigationHost(navController: NavHostController) {
 
         composable(route = NavRoutes.SHOTS.route) { navBackStackEntry ->
             ShotsScreen(navController)
+        }
+
+        composable(route = NavRoutes.CHALLENGE_DETAILS.route) { navBackStackEntry ->
+            ChallengeDetailsScreen("", navController)
         }
     }
 }
