@@ -46,6 +46,8 @@ class ChallengesViewModel(val sdk: ApiManager) : ViewModel() {
         }
     }
 
+    var relationType = ""
+    var category = ""
     fun loadChallenges() {
         try {
             viewModelScope.launch {
@@ -53,7 +55,7 @@ class ChallengesViewModel(val sdk: ApiManager) : ViewModel() {
                     _challengestState.value = ResponseState.Loading
                 }
 
-                sdk.getChallenges({ success ->
+                sdk.getChallenges(relationType,category,{ success ->
                     isChallengesLoadedFirstTime = false
                     _challengestState.value = ResponseState.Success(success)
                 }, { error ->

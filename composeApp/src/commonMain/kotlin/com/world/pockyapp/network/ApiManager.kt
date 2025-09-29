@@ -1947,6 +1947,8 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
     }
 
     suspend fun getChallenges(
+        relationType:String,
+        category:String,
         onSuccess: (List<ChallengeModel>) -> Unit,
         onFailure: (ErrorModel) -> Unit
     ) {
@@ -1954,11 +1956,41 @@ class ApiManager(val dataStore: DataStore<Preferences>) {
             val response: HttpResponse = client.get("$baseUrl/operations/get-challenges") {
                 val token = getToken()
                 contentType(ContentType.Application.Json)
+                parameter("relationType", relationType)
+                parameter("category", category)
                 headers { append(HttpHeaders.Authorization, "Bearer $token") }
             }
 
             if (response.status.isSuccess()) {
                 val responseBody: List<ChallengeModel> = response.body()
+                println("success-----> ${response.bodyAsText()}")
+                onSuccess(responseBody)
+            } else {
+                val errorMessage: ErrorModel = response.body()
+                println("error-----> $errorMessage")
+
+                onFailure(errorMessage)
+            }
+        } catch (e: Exception) {
+
+        }
+    }
+
+    suspend fun getChallengeDetails(
+        challengeId:String,
+        onSuccess: (ChallengeModel) -> Unit,
+        onFailure: (ErrorModel) -> Unit
+    ){
+        try {
+            val response: HttpResponse = client.get("$baseUrl/operations/get-challenge") {
+                val token = getToken()
+                contentType(ContentType.Application.Json)
+                parameter("challengeId", challengeId)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+            }
+
+            if (response.status.isSuccess()) {
+                val responseBody: ChallengeModel = response.body()
                 println("success-----> ${response.bodyAsText()}")
                 onSuccess(responseBody)
             } else {

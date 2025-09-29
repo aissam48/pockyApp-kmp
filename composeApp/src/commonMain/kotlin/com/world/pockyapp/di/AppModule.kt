@@ -4,6 +4,7 @@ package com.world.pockyapp.di
 import com.world.pockyapp.network.ApiManager
 import com.world.pockyapp.screens.auth.login.LoginScreenViewModel
 import com.world.pockyapp.screens.auth.register.RegisterScreenViewModel
+import com.world.pockyapp.screens.challengeDetails.ChallengeDetailsViewModel
 import com.world.pockyapp.screens.settings.blocked.BlockedViewModel
 import com.world.pockyapp.screens.settings.change_password.ChangePasswordViewModel
 import com.world.pockyapp.screens.chat.ChatViewModel
@@ -72,6 +73,7 @@ val appModule = module {
 
     single { ShotsViewModel(sdk = get()) }
     single { CreateChallengeViewModel(sdk = get()) }
+    single { ChallengeDetailsViewModel(sdk = get()) }
 
 }
 

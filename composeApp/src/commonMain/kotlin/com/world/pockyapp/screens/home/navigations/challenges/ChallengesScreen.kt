@@ -61,6 +61,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.world.pockyapp.navigation.NavRoutes
 import com.world.pockyapp.network.models.model.ChallengeModel
+import com.world.pockyapp.screens.challengeDetails.ChallengeDetailsViewModel
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverTheme
 import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import com.world.pockyapp.utils.Utils.formatCreatedAt
@@ -75,12 +76,15 @@ fun ChallengesScreen(
     viewModel: ChallengesViewModel = koinViewModel()
 ) {
     val screenSize = remember { mutableStateOf(Pair(-1, -1)) }
-    var selectedTab by remember { mutableStateOf(ChallengesScreenTab.Following) }
+    var selectedTab by remember { mutableStateOf(ChallengesScreenTab.Friends) }
 
 
+    val challengeDetailsViewModel : ChallengeDetailsViewModel = koinViewModel()
     val challengesState = viewModel.challengesState.collectAsState()
 
     LaunchedEffect(Unit) {
+        viewModel.relationType = "Friends"
+        viewModel.category = "All"
         viewModel.loadChallenges()
     }
 
@@ -274,7 +278,11 @@ fun ChallengesScreen(
 
                     ChallengeModernTabSelector(
                         selectedTab = selectedTab,
-                        onTabSelected = { selectedTab = it }
+                        onTabSelected = {
+                            selectedTab = it
+                            viewModel.relationType = it.title
+                            viewModel.loadChallenges()
+                        }
                     )
 
 
@@ -284,7 +292,11 @@ fun ChallengesScreen(
                     ) {
                         items(categories) { category ->
                             FilterChip(
-                                onClick = { selectedCategory.value = category },
+                                onClick = {
+                                    selectedCategory.value = category
+                                    viewModel.category = category
+                                    viewModel.loadChallenges()
+                                },
                                 label = { Text(category) },
                                 selected = selectedCategory.value == category,
                                 colors = FilterChipDefaults.filterChipColors(
@@ -312,7 +324,7 @@ fun ChallengesScreen(
                 is ResponseState.Loading -> {
 
                     item {
-                        Box(modifier = Modifier.fillMaxWidth()){
+                        Box(modifier = Modifier.fillMaxWidth()) {
 
                             CircularProgressIndicator()
                         }
@@ -326,6 +338,8 @@ fun ChallengesScreen(
                             challenge = challenge,
                             modifier = Modifier.padding(horizontal = 20.dp),
                             onClick = {
+                                challengeDetailsViewModel.challengeId = challenge.id
+
                                 navController.navigate(NavRoutes.CHALLENGE_DETAILS.route)
                             }
                         )
@@ -340,7 +354,6 @@ fun ChallengesScreen(
 
                 }
             }
-
 
 
             // Bottom spacing
@@ -482,13 +495,13 @@ fun ChallengeCard(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Row {
+                Column {
                     Text(
                         text = "${challenge.profile.firstName} ${challenge.profile.lastName}",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
                         text = "@${challenge.profile.username}",

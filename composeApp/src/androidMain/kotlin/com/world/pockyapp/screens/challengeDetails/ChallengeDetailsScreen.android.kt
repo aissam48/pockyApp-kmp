@@ -26,7 +26,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.world.pockyapp.navigation.NavRoutes
+import com.world.pockyapp.network.models.model.ChallengeModel
+import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import org.jetbrains.compose.resources.painterResource
+import org.koin.androidx.compose.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
 import pockyapp.composeapp.generated.resources.ic_placeholder
 
@@ -54,40 +57,6 @@ object ChallengeDetailsTheme {
     )
 }
 
-// Data Classes
-data class ChallengeModel(
-    val id: String,
-    val title: String,
-    val description: String,
-    val rules: String,
-    val videoUrl: String,
-    val category: String,
-    val difficulty: String,
-    val difficultyColor: Color,
-    val owner: UserProfile,
-    val createdAt: String,
-    val participantsCount: Int,
-    val likesCount: Int,
-    val isLiked: Boolean,
-    val isParticipated: Boolean
-)
-
-data class UserProfile(
-    val id: String,
-    val firstName: String,
-    val lastName: String,
-    val photoUrl: String,
-    val isVerified: Boolean = false
-)
-
-data class ParticipantModel(
-    val id: String,
-    val user: UserProfile,
-    val videoUrl: String,
-    val createdAt: String,
-    val likesCount: Int,
-    val isLiked: Boolean
-)
 
 @Composable
 actual fun ChallengeDetailsScreen(
@@ -95,41 +64,13 @@ actual fun ChallengeDetailsScreen(
     navController: NavHostController
 ) {
     // Mock data - replace with actual data loading
-    val challenge = remember {
-        ChallengeModel(
-            id = challengeId,
-            title = "30-Day Push-Up Challenge",
-            description = "Build upper body strength with this progressive push-up challenge. Start with 10 push-ups and work your way up to 100!",
-            rules = "• Perform push-ups with proper form\n• Take progress photos\n• Rest days are important\n• Stay consistent",
-            videoUrl = "https://example.com/challenge.mp4",
-            category = "Fitness",
-            difficulty = "Medium",
-            difficultyColor = Color(0xFFF59E0B),
-            owner = UserProfile("1", "Sarah", "Johnson", "https://example.com/sarah.jpg", true),
-            createdAt = "2 days ago",
-            participantsCount = 1250,
-            likesCount = 4820,
-            isLiked = false,
-            isParticipated = false
-        )
-    }
 
-    val participants = remember {
-        List(20) { index ->
-            ParticipantModel(
-                id = "participant_$index",
-                user = UserProfile(
-                    id = "user_$index",
-                    firstName = listOf("Alex", "Emma", "John", "Lisa", "Mike", "Anna")[index % 6],
-                    lastName = listOf("Smith", "Brown", "Wilson", "Davis", "Miller", "Taylor")[index % 6],
-                    photoUrl = "https://example.com/user_$index.jpg"
-                ),
-                videoUrl = "https://example.com/participant_$index.mp4",
-                createdAt = "${index + 1} hours ago",
-                likesCount = (10..500).random(),
-                isLiked = (index % 3) == 0
-            )
-        }
+    val viewModel: ChallengeDetailsViewModel = koinViewModel()
+
+    val challengeDetailsState = viewModel.challengeDetailsState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getChallengeDetails()
     }
 
     var isPlaying by remember { mutableStateOf(false) }
@@ -145,47 +86,71 @@ actual fun ChallengeDetailsScreen(
             contentPadding = PaddingValues(bottom = 100.dp)
         ) {
             // Video Section
-            item {
-                ChallengeVideoSection(
-                    challenge = challenge,
-                    isPlaying = isPlaying,
-                    onPlayStateChanged = { isPlaying = it },
-                    onBackClick = { navController.popBackStack() }
-                )
-            }
 
-            // Challenge Info Section
-            item {
-                ChallengeInfoSection(
-                    challenge = challenge,
-                    onOwnerClick = {
-                        navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${challenge.owner.id}")
+
+            when (val state = challengeDetailsState.value) {
+                is ResponseState.Loading -> {
+                    item {
+
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
                     }
-                )
-            }
+                }
+                is ResponseState.Success -> {
 
-            // Action Buttons
-            item {
-                ActionButtonsSection(
-                    challenge = challenge,
-                    onJoinClick = { /* Handle join challenge */ },
-                    onLikeClick = { /* Handle like */ },
-                    onShareClick = { /* Handle share */ }
-                )
-            }
-
-            // Participants Section
-            item {
-                ParticipantsSection(
-                    participants = if (showAllParticipants) participants else participants.take(6),
-                    totalParticipants = challenge.participantsCount,
-                    showAll = showAllParticipants,
-                    onToggleShowAll = { showAllParticipants = !showAllParticipants },
-                    onParticipantClick = { participant ->
-                        // Navigate to participant's video
+                    item {
+                        ChallengeVideoSection(
+                            challenge = state.data,
+                            isPlaying = isPlaying,
+                            onPlayStateChanged = { isPlaying = it },
+                            onBackClick = { navController.popBackStack() }
+                        )
                     }
-                )
+
+                    // Challenge Info Section
+                    item {
+                        ChallengeInfoSection(
+                            challenge = state.data,
+                            onOwnerClick = {
+                                navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/${state.data.ownerID}")
+                            }
+                        )
+                    }
+
+                    // Action Buttons
+                    /*item {
+                        ActionButtonsSection(
+                            challenge = challenge,
+                            onJoinClick = { /* Handle join challenge */ },
+                            onLikeClick = { /* Handle like */ },
+                            onShareClick = { /* Handle share */ }
+                        )
+                    }
+
+                    // Participants Section
+                    item {
+                        ParticipantsSection(
+                            participants = if (showAllParticipants) participants else participants.take(6),
+                            totalParticipants = challenge.participantsCount,
+                            showAll = showAllParticipants,
+                            onToggleShowAll = { showAllParticipants = !showAllParticipants },
+                            onParticipantClick = { participant ->
+                                // Navigate to participant's video
+                            }
+                        )
+                    }*/
+                }
+                is ResponseState.Error -> {
+
+                }
+                else -> {
+
+                }
             }
+
+
+
         }
     }
 }
@@ -204,7 +169,7 @@ fun ChallengeVideoSection(
     ) {
         // Video Player
         VideoPlayerComponent(
-            videoUrl = challenge.videoUrl,
+            videoUrl = challenge.mediaUrl,
             isPlaying = isPlaying,
             onPlayStateChanged = onPlayStateChanged,
             modifier = Modifier.fillMaxSize()
@@ -272,7 +237,7 @@ fun ChallengeVideoSection(
                         color = Color.White,
                         modifier = Modifier
                             .background(
-                                challenge.difficultyColor,
+                                Color.White.copy(alpha = 0.2f),
                                 RoundedCornerShape(8.dp)
                             )
                             .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -376,7 +341,7 @@ fun ChallengeInfoSection(
             ) {
                 Box {
                     AsyncImage(
-                        model = challenge.owner.photoUrl,
+                        model = challenge.profile.photoUrl,
                         contentDescription = "Owner profile",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -386,27 +351,11 @@ fun ChallengeInfoSection(
                         error = painterResource(Res.drawable.ic_placeholder)
                     )
 
-                    if (challenge.owner.isVerified) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .size(20.dp)
-                                .background(ChallengeDetailsTheme.Primary, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Verified",
-                                tint = Color.White,
-                                modifier = Modifier.size(12.dp)
-                            )
-                        }
-                    }
                 }
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "${challenge.owner.firstName} ${challenge.owner.lastName}",
+                        text = "${challenge.profile.firstName} ${challenge.profile.lastName}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = ChallengeDetailsTheme.OnSurface
@@ -470,12 +419,12 @@ fun ChallengeInfoSection(
             ) {
                 StatItem(
                     icon = Icons.Default.Face,
-                    count = challenge.participantsCount,
+                    count = challenge.participants.size,
                     label = "Participants"
                 )
                 StatItem(
                     icon = Icons.Default.Favorite,
-                    count = challenge.likesCount,
+                    count = challenge.participants.size,
                     label = "Likes"
                 )
                 StatItem(
@@ -541,7 +490,7 @@ fun ActionButtonsSection(
             ),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Icon(
+            /*Icon(
                 imageVector = if (challenge.isParticipated) Icons.Default.CheckCircle else Icons.Default.Add,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp)
@@ -550,11 +499,11 @@ fun ActionButtonsSection(
             Text(
                 text = if (challenge.isParticipated) "Joined" else "Join Challenge",
                 fontWeight = FontWeight.SemiBold
-            )
+            )*/
         }
 
         // Like Button
-        IconButton(
+       /* IconButton(
             onClick = onLikeClick,
             modifier = Modifier
                 .background(
@@ -567,7 +516,7 @@ fun ActionButtonsSection(
                 contentDescription = "Like",
                 tint = if (challenge.isLiked) Color.Red else ChallengeDetailsTheme.OnSurfaceVariant
             )
-        }
+        }*/
 
         // Share Button
         IconButton(
@@ -582,7 +531,7 @@ fun ActionButtonsSection(
         }
     }
 }
-
+/*
 @Composable
 fun ParticipantsSection(
     participants: List<ParticipantModel>,
@@ -649,8 +598,8 @@ fun ParticipantsSection(
             }
         }
     }
-}
-
+}*/
+/*
 @Composable
 fun ParticipantCard(
     participant: ParticipantModel,
@@ -748,7 +697,7 @@ fun ParticipantCard(
             }
         }
     }
-}
+}*/
 
 // Helper Functions
 fun formatCount(count: Int): String {
