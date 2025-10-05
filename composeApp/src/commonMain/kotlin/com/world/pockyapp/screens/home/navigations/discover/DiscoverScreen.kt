@@ -42,6 +42,7 @@ import com.world.pockyapp.screens.home.navigations.discover.UiState
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import com.world.pockyapp.utils.Utils.formatCreatedAt
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -508,16 +509,13 @@ fun LazyListScope.followingsMomentsContent(
         is ResponseState.Success -> {
             val posts = postsState.data
             if (posts.isNotEmpty()) {
-                item {
-                    SectionHeader(title = "Following Posts")
-                }
                 items(posts, key = { it.id }) { post ->
                     ModernPostCard(
                         post = post,
                         currentUserId = (profileState as? UiState.Success)?.data?.id,
-                        onLikeClick = { clickedPost ->
+                        onLikeClick = { clickedPost, isLiked ->
                             (profileState as? UiState.Success)?.data?.id?.let { userId ->
-                                viewModel.toggleLike(clickedPost.id, userId)
+                                viewModel.toggleLike(clickedPost.id, userId, isLiked)
                             }
                         },
                         onProfileClick = { userId ->
@@ -595,9 +593,9 @@ fun LazyListScope.nearbyContent(
                     ModernPostCard(
                         post = post,
                         currentUserId = (profileState as? UiState.Success)?.data?.id,
-                        onLikeClick = { clickedPost ->
+                        onLikeClick = { clickedPost, isLiked ->
                             (profileState as? UiState.Success)?.data?.id?.let { userId ->
-                                viewModel.toggleLike(clickedPost.id, userId)
+                                viewModel.toggleLike(clickedPost.id, userId, isLiked)
                             }
                         },
                         onProfileClick = { userId ->
@@ -740,11 +738,19 @@ fun MomentCard(
 fun ModernPostCard(
     post: PostModel,
     currentUserId: String?,
-    onLikeClick: (PostModel) -> Unit,
+    onLikeClick: (PostModel, Boolean) -> Unit,
     onProfileClick: (String) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
-    val isLiked = post.likes.contains(currentUserId)
+    var isLiked by remember(post.likes, currentUserId) {
+        mutableStateOf(post.likes.contains(currentUserId))
+    }
+    println("klklklfglgf isLiked $isLiked")
+    println("klklklfglgf currentUserId $currentUserId")
+
+    var likesCount by remember(post.likes.size) {
+        mutableStateOf(post.likes.size)
+    }
 
     Card(
         modifier = Modifier
@@ -810,67 +816,58 @@ fun ModernPostCard(
                     .padding(DiscoverTheme.SpacingMedium),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AnimatedLikeButton(
-                    isLiked = isLiked,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onLikeClick(post)
-                    }
+                val scale by animateFloatAsState(
+                    targetValue = if (isLiked) 1.2f else 1f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessHigh
+                    )
                 )
+
+                val rotation by animateFloatAsState(
+                    targetValue = if (isLiked) 360f else 0f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .background(
+                            color = if (isLiked) DiscoverTheme.Secondary.copy(alpha = 0.1f) else Color.Transparent,
+                            shape = CircleShape
+                        )
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            val newLikedState = !isLiked
+                            isLiked = newLikedState
+                            likesCount = if (newLikedState) likesCount + 1 else likesCount - 1
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onLikeClick(post, newLikedState)
+                        }
+                        .scale(scale)
+                        .rotate(rotation),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = if (isLiked) "Unlike" else "Like",
+                        tint = if (isLiked) DiscoverTheme.Secondary else DiscoverTheme.OnSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.width(DiscoverTheme.SpacingSmall))
 
                 Text(
-                    text = "${post.likes.size} likes",
+                    text = "$likesCount likes",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = DiscoverTheme.OnSurface
                 )
-
             }
         }
-    }
-}
-
-@Composable
-fun AnimatedLikeButton(
-    isLiked: Boolean,
-    onClick: () -> Unit
-) {
-    val scale by animateFloatAsState(
-        targetValue = if (isLiked) 1.2f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessHigh
-        )
-    )
-
-    val rotation by animateFloatAsState(
-        targetValue = if (isLiked) 360f else 0f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
-    )
-
-    Box(
-        modifier = Modifier
-            .size(44.dp)
-            .background(
-                color = if (isLiked) DiscoverTheme.Secondary.copy(alpha = 0.1f) else Color.Transparent,
-                shape = CircleShape
-            )
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) { onClick() }
-            .scale(scale)
-            .rotate(rotation),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-            contentDescription = if (isLiked) "Unlike" else "Like",
-            tint = if (isLiked) DiscoverTheme.Secondary else DiscoverTheme.OnSurfaceVariant,
-            modifier = Modifier.size(20.dp)
-        )
     }
 }
 

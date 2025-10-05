@@ -193,31 +193,18 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
         }
     }
 
-    fun toggleLike(postId: String, userId: String) {
+    fun toggleLike(postId: String, userId: String, isLiked: Boolean) {
         viewModelScope.launch {
             _likeActionState.value = UiState.Loading
             try {
-                val currentPosts =
-                    (_nearbyPostsState.value as? UiState.Success)?.data ?: return@launch
-                val updatedPosts = currentPosts.map { post ->
-                    if (post.id == postId) {
-                        val updatedLikes = post.likes.toMutableList()
-                        val isLiked = if (updatedLikes.contains(userId)) {
-                            updatedLikes.remove(userId)
-                            sdk.unLike(postId, {}, {})
-                            false
-                        } else {
-                            updatedLikes.add(userId)
-                            sdk.like(postId, {}, {})
-                            true
-                        }
-                        _likeActionState.value = UiState.Success(LikeAction(postId, isLiked))
-                        post.copy(likes = updatedLikes)
-                    } else {
-                        post
-                    }
+                if (!isLiked){
+                    sdk.unLike(postId, {}, {})
+
+                }else{
+                    sdk.like(postId, {}, {})
+
                 }
-                _nearbyPostsState.value = UiState.Success(updatedPosts)
+
             } catch (e: Exception) {
                 _likeActionState.value = UiState.Error(
                     error = ErrorModel(

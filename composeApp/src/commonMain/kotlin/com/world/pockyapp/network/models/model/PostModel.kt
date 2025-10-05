@@ -10,7 +10,7 @@ data class PostModel(
     val mimetype: String = "",
     val createdAt: String = "",
     val profile: ProfileModel = ProfileModel(),
-    val likes: MutableList<String> = mutableListOf(),
+    val likes: MutableSet<String> = mutableSetOf(),
     var liked: Boolean = false,
     val geoLocation: GeoLocationModel = GeoLocationModel(),
 )
