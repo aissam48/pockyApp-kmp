@@ -515,11 +515,11 @@ fun ChallengeCard(
     }
 }
 
-enum class ChallengesScreenTab(val title: String, val icon: ImageVector) {
-    Friends("Friends", Icons.Outlined.Face),
-    Following("Following", Icons.Outlined.Notifications),
-    Nearby("Nearby", Icons.Outlined.LocationOn),
-    Global("Global", Icons.Outlined.MoreVert)
+enum class ChallengesScreenTab(val title: String) {
+    Friends("Friends"),
+    Following("Following"),
+    Nearby("Nearby"),
+    Global("Global")
 }
 
 @Composable
@@ -556,18 +556,11 @@ fun ChallengeModernTabSelector(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(DiscoverTheme.SpacingXSmall)
                     ) {
-                        Icon(
-                            imageVector = tab.icon,
-                            contentDescription = tab.title,
-                            tint = if (isSelected) DiscoverTheme.Primary else DiscoverTheme.OnSurfaceVariant,
-                            modifier = Modifier.size(16.dp)
-                        )
-
                         Text(
                             text = tab.title,
                             fontSize = 14.sp,
                             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                            color = if (isSelected) DiscoverTheme.Primary else DiscoverTheme.OnSurfaceVariant
+                            color = if (isSelected) Color(0xFFDFC46B) else Color(0xFF000000)
                         )
                     }
                 }

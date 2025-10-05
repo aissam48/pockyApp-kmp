@@ -1,10 +1,13 @@
 package com.world.pockyapp.network.models.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
+@Entity(tableName = "profiles")
 @Serializable
 data class ProfileModel(
-    var id: String = "",
+    @PrimaryKey var id: String = "",
     var firstName: String = "",
     var lastName: String = "",
     var username: String = "",

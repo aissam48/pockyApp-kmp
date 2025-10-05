@@ -25,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +45,7 @@ import com.world.pockyapp.screens.home.navigations.shots.ShotsScreen
 import com.world.pockyapp.screens.home.navigations.conversations.ChatScreen
 import com.world.pockyapp.screens.home.navigations.discover.DiscoverScreen
 import com.world.pockyapp.screens.home.navigations.challenges.ChallengesScreen
+import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
@@ -65,9 +67,30 @@ fun HomeScreen(navController: NavHostController, viewModel: HomeViewModel = koin
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit){
+    val profileState = viewModel.profileState.collectAsState()
+    LaunchedEffect(Unit) {
+        viewModel.getProfile()
         viewModel.launchScreenState.collect {
             selected = it
+        }
+    }
+
+    when (val state = profileState.value) {
+        is ResponseState.Loading -> {
+
+        }
+
+        is ResponseState.Success -> {
+            val profile = state.data
+            viewModel.saveProfileLocalDB(profile)
+        }
+
+        is ResponseState.Error -> {
+
+        }
+
+        is ResponseState.Idle -> {
+
         }
     }
 

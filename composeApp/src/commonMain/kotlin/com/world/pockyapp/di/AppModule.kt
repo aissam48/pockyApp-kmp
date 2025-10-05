@@ -1,7 +1,11 @@
 package com.world.pockyapp.di
 
 
+import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.world.pockyapp.network.ApiManager
+import com.world.pockyapp.network.localDB.ProfileDB
+import com.world.pockyapp.network.localDB.getRoomDatabase
 import com.world.pockyapp.screens.auth.login.LoginScreenViewModel
 import com.world.pockyapp.screens.auth.register.RegisterScreenViewModel
 import com.world.pockyapp.screens.challengeDetails.ChallengeDetailsViewModel
@@ -41,11 +45,11 @@ import org.koin.mp.KoinPlatform
 val appModule = module {
 
     single { ApiManager(dataStore = get()) }
-
+    single { getRoomDatabase(builder = get()).profileDoa() }
     viewModel { SplashViewModel(dataStore = get()) }
     viewModel { LoginScreenViewModel(sdk = get(), dataStore = get()) }
     viewModel { RegisterScreenViewModel(sdk = get(), dataStore = get()) }
-    single { HomeViewModel(sdk = get()) }
+    single { HomeViewModel(sdk = get(), localDB = get()) }
     viewModel { PostViewModel(sdk = get()) }
     viewModel { ProfileViewModel(sdk = get()) }
     viewModel { DiscoverViewModel(sdk = get()) }
