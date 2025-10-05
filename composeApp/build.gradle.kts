@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -10,6 +9,10 @@ plugins {
     kotlin("plugin.serialization")
     id("com.google.gms.google-services")
     alias(libs.plugins.cocoapods)
+
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+
 }
 
 kotlin {
@@ -92,6 +95,7 @@ kotlin {
 
             implementation("com.google.mlkit:face-detection:16.1.7")
 
+
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -169,6 +173,8 @@ kotlin {
             // Optional - Location permissions for mobile
             implementation(libs.compass.permissions.mobile)
 
+            implementation(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
         }
     }
 }
@@ -200,6 +206,11 @@ android {
     }
 }
 
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+
 dependencies {
     implementation(libs.androidx.activity.ktx)
     debugImplementation(compose.uiTooling)
@@ -211,6 +222,8 @@ dependencies {
     api("com.google.firebase:firebase-messaging:23.4.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0") // Use the latest version
+
+    ksp(libs.room.compiler)
 
 }
 

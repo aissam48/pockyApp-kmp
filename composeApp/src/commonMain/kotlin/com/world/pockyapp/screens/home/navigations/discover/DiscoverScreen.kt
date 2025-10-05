@@ -38,6 +38,7 @@ import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.home.HomeViewModel
 import com.world.pockyapp.screens.home.navigations.discover.UiState
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.settings.controlAccount.ResponseState
@@ -167,10 +168,10 @@ fun DiscoverScreen(
     }
 }
 
-enum class FeedTab(val title: String, val icon: ImageVector) {
-    Following("Following", Icons.Outlined.Notifications),
-    Nearby("Nearby", Icons.Outlined.LocationOn),
-    Global("Global", Icons.Outlined.MoreVert)
+enum class FeedTab(val title: String) {
+    Following("Following"),
+    Nearby("Nearby"),
+    Global("Global")
 }
 
 @Composable
@@ -180,6 +181,8 @@ fun AnimatedStoriesSection(
     profileState: UiState<ProfileModel>,
     navController: NavHostController
 ) {
+    val momentsViewModel: MomentsViewModel = koinViewModel()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -240,7 +243,10 @@ fun AnimatedStoriesSection(
                             AnimatedStoryItem(
                                 moments = friendMoments,
                                 onClick = {
-                                    // Navigate to moments
+                                    momentsViewModel.myID = friendMoments[0].profile.id
+                                    momentsViewModel.selectedIndex = groupedMoments.indexOf(friendMoments)
+                                    momentsViewModel.moments = groupedMoments
+                                    navController.navigate(NavRoutes.MOMENTS.route)
                                 }
                             )
                         }
@@ -262,6 +268,7 @@ fun MyStoryItem(
     navController: NavHostController
 ) {
     val momentsViewModel: MomentsViewModel = koinViewModel()
+    val homeViewModel: HomeViewModel = koinViewModel()
     val hasUnviewed = myDailyMoments.any { !it.viewed }
 
     Column(
@@ -274,7 +281,8 @@ fun MyStoryItem(
                 size = 70.dp,
                 onClick = {
                     if (myDailyMoments.isEmpty()) {
-                        navController.navigate(NavRoutes.MY_PROFILE.route)
+                        //navController.navigate(NavRoutes.MY_PROFILE.route)
+                        homeViewModel.launchScreen(2)
                     } else {
                         momentsViewModel.myID = myDailyMoments[0].profile.id
                         momentsViewModel.selectedIndex = 0
@@ -448,13 +456,6 @@ fun ModernTabSelector(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(DiscoverTheme.SpacingXSmall)
                     ) {
-                        Icon(
-                            imageVector = tab.icon,
-                            contentDescription = tab.title,
-                            tint = if (isSelected) Color(0xFFDFC46B) else Color(0xFF000000),
-                            modifier = Modifier.size(16.dp)
-                        )
-
                         Text(
                             text = tab.title,
                             fontSize = 14.sp,
@@ -631,6 +632,9 @@ fun MomentsGrid(
     profileState: UiState<ProfileModel>,
     navController: NavHostController
 ) {
+
+    val momentsViewModel: MomentsViewModel = koinViewModel()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -647,7 +651,12 @@ fun MomentsGrid(
                     MomentCard(
                         moments = profileMoments,
                         onClick = {
+                            println("hfhfhfhfhfhfhfhf")
                             // Navigate to moments viewer
+                            momentsViewModel.myID = profileMoments[0].profile.id
+                            momentsViewModel.selectedIndex = groupedMoments.indexOf(profileMoments)
+                            momentsViewModel.moments = groupedMoments //mutableListOf(profileMoments)
+                            navController.navigate(NavRoutes.MOMENTS.route)
                         }
                     )
                 }
@@ -879,7 +888,7 @@ fun GlobalMapSection(navController: NavHostController) {
             .padding(horizontal = DiscoverTheme.SpacingMedium),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = DiscoverTheme.Surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier.padding(DiscoverTheme.SpacingMedium)
@@ -902,13 +911,6 @@ fun GlobalMapSection(navController: NavHostController) {
                         color = DiscoverTheme.OnSurfaceVariant
                     )
                 }
-
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "Global",
-                    tint = DiscoverTheme.Primary,
-                    modifier = Modifier.size(24.dp)
-                )
             }
 
             Spacer(modifier = Modifier.height(DiscoverTheme.SpacingMedium))
@@ -925,16 +927,6 @@ fun GlobalMapSection(navController: NavHostController) {
     }
 }
 
-@Composable
-fun SectionHeader(title: String) {
-    Text(
-        text = title,
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Bold,
-        color = DiscoverTheme.OnSurface,
-        modifier = Modifier.padding(horizontal = DiscoverTheme.SpacingMedium)
-    )
-}
 
 @Composable
 fun LoadingSection() {

@@ -26,6 +26,13 @@ class HomeViewModel(private val sdk: ApiManager):ViewModel() {
         }
     }*/
 
+    private val _LaunchScreenState = MutableSharedFlow<Int>()
+    val launchScreenState = _LaunchScreenState.asSharedFlow()
+    fun launchScreen(index: Int){
+        viewModelScope.launch {
+            _LaunchScreenState.emit(index)
+        }
+    }
 
     fun updateFcmToken(token: String) {
 
