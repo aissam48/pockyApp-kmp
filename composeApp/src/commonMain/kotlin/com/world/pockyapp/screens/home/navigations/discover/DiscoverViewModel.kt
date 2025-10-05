@@ -259,4 +259,35 @@ class DiscoverViewModel(private val sdk: ApiManager) : ViewModel() {
             }
         }
     }
+
+    private var isFollowingsPostsLoadingFirstTime = true
+    private val _followingsPostsState = MutableStateFlow<ResponseState<List<PostModel>>>(ResponseState.Idle)
+    val followingsPostsState = _followingsPostsState.asStateFlow()
+
+    fun loadFollowingsPosts() {
+        viewModelScope.launch {
+            if (isFollowingsPostsLoadingFirstTime) {
+                _followingsPostsState.value = ResponseState.Loading
+            }
+            try {
+                sdk.getFollowingsPosts(
+                    onSuccess = { posts ->
+                        isFollowingsPostsLoadingFirstTime = false
+                        _followingsPostsState.value = ResponseState.Success(posts)
+                    },
+                    onFailure = { error ->
+                        isFollowingsPostsLoadingFirstTime = true
+                        _followingsPostsState.value = ResponseState.Error(error)
+                    }
+                )
+            } catch (e: Exception) {
+                _followingsPostsState.value = ResponseState.Error(
+                    error = ErrorModel(
+                        message = "Network error. Please try again later.",
+                        code = 500
+                    )
+                )
+            }
+        }
+    }
 }

@@ -1,12 +1,12 @@
 package com.world.pockyapp.screens.home.navigations.discover
 
-import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -38,16 +38,14 @@ import com.world.pockyapp.network.models.model.ErrorModel
 import com.world.pockyapp.network.models.model.MomentModel
 import com.world.pockyapp.network.models.model.PostModel
 import com.world.pockyapp.network.models.model.ProfileModel
+import com.world.pockyapp.screens.home.navigations.discover.UiState
 import com.world.pockyapp.screens.moment_screen.MomentsViewModel
 import com.world.pockyapp.screens.settings.controlAccount.ResponseState
 import com.world.pockyapp.utils.Utils.formatCreatedAt
-import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import pockyapp.composeapp.generated.resources.Res
-import pockyapp.composeapp.generated.resources.ic_like
 import pockyapp.composeapp.generated.resources.ic_placeholder
-import pockyapp.composeapp.generated.resources.ic_unlike_black
 
 // Design System
 object DiscoverTheme {
@@ -84,17 +82,22 @@ fun DiscoverScreen(
     val nearbyMomentsState by viewModel.nearbyMomentsState.collectAsState()
     val nearbyPostsState by viewModel.nearbyPostsState.collectAsState()
     val followingsMomentsState by viewModel.followingsMomentsState.collectAsState()
+    val followingsPostsState by viewModel.followingsPostsState.collectAsState()
 
     var selectedTab by remember { mutableStateOf(FeedTab.Following) }
     var isRefreshing by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.getProfile()
+
         viewModel.loadMyDailyMoments()
         viewModel.loadFriendsMoments()
+
         viewModel.loadNearbyMoments()
         viewModel.loadNearbyPosts()
+
         viewModel.loadFollowingsMoments()
+        viewModel.loadFollowingsPosts()
     }
 
     Box(
@@ -135,6 +138,7 @@ fun DiscoverScreen(
                 FeedTab.Following -> {
                     followingsMomentsContent(
                         state = followingsMomentsState,
+                        postsState = followingsPostsState,
                         profileState = profileState,
                         navController = navController,
                         viewModel = viewModel
@@ -297,7 +301,7 @@ fun MyStoryItem(
                 Box(
                     modifier = Modifier
                         .size(20.dp)
-                        .background(DiscoverTheme.Primary, CircleShape)
+                        .background(Color(0xFFDFC46B), CircleShape)
                         .align(Alignment.BottomEnd),
                     contentAlignment = Alignment.Center
                 ) {
@@ -392,9 +396,7 @@ fun StoryRing(
         modifier = Modifier
             .size(size)
             .background(
-                brush = Brush.sweepGradient(
-                    colors = if (hasUnviewed) DiscoverTheme.GradientPrimary else DiscoverTheme.GradientViewed
-                ),
+                color = if (hasUnviewed) Color.Gray else Color(0xFFDFC46B),
                 shape = CircleShape
             )
             .padding(3.dp)
@@ -427,7 +429,7 @@ fun ModernTabSelector(
         Row(
             modifier = Modifier.padding(4.dp)
         ) {
-            FeedTab.values().forEach { tab ->
+            FeedTab.entries.forEach { tab ->
                 val isSelected = selectedTab == tab
 
                 Box(
@@ -448,7 +450,7 @@ fun ModernTabSelector(
                         Icon(
                             imageVector = tab.icon,
                             contentDescription = tab.title,
-                            tint = if (isSelected) DiscoverTheme.Primary else DiscoverTheme.OnSurfaceVariant,
+                            tint = if (isSelected) Color(0xFFDFC46B) else Color(0xFF000000),
                             modifier = Modifier.size(16.dp)
                         )
 
@@ -456,7 +458,7 @@ fun ModernTabSelector(
                             text = tab.title,
                             fontSize = 14.sp,
                             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                            color = if (isSelected) DiscoverTheme.Primary else DiscoverTheme.OnSurfaceVariant
+                            color = if (isSelected) Color(0xFFDFC46B) else Color(0xFF000000)
                         )
                     }
                 }
@@ -469,7 +471,8 @@ fun LazyListScope.followingsMomentsContent(
     state: ResponseState<List<MomentModel>>,
     profileState: UiState<ProfileModel>,
     navController: NavHostController,
-    viewModel: DiscoverViewModel
+    viewModel: DiscoverViewModel,
+    postsState: ResponseState<List<PostModel>>
 ) {
     when (state) {
         is ResponseState.Loading -> {
@@ -500,6 +503,51 @@ fun LazyListScope.followingsMomentsContent(
 
         else -> {}
     }
+
+    when (postsState) {
+        is ResponseState.Success -> {
+            val posts = postsState.data
+            if (posts.isNotEmpty()) {
+                item {
+                    SectionHeader(title = "Following Posts")
+                }
+                items(posts, key = { it.id }) { post ->
+                    ModernPostCard(
+                        post = post,
+                        currentUserId = (profileState as? UiState.Success)?.data?.id,
+                        onLikeClick = { clickedPost ->
+                            (profileState as? UiState.Success)?.data?.id?.let { userId ->
+                                viewModel.toggleLike(clickedPost.id, userId)
+                            }
+                        },
+                        onProfileClick = { userId ->
+                            if (userId == (profileState as? UiState.Success)?.data?.id) {
+                                navController.navigate(NavRoutes.MY_PROFILE.route)
+                            } else {
+                                navController.navigate(NavRoutes.PROFILE_PREVIEW.route + "/$userId")
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
+        is ResponseState.Loading -> {
+            item { LoadingSection() }
+        }
+
+        is ResponseState.Error -> {
+            item {
+                ErrorSection(
+                    error = postsState.error,
+                    onRetry = { viewModel.loadFollowingsPosts() }
+                )
+            }
+        }
+
+        is ResponseState.Idle -> {}
+    }
+
 }
 
 fun LazyListScope.nearbyContent(
@@ -543,9 +591,6 @@ fun LazyListScope.nearbyContent(
         is UiState.Success -> {
             val posts = postsState.data
             if (posts.isNotEmpty()) {
-                item {
-                    SectionHeader(title = "Nearby Posts")
-                }
                 items(posts, key = { it.id }) { post ->
                     ModernPostCard(
                         post = post,
@@ -626,7 +671,7 @@ fun MomentCard(
             .height(160.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Box {
             AsyncImage(
@@ -653,33 +698,38 @@ fun MomentCard(
                     )
             )
 
-            // Unviewed indicator
-            if (hasUnviewed) {
-                Box(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .size(8.dp)
-                        .background(DiscoverTheme.Secondary, CircleShape)
-                        .align(Alignment.TopEnd)
-                )
-            }
-
             // Profile info
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(12.dp)
+                    .padding(5.dp)
             ) {
-                Text(
-                    text = moments.first().profile.firstName,
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AsyncImage(
+                        model = moments.first().profile.photoUrl,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clip(CircleShape),
+                        contentDescription = "Post image",
+                        placeholder = painterResource(Res.drawable.ic_placeholder),
+                        error = painterResource(Res.drawable.ic_placeholder)
+                    )
+
+                    Spacer(modifier = Modifier.width(5.dp))
+
+                    Text(
+                        text = moments.first().profile.firstName,
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
                 Text(
                     text = formatCreatedAt(moments.first().createdAt),
                     color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 12.sp
+                    fontSize = 10.sp
                 )
             }
         }
@@ -698,11 +748,10 @@ fun ModernPostCard(
 
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = DiscoverTheme.SpacingMedium),
+            .fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = DiscoverTheme.Surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column {
             // Header
@@ -729,20 +778,15 @@ fun ModernPostCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "${post.profile.firstName} ${post.profile.lastName}",
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = DiscoverTheme.OnSurface
-                    )
-                    Text(
-                        text = "${post.geoLocation.country}, ${post.geoLocation.street}",
-                        fontSize = 13.sp,
-                        color = DiscoverTheme.OnSurfaceVariant
                     )
                 }
 
                 Text(
                     text = formatCreatedAt(post.createdAt),
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     color = DiscoverTheme.OnSurfaceVariant
                 )
             }
@@ -783,15 +827,6 @@ fun ModernPostCard(
                     color = DiscoverTheme.OnSurface
                 )
 
-                Spacer(modifier = Modifier.weight(1f))
-
-                IconButton(onClick = { /* Share */ }) {
-                    Icon(
-                        imageVector = Icons.Outlined.Share,
-                        contentDescription = "Share",
-                        tint = DiscoverTheme.OnSurfaceVariant
-                    )
-                }
             }
         }
     }
