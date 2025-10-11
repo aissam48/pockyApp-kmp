@@ -338,9 +338,7 @@ fun ChallengesScreen(
                             challenge = challenge,
                             modifier = Modifier.padding(horizontal = 20.dp),
                             onClick = {
-                                challengeDetailsViewModel.challengeId = challenge.id
-
-                                navController.navigate(NavRoutes.CHALLENGE_DETAILS.route)
+                                navController.navigate(NavRoutes.CHALLENGE_DETAILS.route +"/${challenge.id}")
                             }
                         )
                     }

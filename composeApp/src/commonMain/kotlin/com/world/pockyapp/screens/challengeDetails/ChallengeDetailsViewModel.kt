@@ -12,16 +12,14 @@ import kotlinx.coroutines.launch
 class ChallengeDetailsViewModel(private val sdk: ApiManager): ViewModel() {
 
 
-    var challengeId = ""
-
-
     private val _challengeDetailsState = MutableStateFlow<ResponseState<ChallengeModel>>(
         ResponseState.Idle)
-
     val challengeDetailsState = _challengeDetailsState.asStateFlow()
 
-    fun getChallengeDetails(){
+    fun getChallengeDetails(challengeId: String) {
         viewModelScope.launch {
+            println("rerererere 2")
+
             _challengeDetailsState.value = ResponseState.Loading
 
             sdk.getChallengeDetails(challengeId,{

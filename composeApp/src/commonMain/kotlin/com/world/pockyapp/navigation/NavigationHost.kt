@@ -191,8 +191,10 @@ fun NavigationHost(navController: NavHostController) {
             ShotsScreen(navController)
         }
 
-        composable(route = NavRoutes.CHALLENGE_DETAILS.route) { navBackStackEntry ->
-            ChallengeDetailsScreen("", navController)
+        composable(route = NavRoutes.CHALLENGE_DETAILS.route +"/{challengeId}") { navBackStackEntry ->
+            val challengeId = navBackStackEntry.arguments?.getString("challengeId") ?: ""
+
+            ChallengeDetailsScreen(challengeId, navController)
         }
     }
 }

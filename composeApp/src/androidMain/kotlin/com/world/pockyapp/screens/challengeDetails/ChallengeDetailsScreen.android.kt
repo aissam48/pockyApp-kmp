@@ -57,9 +57,9 @@ object ChallengeDetailsTheme {
     )
 }
 
-
+/*
 @Composable
-actual fun ChallengeDetailsScreen(
+fun ChallengeDetailsScreen1(
     challengeId: String,
     navController: NavHostController
 ) {
@@ -70,7 +70,7 @@ actual fun ChallengeDetailsScreen(
     val challengeDetailsState = viewModel.challengeDetailsState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getChallengeDetails()
+        viewModel.getChallengeDetails(challengeId)
     }
 
     var isPlaying by remember { mutableStateOf(false) }
@@ -119,7 +119,7 @@ actual fun ChallengeDetailsScreen(
                     }
 
                     // Action Buttons
-                    /*item {
+                    item {
                         ActionButtonsSection(
                             challenge = challenge,
                             onJoinClick = { /* Handle join challenge */ },
@@ -139,7 +139,7 @@ actual fun ChallengeDetailsScreen(
                                 // Navigate to participant's video
                             }
                         )
-                    }*/
+                    }
                 }
                 is ResponseState.Error -> {
 
@@ -503,7 +503,7 @@ fun ActionButtonsSection(
         }
 
         // Like Button
-       /* IconButton(
+        IconButton(
             onClick = onLikeClick,
             modifier = Modifier
                 .background(
@@ -516,7 +516,7 @@ fun ActionButtonsSection(
                 contentDescription = "Like",
                 tint = if (challenge.isLiked) Color.Red else ChallengeDetailsTheme.OnSurfaceVariant
             )
-        }*/
+        }
 
         // Share Button
         IconButton(
@@ -531,7 +531,7 @@ fun ActionButtonsSection(
         }
     }
 }
-/*
+
 @Composable
 fun ParticipantsSection(
     participants: List<ParticipantModel>,
@@ -598,8 +598,8 @@ fun ParticipantsSection(
             }
         }
     }
-}*/
-/*
+}
+
 @Composable
 fun ParticipantCard(
     participant: ParticipantModel,
@@ -697,7 +697,7 @@ fun ParticipantCard(
             }
         }
     }
-}*/
+}
 
 // Helper Functions
 fun formatCount(count: Int): String {
@@ -707,3 +707,4 @@ fun formatCount(count: Int): String {
         else -> count.toString()
     }
 }
+*/
